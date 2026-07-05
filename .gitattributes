@@ -1,0 +1,3 @@
+# Keep LF everywhere: source captures in kb/sources/ are sha256-hashed
+# over their bytes, so autocrlf rewrites would trigger false drift.
+* text=auto eol=lf

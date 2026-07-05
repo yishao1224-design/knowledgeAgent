@@ -1,0 +1,92 @@
+# knowledgeAgent
+
+An agent-maintained knowledge base. The knowledge lives in `kb/` as an
+**OKF bundle** (Open Knowledge Format v0.1) extended with a lifecycle
+profile — see `kb/SCHEMA.md` for the authoritative conventions.
+
+## What this repo is
+
+| Path | Purpose |
+|------|---------|
+| `kb/` | The knowledge bundle. Markdown concepts with YAML frontmatter. |
+| `kb/SCHEMA.md` | Bundle conventions: types, tags, frontmatter templates, lifecycle rules. Read it before writing any concept. |
+| `kb/index.md` | Progressive-disclosure catalog of the bundle. Regenerate with `python scripts/okf.py index`. |
+| `kb/log.md` | Append-only change history, newest first. |
+| `kb/sources/` | **Immutable** raw source captures. Never edit files here after ingestion. |
+| `scripts/okf.py` | Mechanical toolchain: `init`, `lint`, `index`, `log`, `stats`, `drift`. |
+| `skills/` | **Canonical** lifecycle skills: `kb-ingest`, `kb-query`, `kb-review`, `kb-curate`, `kb-lint`. Edit here. |
+| `.claude/skills/` | Generated copies for Claude Code discovery. Never edit directly — edit `skills/` and run `python scripts/okf.py init` to re-sync. |
+
+## Session protocol — orient before acting
+
+At the start of ANY session that touches `kb/`, in this order:
+
+1. Read `kb/SCHEMA.md` (conventions may have changed since your training of the task).
+2. Read `kb/index.md` (what already exists — prevents duplicate pages).
+3. Read the most recent ~20 lines of `kb/log.md` (what happened recently).
+
+Never create a concept without checking the index for an existing page
+covering the same thing. Update beats create.
+
+## The knowledge lifecycle
+
+Every concept moves through these states (frontmatter `status` field):
+
+```
+draft ──> active ──> needs_review ──> active     (verified)
+                            │
+                            └───────> deprecated ──> archived
+```
+
+- **draft** — captured but not yet verified/cross-linked. Lint tolerates missing links.
+- **active** — verified, linked, trustworthy. Must carry `review_after`.
+- **needs_review** — `review_after` has passed, a source drifted, or a
+  contradiction was found. Still served, but flagged in answers.
+- **deprecated** — superseded or wrong. Must carry `superseded_by` (a
+  bundle-relative link) or a `## Deprecation` section explaining why.
+  Never deleted while anything links to it.
+- **archived** — moved under `kb/archive/`, kept for history. Terminal.
+
+Which skill drives which transition:
+
+| Phase | Skill | What it does |
+|-------|-------|--------------|
+| Capture | `kb-ingest` | Snapshot source into `kb/sources/`, write/update concepts as `draft`, cross-link, promote to `active`, update index + log. |
+| Serve | `kb-query` | Answer from the bundle, cite pages, flag `needs_review`/`deprecated` content in the answer, file substantial answers back as concepts. |
+| Verify | `kb-review` | Work the review queue: re-verify overdue concepts against sources, resolve contradictions, bump or demote status. |
+| Garden | `kb-curate` | Merge duplicates, split bloated pages, deprecate/archive, refactor structure, keep links whole. |
+| Audit | `kb-lint` | Run `scripts/okf.py lint`, then fix what it reports. Mechanical health only. |
+
+## Hard rules
+
+1. **Never modify anything under `kb/sources/`.** Re-ingest under a new
+   dated filename instead; `okf.py drift` compares hashes.
+2. **Every edit to `kb/` gets a `log.md` entry** — use
+   `python scripts/okf.py log "<Verb>: message with [links](/path.md)"`.
+3. **Frontmatter is mandatory** on every concept: at minimum `type`,
+   `title`, `description`, `status`, `updated`. `active` concepts also
+   need `review_after` and (if claims come from outside) `sources`.
+4. **Links are bundle-relative** (`/concepts/foo.md`, leading slash =
+   bundle root `kb/`). Broken links to not-yet-written pages are allowed;
+   lint reports them as info, not errors.
+5. **Update `updated:` whenever you touch a concept's content.**
+6. **Deprecate, don't delete.** Deletion only happens in `kb-curate`
+   after confirming zero inbound links (lint tells you).
+7. **Tags come from the taxonomy in `kb/SCHEMA.md`.** Want a new tag?
+   Add it to the taxonomy first, in the same change.
+8. **Run `python scripts/okf.py lint` before ending any session** that
+   modified `kb/`. Fix errors; report warnings to the user.
+
+## OKF conformance
+
+The bundle must stay consumable by any plain OKF v0.1 reader:
+
+- Every non-reserved `.md` under `kb/` has parseable frontmatter with a
+  non-empty `type`.
+- `index.md` has no frontmatter (except the bundle root, which may carry
+  `okf_version`); `log.md` uses `## YYYY-MM-DD` headings, newest first.
+- All lifecycle fields (`status`, `confidence`, `review_after`,
+  `sources`, `supersedes`, `superseded_by`) are *extension* keys — legal
+  under OKF §4, ignored harmlessly by plain consumers. Do not invent
+  semantics that break when those keys are stripped: the body prose must
+  still say when something is deprecated or contested.
