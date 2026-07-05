@@ -27,7 +27,11 @@ knowledgeAgent/
 │   ├── kb-review/       #   verify: work the review queue against sources
 │   ├── kb-curate/       #   garden: merge, split, archive, restructure
 │   └── kb-lint/         #   audit: mechanical health, fix or queue
+├── AGENTS.md            # cross-agent entry point (Copilot coding agent, Codex, …)
 ├── .claude/skills/      # generated copies for Claude Code discovery (okf.py init)
+├── .github/
+│   ├── copilot-instructions.md   # GitHub Copilot repo instructions
+│   └── prompts/         # generated Copilot prompt files (/kb-ingest, …)
 └── scripts/okf.py       # stdlib-only toolchain
 ```
 
@@ -40,6 +44,22 @@ python scripts/okf.py lint     # health check (exit 1 on errors)
 
 Then open the repo in Claude Code and say e.g. *"add this article to the
 knowledge base"* — the `kb-ingest` skill drives the rest.
+
+## Agent support
+
+One canonical workflow definition (`skills/*/SKILL.md`), surfaced to
+each tool by `okf.py init`:
+
+| Tool | Surface | Committed? |
+|------|---------|-----------|
+| Claude Code | `CLAUDE.md` + `.claude/skills/` | instructions yes; skill copies regenerated locally (gitignored) |
+| GitHub Copilot (VS Code chat) | `.github/copilot-instructions.md` + `.github/prompts/*.prompt.md` (type `/kb-…`) | yes — Copilot reads them from the repo |
+| Copilot coding agent / other agents | `AGENTS.md` | yes |
+
+`CLAUDE.md` is the single authoritative operating contract; the Copilot
+and AGENTS.md files restate the hard rules briefly and defer to it.
+Edit workflows only in `skills/`, then re-run
+`python scripts/okf.py init` to regenerate the wrappers.
 
 ## The lifecycle
 
