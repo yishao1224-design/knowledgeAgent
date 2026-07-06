@@ -1,6 +1,7 @@
 # Bundle Update Log
 
 ## 2026-07-06
+* **Update**: added domain-concept body template to [SCHEMA.md](/SCHEMA.md) (required/optional sections, no N/A placeholders, artifact-reference rules); kb-ingest skill now points to it.
 * **Ingestion**: filed conversation analyses on lifecycle automation and team merge guardrails; created [automating-the-lifecycle](/concepts/automating-the-lifecycle.md) and [pr-quality-gates](/concepts/pr-quality-gates.md), linked from [adopting-the-bundle-pattern](/concepts/adopting-the-bundle-pattern.md).
 * **Ingestion**: filed conversation analysis on ingesting Azure DevOps user stories; created [ingesting-requirements-from-ticket-systems](/concepts/ingesting-requirements-from-ticket-systems.md), updated [adopting-the-bundle-pattern](/concepts/adopting-the-bundle-pattern.md) with populating-after-bootstrap section.
 * **Ingestion**: filed conversation analysis on adopting the bundle pattern in project repos; created [adopting-the-bundle-pattern](/concepts/adopting-the-bundle-pattern.md), cross-linked from [knowledge-lifecycle](/concepts/knowledge-lifecycle.md).

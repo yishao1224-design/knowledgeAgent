@@ -3,7 +3,7 @@ type: Schema
 title: Bundle Schema & Conventions
 description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, lifecycle rules.
 status: active
-updated: 2026-07-05
+updated: 2026-07-06
 ---
 
 # Bundle Schema & Conventions
@@ -105,6 +105,64 @@ Add new types here before first use.
   the link.
 - Claims from outside the bundle get a `# Citations` section with
   numbered references; frontmatter `sources` points at the captured copy.
+
+# Domain-concept body template
+
+Applies to `Concept` pages describing **domain** knowledge (business
+rules, processes, behavior of the systems the team builds). Method/meta
+pages — how this bundle itself works, engineering practices — keep free
+structure. General body conventions above still apply, including
+`# Citations` for externally-derived claims.
+
+Required sections: `## Definition`, at least one of `## Key Behaviors`
+or `## Invariants`, and `## Related Concepts`. Every other section is
+optional — include it only when it has real content. **Never write
+`N/A` placeholders**; an absent section reads the same and costs
+nothing.
+
+```markdown
+# <Concept Name>
+
+## Definition
+1–3 sentences: what it is, where it applies, why it matters.
+
+## Key Behaviors
+- <behavior>
+
+## Variants                      (optional)
+### <Variant A>
+- <difference or special requirement>
+
+## Invariants
+Rules that must hold regardless of status, entry point, or variant.
+- <rule>
+
+## Personas                      (optional)
+- <persona> — <what they need from this concept>
+
+## Related Artifacts             (optional)
+- `<StableIdentifier>` (<artifact type>) — one-line role
+
+## Related Concepts
+- [Concept A](/concepts/concept-a.md) — <relationship>
+
+## Open Questions                (optional)
+- <unresolved question>
+```
+
+Template rules:
+
+- Links are bundle-relative markdown links, never wiki-style `[[...]]`
+  — lint's link tracking (and the safe-delete check) depends on it.
+- **Artifacts** are deployable code/metadata components (e.g.
+  Salesforce Apex classes, LWC, triggers, Flows). Reference them by
+  stable identifier plus a one-line role. Do not document an artifact's
+  internals here (that belongs in the code), and do not create a page
+  per artifact — an artifact gets an `Entity` page only when it meets
+  the page-creation threshold below.
+- If `## Open Questions` accumulates items that contradict the page's
+  own claims, set `status: needs_review` (and tag `contested` where
+  sources disagree) instead of only annotating.
 
 # Page-creation threshold
 

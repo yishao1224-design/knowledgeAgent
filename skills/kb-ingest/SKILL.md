@@ -45,6 +45,12 @@ For each page:
   `status: draft`; set `review_after` from the confidence table.
 - `sources:` lists the capture(s) from Step 1.
 - Externally-derived claims get a `# Citations` section.
+- Domain concepts (business rules, processes, system behavior) follow
+  the **domain-concept body template** in SCHEMA.md: required sections
+  `## Definition`, `## Key Behaviors` and/or `## Invariants`,
+  `## Related Concepts`; optional sections only when they have real
+  content — never `N/A` placeholders. Method/meta pages keep free
+  structure.
 - ≥ 2 outbound bundle-relative links, with the relationship stated in
   surrounding prose. Link to not-yet-written pages freely if they'd
   meet the threshold later.
