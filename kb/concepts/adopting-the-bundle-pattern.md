@@ -50,7 +50,9 @@ unless one bundle genuinely must be shared across repos.
    `.github/prompts/` (Copilot reads them from the repo). Note in the
    project docs that fresh clones run `init` once.
 5. Optionally add a CI step running `python scripts/okf.py lint` so
-   frontmatter errors, dead links, and drift fail the build.
+   frontmatter errors, dead links, and drift fail the build — for teams
+   merging via PR, the full guardrail set is in
+   [PR quality gates](/concepts/pr-quality-gates.md).
 
 ## Populating after bootstrap
 
