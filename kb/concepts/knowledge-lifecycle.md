@@ -5,7 +5,7 @@ description: How concepts in this bundle move through draft, active, needs_revie
 status: active
 confidence: high
 created: 2026-07-05
-updated: 2026-07-05
+updated: 2026-07-06
 review_after: 2027-01-05
 tags: []
 sources:
@@ -42,7 +42,9 @@ Two invariants make the cycle trustworthy: captures under `/sources/`
 are immutable (drift in their hashes is a corruption signal, not an
 update), and pages are deprecated rather than deleted so inbound links
 never dangle silently. Conventions for fields and cadences live in
-[SCHEMA.md](/SCHEMA.md).
+[SCHEMA.md](/SCHEMA.md). The lifecycle and its toolchain can be
+installed into any project repository — see
+[adopting the bundle pattern](/concepts/adopting-the-bundle-pattern.md).
 
 # Citations
 
