@@ -52,6 +52,15 @@ unless one bundle genuinely must be shared across repos.
 5. Optionally add a CI step running `python scripts/okf.py lint` so
    frontmatter errors, dead links, and drift fail the build.
 
+## Populating after bootstrap
+
+There is no separate "initialization ingest": once bootstrapped, the
+bundle grows by invoking `kb-ingest` repeatedly, and *update beats
+create* keeps it converging instead of duplicating. Seed the SCHEMA.md
+taxonomy before the first ingest (below) so early ingestions don't
+churn it. When requirements live in an external tracker, follow
+[ingesting requirements from ticket systems](/concepts/ingesting-requirements-from-ticket-systems.md).
+
 ## What to tune on adoption
 
 - **Tag taxonomy and Domain section in the generated `kb/SCHEMA.md`** —

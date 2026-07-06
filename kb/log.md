@@ -1,6 +1,7 @@
 # Bundle Update Log
 
 ## 2026-07-06
+* **Ingestion**: filed conversation analysis on ingesting Azure DevOps user stories; created [ingesting-requirements-from-ticket-systems](/concepts/ingesting-requirements-from-ticket-systems.md), updated [adopting-the-bundle-pattern](/concepts/adopting-the-bundle-pattern.md) with populating-after-bootstrap section.
 * **Ingestion**: filed conversation analysis on adopting the bundle pattern in project repos; created [adopting-the-bundle-pattern](/concepts/adopting-the-bundle-pattern.md), cross-linked from [knowledge-lifecycle](/concepts/knowledge-lifecycle.md).
 * **Ingestion**: codebase-memory-mcp analysis from [source](/sources/2026-07-06-codebase-memory-mcp.md); created [entity](/entities/codebase-memory-mcp.md) and [comparison](/comparisons/codebase-memory-mcp-vs-kb-wiki.md).
 
