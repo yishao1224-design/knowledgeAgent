@@ -85,6 +85,11 @@ the KB refresh to it rather than to the clock:
   timer just catches what slips the process — e.g. an external fact
   that changed with no story behind it.
 
+The end-to-end pipeline that operationalizes this — query the bundle at
+analysis time, flag contradictions immediately, ingest only what
+shipped after verification — is the
+[user story analysis workflow](/concepts/user-story-analysis-workflow.md).
+
 This keeps `active` an honest promise without a permanently-noisy
 queue: the story stream refreshes what actually changed, and the
 backstop covers the rest.

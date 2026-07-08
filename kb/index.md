@@ -14,6 +14,7 @@ okf_version: "0.1"
 * [Open Knowledge Format (OKF)](concepts/open-knowledge-format.md) - The storage format this bundle conforms to — markdown + YAML frontmatter bundles with reserved index/log files and permissive consumption.
 * [PR Quality Gates for a Team-Shared Bundle](concepts/pr-quality-gates.md) - Three-tier merge guardrails for a git-managed wiki/bundle — blocking mechanical CI, advisory LLM review, human gates scoped by blast radius; conformance at merge, truth via lifecycle.
 * [The Knowledge Lifecycle](concepts/knowledge-lifecycle.md) - How concepts in this bundle move through draft, active, needs_review, deprecated, and archived — and which skill drives each transition.
+* [User Story Analysis Workflow (Ingest After Verify)](concepts/user-story-analysis-workflow.md) - The bundle-integrated pipeline for working a user story — query first, flag contradictions at analysis time, implement and verify, ingest what shipped last.
 
 # Entities
 

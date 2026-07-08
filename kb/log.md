@@ -1,6 +1,7 @@
 # Bundle Update Log
 
 ## 2026-07-08
+* **Ingestion**: filed conversation takeaways on the ingest-after-verify story pipeline; created [user-story-analysis-workflow](/concepts/user-story-analysis-workflow.md), linked from [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md).
 * **Update**: added okf.py `links` subcommand — expands `[[slug]]` authoring shorthand into canonical bundle-relative links (resolve by stem/title/path, skip code spans, leave ambiguous/missing in place); lint now flags surviving wiki-links. Revised [SCHEMA.md](/SCHEMA.md) link rule (sugar allowed, expand before index/lint) and [okf-toolchain](/entities/okf-toolchain.md) (seven subcommands).
 * **Update**: added *Keeping code knowledge fresh* to [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md) — story Definition-of-Done as primary code-knowledge freshness trigger, review_after as backstop; reconciled its review-cadence note with the scoped [SCHEMA.md](/SCHEMA.md) rule.
 * **Update**: reworked [SCHEMA.md](/SCHEMA.md) review cadence — review_after is now an explicitly-scoped backstop (change-signal vs no-signal), internal maintainer field; story-driven pages defer to the DoD trigger per [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md).
