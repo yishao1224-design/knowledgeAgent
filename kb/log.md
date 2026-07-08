@@ -1,6 +1,8 @@
 # Bundle Update Log
 
 ## 2026-07-08
+* **Ingestion**: filed session takeaways on trust semantics — page-as-unit-of-trust, weakest-link rules, needs_review as detector convergence point added to [knowledge-lifecycle](/concepts/knowledge-lifecycle.md); multi-story ingest discipline (no re-warranting, evolution vs contradiction) added to [user-story-analysis-workflow](/concepts/user-story-analysis-workflow.md).
+* **Update**: added analysis-time code cross-check to [user-story-analysis-workflow](/concepts/user-story-analysis-workflow.md) — trust-label updates during story analysis with scope/asymmetric-authority/three-way-mismatch guardrails.
 * **Ingestion**: filed conversation takeaways on the ingest-after-verify story pipeline; created [user-story-analysis-workflow](/concepts/user-story-analysis-workflow.md), linked from [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md).
 * **Update**: added okf.py `links` subcommand — expands `[[slug]]` authoring shorthand into canonical bundle-relative links (resolve by stem/title/path, skip code spans, leave ambiguous/missing in place); lint now flags surviving wiki-links. Revised [SCHEMA.md](/SCHEMA.md) link rule (sugar allowed, expand before index/lint) and [okf-toolchain](/entities/okf-toolchain.md) (seven subcommands).
 * **Update**: added *Keeping code knowledge fresh* to [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md) — story Definition-of-Done as primary code-knowledge freshness trigger, review_after as backstop; reconciled its review-cadence note with the scoped [SCHEMA.md](/SCHEMA.md) rule.

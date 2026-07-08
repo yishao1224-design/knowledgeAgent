@@ -72,6 +72,45 @@ query → analyze → implement → test/verify → ingest → story closes
    pages *known* to be affected; the `review_after` backstop (scoped
    per [SCHEMA.md](/SCHEMA.md)) covers the rest.
 
+## Analysis-time code cross-check
+
+During steps 1–2 the agent has both the affected code and the affected
+KB pages in context — so it **cross-checks the pages' claims against
+the live code and updates trust labels**. This is the change-triggered
+detector the rest of the machinery lacks: `drift` only guards captures,
+`review_after` only watches the clock, and the DoD gate only fires when
+the process is followed. The cross-check works from the current state
+of the code, so it also catches hotfixes with no story and gate-skipped
+changes — and it makes freshness *attention-driven*: pages about hot
+code get re-verified on every story that touches them, cold pages fall
+back to the backstop.
+
+Guardrails:
+
+1. **Scope**: only the pages whose claims the analysis actually leans
+   on (acceptance criteria, implementation plan) — not a sweep of
+   everything one hop away. General audits stay with
+   [kb-review](/entities/lifecycle-skills.md)'s queue.
+2. **Asymmetric authority** — demote freely, affirm carefully, never
+   rewrite:
+
+   | Finding | Analyst-agent may… |
+   |---------|--------------------|
+   | Code contradicts a page claim | Flag immediately: `needs_review` + `## Contradictions` note with file refs (status-only, same as carve-out 1) |
+   | Code confirms the claims checked | Bump `review_after` — only for a genuine verification, with a `**Review**` log entry (kb-review work done opportunistically) |
+   | Page wrong, fix obvious | Still no mid-analysis rewrite — content correction belongs to the ingest step or kb-review |
+
+3. **A mismatch is a three-way question.** Page stale, code buggy
+   relative to intent, or story assumptions wrong — a page can state
+   the business rule correctly while the code violates it, and
+   auto-"fixing" the page would launder a bug into documented behavior.
+   Flag as contested; a human or kb-review resolves.
+
+A derived code index (see
+[codebase-memory-mcp vs the kb wiki](/comparisons/codebase-memory-mcp-vs-kb-wiki.md))
+is what makes this check cheap enough to run on every story instead of
+hand-grepping.
+
 ## Capture rule
 
 Snapshot the story text **as-shipped at ingest time** (final acceptance
@@ -79,6 +118,30 @@ criteria, post-negotiation), not as-analyzed. If the story changed
 materially mid-flight and the evolution itself matters, use the dated
 re-capture audit-trail pattern — but do not capture twice by default;
 that is backlog-mirroring creep.
+
+## When many stories feed one concept
+
+A concept page normally accumulates contributions from multiple
+stories over time; trust fields then follow the **weakest-link
+semantics** defined in
+[the knowledge lifecycle](/concepts/knowledge-lifecycle.md). Two
+ingest-step disciplines follow:
+
+- **Don't re-warrant untouched claims.** Ingesting story #N's outcome
+  updates one section and bumps `updated:` — but resetting
+  `review_after` from `updated` would silently vouch for claims from
+  earlier stories nobody looked at. Either genuinely re-check the old
+  claims while they're in context (the analysis-time cross-check
+  usually already has), or set `review_after` for the
+  least-recently-verified claim on the page.
+- **Story-vs-story disagreement is usually evolution, not
+  contradiction.** If story #N changes the rule an earlier story
+  established, rewrite the claim and cite the new capture — the old
+  capture stays in `/sources/` as the audit trail of how the
+  requirement evolved. Reserve `contested`/`## Contradictions` for
+  genuine ambiguity about whether the new story supersedes a
+  still-valid rule — that ambiguity is a PO question, which is exactly
+  what analysis-time flagging exists for.
 
 ## Composition principle
 

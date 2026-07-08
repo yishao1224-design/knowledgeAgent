@@ -30,8 +30,29 @@ just do them.
    `okf.py lint --inbound /path/to/loser.md` lists the linkers.
 
 ### Split a bloated page
-Page covers 2+ threshold-worthy subjects → create the new pages, move
-content, leave a summary + link on the original, cross-link all parts.
+Trigger: the page covers 2+ subjects that each pass SCHEMA.md's
+page-creation threshold on their own. Earlier symptoms worth acting on:
+one volatile claim repeatedly dragging a stable page into
+`needs_review` (trust granularity no longer matches page granularity);
+sections citing disjoint `sources`; the page's one-sentence
+`description` no longer honest.
+
+1. Move content **verbatim** — split changes structure, not claims. A
+   wrong claim noticed mid-split gets flagged `needs_review`, never
+   fixed in the same operation.
+2. New pages' frontmatter: `status` carries over from the parent (the
+   content was already verified; only its address changed);
+   `confidence` and `review_after` set **per part** — this is the
+   payoff: the volatile part gets the short cadence, the stable part
+   the long one; `sources` and `# Citations` distributed to the parts
+   they back; tags per part; keep the parent's `created`, set
+   `updated` to today.
+3. The original stays alive as a summary + links to the parts — **not
+   deprecated** (unlike merge's loser). Its URL keeps working, so
+   inbound links don't break; optionally repoint linkers that clearly
+   targeted a moved section.
+4. Cross-link all parts, relationship stated in prose (this also
+   satisfies the 2-link minimum immediately).
 
 ### Archive
 Only `deprecated` pages with **zero inbound links** (verify with
