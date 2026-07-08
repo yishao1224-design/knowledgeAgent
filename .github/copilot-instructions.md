@@ -22,7 +22,9 @@ beats create.
   `sha256` of its body (`python scripts/okf.py drift --hash FILE`).
 - Every `kb/` edit gets a `python scripts/okf.py log "..."` entry.
 - Frontmatter per `kb/SCHEMA.md` templates; `type` is mandatory (OKF).
-- Links are bundle-relative (`/concepts/x.md` = `kb/concepts/x.md`).
+- Links are bundle-relative (`/concepts/x.md` = `kb/concepts/x.md`) in
+  committed files. `[[slug]]` shorthand is fine while drafting — run
+  `python scripts/okf.py links` to expand it before `index`/`lint`.
 - Deprecate, never delete; end every editing session with
   `python scripts/okf.py lint` at zero errors.
 

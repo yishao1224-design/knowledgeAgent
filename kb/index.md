@@ -19,7 +19,7 @@ okf_version: "0.1"
 
 * [The Lifecycle Skill Suite](entities/lifecycle-skills.md) - The five canonical skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) that drive the knowledge lifecycle — one per phase, with strict division of responsibility.
 * [codebase-memory-mcp](entities/codebase-memory-mcp.md) - MCP server by DeusData that indexes codebases into a queryable SQLite knowledge graph (tree-sitter + hybrid LSP) with automatic freshness via git watching.
-* [okf.py — the Mechanical Toolchain](entities/okf-toolchain.md) - The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
+* [okf.py — the Mechanical Toolchain](entities/okf-toolchain.md) - The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
 
 # Comparisons
 

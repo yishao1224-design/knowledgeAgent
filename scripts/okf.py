@@ -7,6 +7,7 @@ Subcommands:
   lint             conformance + lifecycle audit (exit 1 on errors)
   lint --inbound P list files linking to bundle path P (safe-delete check)
   index            regenerate kb/index.md from the tree + frontmatter
+  links            expand [[slug]] shorthand into canonical bundle links
   log "MESSAGE"    prepend a log entry under today's date
   stats            counts by type/status, review queue
   drift            verify sha256 of sources/ captures
@@ -28,6 +29,7 @@ KB = ROOT / "kb"
 RESERVED = {"index.md", "log.md"}
 STATUSES = {"draft", "active", "needs_review", "deprecated", "archived"}
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
+WIKILINK_RE = re.compile(r"\[\[([^\]|\n]+?)(?:\|([^\]\n]+?))?\]\]")
 TAG_DEF_RE = re.compile(r"^\s*[-*]\s+`([A-Za-z0-9_-]+)`", re.M)
 
 try:
@@ -125,6 +127,55 @@ def strip_code(text):
     return re.sub(r"`[^`\n]*`", "", text)
 
 
+def code_spans(text):
+    """(start, end) offset ranges of fenced code blocks and inline code
+    spans — regions where wiki-links must NOT be expanded (they may be
+    literal examples, e.g. in SCHEMA.md)."""
+    spans = []
+    for m in re.finditer(r"```.*?```", text, re.S):
+        spans.append((m.start(), m.end()))
+    for m in re.finditer(r"`[^`\n]*`", text):
+        if any(s <= m.start() < e for s, e in spans):
+            continue
+        spans.append((m.start(), m.end()))
+    return spans
+
+
+def build_resolver(files):
+    """Map lower-cased filename stems and titles to bundle Paths, so
+    [[slug]] shorthand can be resolved to a concrete page. A key that maps
+    to more than one page is ambiguous."""
+    by_key = {}
+    for p in files:
+        meta, _, _ = load(p)
+        keys = {p.stem.lower()}
+        title = str((meta or {}).get("title") or "").strip().lower()
+        if title:
+            keys.add(title)
+        for k in keys:
+            bucket = by_key.setdefault(k, [])
+            if p not in bucket:
+                bucket.append(p)
+    return by_key
+
+
+def resolve_wikilink(target, by_key):
+    """Resolve a [[target]] to (Path, status), status in
+    {ok, ambiguous, missing}. A target containing '/' or ending '.md' is
+    treated as an explicit bundle path; otherwise it is matched by stem
+    or title (case-insensitive)."""
+    t = target.strip()
+    if t.startswith("/") or "/" in t or t.lower().endswith(".md"):
+        cand = (KB / t.lstrip("/")).resolve()
+        return (cand, "ok") if cand.exists() else (None, "missing")
+    hits = by_key.get(t.lower(), [])
+    if len(hits) == 1:
+        return hits[0], "ok"
+    if len(hits) > 1:
+        return None, "ambiguous"
+    return None, "missing"
+
+
 def taxonomy():
     schema = KB / "SCHEMA.md"
     if not schema.exists():
@@ -149,6 +200,7 @@ def cmd_lint(args):
     errors, warns, infos = [], [], []
     files = concept_files()
     tags_known = taxonomy()
+    by_key = build_resolver(files)   # for wiki-link resolution
     inbound = {}          # bundle path -> set of linking files
     all_paths = {p.resolve() for p in files}
 
@@ -236,6 +288,20 @@ def cmd_lint(args):
         if status in ("active", "needs_review") and n_out < 2:
             warns.append(f"{r}: only {n_out} outbound bundle link(s); minimum is 2")
 
+        # wiki-links — authoring sugar that must be expanded before commit
+        for m in WIKILINK_RE.finditer(strip_code(body)):
+            tgt = m.group(1).strip()
+            _, st = resolve_wikilink(tgt, by_key)
+            if st == "ambiguous":
+                warns.append(f"{r}: ambiguous wiki-link [[{tgt}]] — matches "
+                             f"multiple pages; use [[/path.md|text]]")
+            elif st == "missing":
+                infos.append(f"{r}: unresolved wiki-link [[{tgt}]] "
+                             f"(target not yet written)")
+            else:
+                warns.append(f"{r}: unexpanded wiki-link [[{tgt}]] — run "
+                             f"'python scripts/okf.py links'")
+
         # orphan check (not linked from anywhere, incl. index)
         if p.resolve() not in inbound and p.name != "SCHEMA.md":
             warns.append(f"{r}: orphan — no inbound links and not in index.md "
@@ -288,6 +354,52 @@ def cmd_index(args):
     (KB / "index.md").write_text("\n".join(lines) + "\n", encoding="utf-8",
                                  newline="\n")
     print(f"index.md regenerated: {total} entries")
+    return 0
+
+
+# ------------------------------------------------------------------ links
+
+def cmd_links(args):
+    """Expand [[slug]] / [[slug|display text]] authoring shorthand into
+    canonical bundle-relative markdown links, in place. Targets that are
+    ambiguous or not-yet-written are left untouched and reported, so the
+    committed bundle only ever contains plain-OKF-readable links."""
+    files = concept_files()
+    by_key = build_resolver(files)
+    title_of = {}
+    for p in files:
+        meta, _, _ = load(p)
+        title_of[p.resolve()] = str((meta or {}).get("title") or p.stem).strip()
+
+    expanded = amb = missing = changed = 0
+    for p in files:
+        text = p.read_text(encoding="utf-8", errors="replace")
+        spans = code_spans(text)
+        out, last, n = [], 0, 0
+        for m in WIKILINK_RE.finditer(text):
+            if any(s <= m.start() < e for s, e in spans):
+                continue  # literal example inside code — never rewrite
+            target, disp = m.group(1), m.group(2)
+            path, st = resolve_wikilink(target, by_key)
+            if st != "ok":
+                amb += st == "ambiguous"
+                missing += st == "missing"
+                continue  # leave unresolved shorthand in place
+            label = (disp or title_of.get(path.resolve()) or target).strip()
+            out.append(text[last:m.start()])
+            out.append(f"[{label}]({rel(path)})")
+            last = m.end()
+            n += 1
+        if n:
+            out.append(text[last:])
+            p.write_text("".join(out), encoding="utf-8", newline="\n")
+            changed += 1
+            expanded += n
+    print(f"links: expanded {expanded} wiki-link(s) in {changed} file(s)")
+    if amb:
+        print(f"  {amb} ambiguous — left as-is; disambiguate with [[/path.md|text]]")
+    if missing:
+        print(f"  {missing} unresolved — left as-is; target page not written yet")
     return 0
 
 
@@ -503,6 +615,7 @@ def main():
     sub.add_parser("init")
     p = sub.add_parser("lint");  p.add_argument("--inbound", metavar="PATH")
     sub.add_parser("index")
+    sub.add_parser("links")
     p = sub.add_parser("log");   p.add_argument("message")
     sub.add_parser("stats")
     p = sub.add_parser("drift"); p.add_argument("--hash", metavar="FILE")
@@ -514,7 +627,8 @@ def main():
               file=sys.stderr)
         return 2
     return {"init": cmd_init, "lint": cmd_lint, "index": cmd_index,
-            "log": cmd_log, "stats": cmd_stats, "drift": cmd_drift}[args.cmd](args)
+            "links": cmd_links, "log": cmd_log, "stats": cmd_stats,
+            "drift": cmd_drift}[args.cmd](args)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,11 @@
 ---
 type: Entity
 title: okf.py — the Mechanical Toolchain
-description: The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
+description: The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
 status: active
 confidence: high
 created: 2026-07-07
-updated: 2026-07-07
+updated: 2026-07-08
 review_after: 2027-01-07
 tags: []
 sources:
@@ -26,7 +26,7 @@ conformant [OKF v0.1](/concepts/open-knowledge-format.md) reader target.
 
 # Schema
 
-Six subcommands; `lint` and `drift` are the only ones that gate (exit 1
+Seven subcommands; `lint` and `drift` are the only ones that gate (exit 1
 on failure).
 
 | Command | Role |
@@ -34,6 +34,7 @@ on failure).
 | `init` | Create dir skeleton + seed SCHEMA/log; sync canonical `skills/` → `.claude/skills/` and `.github/prompts/`; then index + lint |
 | `lint` | Conformance + lifecycle audit (exit 1 on errors). `--inbound PATH` lists linkers to a bundle path |
 | `index` | Regenerate `kb/index.md` from tree + frontmatter, with status badges |
+| `links` | Expand `[[slug]]`/`[[slug\|text]]` authoring shorthand into canonical bundle-relative links, in place |
 | `log "MSG"` | Prepend an entry under today's `## YYYY-MM-DD` heading |
 | `stats` | Counts by type/status + the review queue |
 | `drift` | Verify each source capture's `sha256`. `--hash FILE` prints a body hash |
@@ -83,8 +84,14 @@ to drift.
 - `strip_code` blanks fenced blocks and inline code before link
   extraction, so example links inside templates/snippets are not linted
   as real outbound links or counted toward the 2-link minimum.
-- Link tracking only understands bundle-relative markdown links; wiki
-  `[[...]]` links are invisible to it — hence SCHEMA.md forbids them.
+- Link tracking (graph, orphan/inbound checks, 2-link minimum) only
+  understands bundle-relative markdown links. Wiki `[[slug]]` shorthand is
+  an *authoring* convenience: `links` resolves each `slug` (by filename
+  stem, title, or explicit `/path.md`) and rewrites it to the canonical
+  form, skipping code spans and leaving ambiguous / not-yet-written
+  targets in place. Run it before `index`/`lint`; `lint` warns on any
+  surviving unexpanded or ambiguous `[[...]]` and files a missing target
+  as info.
 
 # Related pages
 

@@ -53,7 +53,9 @@ For each page:
   structure.
 - ≥ 2 outbound bundle-relative links, with the relationship stated in
   surrounding prose. Link to not-yet-written pages freely if they'd
-  meet the threshold later.
+  meet the threshold later. You may write links as `[[slug]]` or
+  `[[slug|display text]]` shorthand (`slug` = a page's filename stem or
+  title); close-out expands them to canonical form.
 - Bump `updated:` on every touched page.
 
 Promote `draft → active` only when the page is cross-linked, cited, and
@@ -61,8 +63,10 @@ you'd stand behind its claims.
 
 ## Step 4 — Close out
 
-1. `python scripts/okf.py index`
-2. `python scripts/okf.py log "**Ingestion**: <what> from [source](/sources/<file>.md); created/updated [page](/path.md)."`
-3. `python scripts/okf.py lint` — fix errors, report warnings.
-4. Summarize for the user: pages created/updated, status assigned,
+1. `python scripts/okf.py links` — expand any `[[slug]]` shorthand to
+   canonical links; resolve anything it reports as ambiguous/unresolved.
+2. `python scripts/okf.py index`
+3. `python scripts/okf.py log "**Ingestion**: <what> from [source](/sources/<file>.md); created/updated [page](/path.md)."`
+4. `python scripts/okf.py lint` — fix errors, report warnings.
+5. Summarize for the user: pages created/updated, status assigned,
    contradictions flagged.

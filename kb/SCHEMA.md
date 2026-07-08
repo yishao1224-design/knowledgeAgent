@@ -152,8 +152,17 @@ Rules that must hold regardless of status, entry point, or variant.
 
 Template rules:
 
-- Links are bundle-relative markdown links, never wiki-style `[[...]]`
-  — lint's link tracking (and the safe-delete check) depends on it.
+- The **committed** form of a link is always a bundle-relative markdown
+  link (`[Title](/concepts/foo.md)`) — lint's link tracking, the graph,
+  and the safe-delete check depend on it, and plain OKF readers can only
+  follow that form.
+- While **authoring**, you may write `[[slug]]` or `[[slug|display text]]`
+  shorthand (`slug` = a page's filename stem or title; or an explicit
+  `[[/path.md]]`). Run `python scripts/okf.py links` to expand every
+  shorthand into the canonical form *before* `index`/`lint`. Expansion
+  skips code spans, and leaves ambiguous / not-yet-written targets in
+  place — lint then flags any `[[...]]` that survived (unexpanded/
+  ambiguous → warning, missing target → info).
 - **Artifacts** are deployable code/metadata components (e.g.
   Salesforce Apex classes, LWC, triggers, Flows). Reference them by
   stable identifier plus a one-line role. Do not document an artifact's
