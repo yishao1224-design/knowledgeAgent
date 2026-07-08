@@ -1,5 +1,13 @@
 # Bundle Update Log
 
+## 2026-07-08
+* **Update**: added *Keeping code knowledge fresh* to [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md) — story Definition-of-Done as primary code-knowledge freshness trigger, review_after as backstop; reconciled its review-cadence note with the scoped [SCHEMA.md](/SCHEMA.md) rule.
+* **Update**: reworked [SCHEMA.md](/SCHEMA.md) review cadence — review_after is now an explicitly-scoped backstop (change-signal vs no-signal), internal maintainer field; story-driven pages defer to the DoD trigger per [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md).
+
+## 2026-07-07
+* **Ingestion**: okf.py toolchain from [capture](/sources/2026-07-07-okf-toolchain.md); created [okf-toolchain entity](/entities/okf-toolchain.md), linked from [lifecycle-skills](/entities/lifecycle-skills.md).
+* **Ingestion**: lifecycle skills from [capture](/sources/2026-07-06-lifecycle-skills.md); created [lifecycle-skills entity](/entities/lifecycle-skills.md), linked from [knowledge-lifecycle](/concepts/knowledge-lifecycle.md).
+
 ## 2026-07-06
 * **Update**: added domain-concept body template to [SCHEMA.md](/SCHEMA.md) (required/optional sections, no N/A placeholders, artifact-reference rules); kb-ingest skill now points to it.
 * **Ingestion**: filed conversation analyses on lifecycle automation and team merge guardrails; created [automating-the-lifecycle](/concepts/automating-the-lifecycle.md) and [pr-quality-gates](/concepts/pr-quality-gates.md), linked from [adopting-the-bundle-pattern](/concepts/adopting-the-bundle-pattern.md).

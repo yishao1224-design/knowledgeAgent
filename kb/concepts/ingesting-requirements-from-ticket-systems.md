@@ -5,8 +5,8 @@ description: How to feed user stories from a work-item tracker (e.g. Azure DevOp
 status: active
 confidence: low
 created: 2026-07-06
-updated: 2026-07-06
-review_after: 2026-08-06
+updated: 2026-07-08
+review_after: 2026-08-08
 tags: [unverified]
 ---
 
@@ -61,9 +61,39 @@ in the tracker, re-ingest under a **new dated file** — the sequence of
 captures becomes an audit trail of how the requirement evolved, and
 `okf.py drift` guards the old ones.
 
+## Keeping code knowledge fresh
+
+The freshness question for a distilled requirement/behavior page is
+*when does a code change make this page wrong* — and time can't answer
+it. A page goes stale the moment a story ships, not on a fixed cadence.
+The work item that drove the change **is** the freshness signal, so tie
+the KB refresh to it rather than to the clock:
+
+- **Definition-of-Done gate.** Add "affected `kb/` pages updated or
+  re-ingested" to a story's Definition of Done, the way
+  [PR quality gates](/concepts/pr-quality-gates.md) make conformance a
+  merge condition. The obligation then lives where the change lives —
+  the story doesn't close until the knowledge it changed is current.
+- **Trace the link both ways.** Have the story reference the concept
+  page(s) it affects, and/or the page's `sources` cite the story's
+  dated capture. A closed story can then flag exactly those pages for
+  [kb-review](/concepts/knowledge-lifecycle.md) — change-triggered, not
+  memory-triggered.
+- **`review_after` is only the backstop.** Per the scoped cadence in
+  [SCHEMA.md](/SCHEMA.md), story-driven pages lengthen `review_after`
+  well past the baseline and rely on the DoD trigger as primary; the
+  timer just catches what slips the process — e.g. an external fact
+  that changed with no story behind it.
+
+This keeps `active` an honest promise without a permanently-noisy
+queue: the story stream refreshes what actually changed, and the
+backstop covers the rest.
+
 ## Review cadence
 
-Requirements are volatile: give distilled requirement pages the
-**1-month `review_after` offset regardless of confidence** (SCHEMA.md's
-volatile-topic rule). `kb-review` is then the mechanism that notices
-the bundle drifting from the backlog.
+Distilled requirement pages are **story-driven**, so treat
+`review_after` as the backstop and the story's Definition of Done as
+the primary freshness trigger (see *Keeping code knowledge fresh* above
+and the scoped cadence in [SCHEMA.md](/SCHEMA.md)). `kb-review` still
+works the queue — for whatever the process misses, and for pages that
+drift from external volatility rather than a tracked story.

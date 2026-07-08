@@ -3,7 +3,7 @@ type: Schema
 title: Bundle Schema & Conventions
 description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, lifecycle rules.
 status: active
-updated: 2026-07-06
+updated: 2026-07-08
 ---
 
 # Bundle Schema & Conventions
@@ -172,13 +172,39 @@ to it. Otherwise fold the material into the closest existing page.
 
 # Review cadence defaults
 
-| confidence | review_after offset from `updated` |
-|-----------|-------------------------------------|
+`review_after` is a **backstop, not the primary freshness mechanism** —
+a dead-man's-switch that guarantees an `active` page is eventually
+re-affirmed even when nothing else prompts it. It fires on the clock,
+not on change, so it cannot tell "nothing changed" from "everything
+changed." Scope the cadence to whether the page already has a *real
+change signal*; running one blunt offset uniformly is what turns the
+review queue into ignorable noise.
+
+The `review_after` **date is an internal maintainer field.** Readers
+never interpret it — the user-facing signal is the `status:
+needs_review` flag surfaced in answers, which the overdue date merely
+triggers.
+
+Baseline offset from `updated`, by confidence:
+
+| confidence | offset |
+|-----------|--------|
 | high | +6 months |
 | medium | +3 months |
 | low | +1 month |
 
-Volatile topics (pricing, versions, org charts): 1 month regardless.
+Then adjust by change signal:
+
+| The page's truth is governed by… | Cadence |
+|----------------------------------|---------|
+| A change process the bundle already tracks — e.g. domain code driven by user stories (see [ingesting requirements](/concepts/ingesting-requirements-from-ticket-systems.md)) | **Backstop only — lengthen well past the baseline.** The story / Definition-of-Done trigger is the real freshness signal; a short timer here is pure noise. |
+| Nothing the bundle can track — external/volatile facts (pricing, versions, org charts, live URLs) | **Short — 1 month regardless of confidence.** This is where `review_after` earns its keep; no other mechanism catches these. |
+| `unverified` conversation takeaways with no source | Short (≤ 1 month) — force a second look before the claim is trusted. |
+
+A chronically-ignored review queue means the offsets are wrong for
+those pages (too short for backstop-only pages), not that the field is
+worthless — retune toward the table above rather than muting the
+warning.
 
 # Log conventions
 

@@ -29,6 +29,9 @@ draft ──> active ──> needs_review ──> active     (re-verified)
                             └───────> deprecated ──> archived
 ```
 
+The skills named below are documented as a suite in
+[the lifecycle skill suite](/entities/lifecycle-skills.md).
+
 | Transition | Driven by | Trigger |
 |-----------|-----------|---------|
 | (new) → draft | kb-ingest | source captured, page written |
