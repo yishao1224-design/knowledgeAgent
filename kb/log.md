@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-07-09
+* **Update**: added one-project-multiple-repos hybrid to [adopting-the-bundle-pattern](/concepts/adopting-the-bundle-pattern.md) — sibling standalone KB repo, process-link DoD, workspace/CLAUDE.md convention, tag-scoping by module, integration-contract guidance.
+
 ## 2026-07-08
 * **Ingestion**: filed session takeaways on trust semantics — page-as-unit-of-trust, weakest-link rules, needs_review as detector convergence point added to [knowledge-lifecycle](/concepts/knowledge-lifecycle.md); multi-story ingest discipline (no re-warranting, evolution vs contradiction) added to [user-story-analysis-workflow](/concepts/user-story-analysis-workflow.md).
 * **Update**: added analysis-time code cross-check to [user-story-analysis-workflow](/concepts/user-story-analysis-workflow.md) — trust-label updates during story analysis with scope/asymmetric-authority/three-way-mismatch guardrails.

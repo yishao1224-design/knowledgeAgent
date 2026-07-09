@@ -5,7 +5,7 @@ description: How to install the OKF bundle + lifecycle skills into a real projec
 status: active
 confidence: low
 created: 2026-07-06
-updated: 2026-07-06
+updated: 2026-07-09
 review_after: 2026-08-06
 tags: [unverified]
 ---
@@ -27,10 +27,56 @@ it creates follows [OKF](/concepts/open-knowledge-format.md) plus the
 | Knowledge is about… | Put the bundle… | Why |
 |---------------------|-----------------|-----|
 | One project (architecture decisions, domain concepts, gotchas, ingested vendor docs) | Inside that project repo (`kb/` at root) — **default choice** | Agent has KB in context during coding sessions; knowledge changes ride in the same PRs as the code; CI can run `okf.py lint` |
-| Multiple projects, personal notes, team practices | A standalone KB repo (like knowledgeAgent itself) | No single codebase owns it |
+| One project spanning multiple repos (tightly-integrated modules, each with its own repo) | A standalone project-level KB repo, checked out as a **sibling** of the module repos | The highest-value knowledge is cross-module (contracts, shared invariants) and has no single owning codebase; bundle links cannot cross repos, so splitting per module would tear it apart |
+| Multiple unrelated projects, personal notes, team practices | A standalone KB repo (like knowledgeAgent itself) | No single codebase owns it |
 
 Git submodules are technically possible but add sync friction; avoid
 unless one bundle genuinely must be shared across repos.
+
+## One project, multiple repos (the hybrid row)
+
+A standalone project-level bundle loses the two same-repo advantages;
+recover both deliberately:
+
+- **The DoD trigger is a process link, not a repo link.** Stories live
+  in one project-level tracker, so the Definition-of-Done gate from
+  [ingesting requirements from ticket systems](/concepts/ingesting-requirements-from-ticket-systems.md)
+  still works — the KB update is a *sibling* PR to the code PR rather
+  than the same one. The story still doesn't close until the KB is
+  current. Stories that touch several modules produce knowledge that
+  only makes sense at project level — the strongest argument for the
+  single bundle.
+- **The analysis-time cross-check needs all repos in context.** The
+  [user story analysis workflow](/concepts/user-story-analysis-workflow.md)'s
+  code cross-check assumes the agent can see the code. Fix by
+  convention: check the repos out as siblings
+  (`project/module-a/`, `project/module-b/`, `project/kb/`) and add a
+  pointer to **each module repo's `CLAUDE.md`**: "project KB lives at
+  `../kb` — read its index before cross-module work; follow its
+  session protocol before writing to it." That pointer is the
+  cross-repo glue; without it module sessions won't know the KB exists.
+
+Structure inside the bundle:
+
+- **Scope by tags, not directories** — seed `module-a`, `module-b`,
+  `integration` in the taxonomy before the first ingest. Pages spanning
+  modules (many of the best ones) then have no directory identity
+  crisis.
+- **One `Entity` hub page per module** — its repo, boundary,
+  responsibilities; cross-module concepts link both hubs.
+- **Integration contracts are the crown jewels** — cross-module
+  invariants belong in the domain-concept template's `## Invariants`,
+  where the analysis-time cross-check can verify them against *both*
+  codebases.
+- **Don't ingest module internals** — the page-creation threshold and
+  the don't-mirror rule apply with extra force; the bundle earns its
+  keep on what spans the seam.
+
+Accepted trade-off: the KB cannot version atomically with either
+module, so brief skew between a module release and its KB update is
+possible. Don't fight it with submodule machinery — the lifecycle's
+`needs_review` flags and in-flight-window logic exist to label exactly
+this.
 
 ## Adoption steps (in-repo)
 
