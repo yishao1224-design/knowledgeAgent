@@ -5,7 +5,7 @@ description: How to feed user stories from a work-item tracker (e.g. Azure DevOp
 status: active
 confidence: low
 created: 2026-07-06
-updated: 2026-07-08
+updated: 2026-07-09
 review_after: 2026-08-08
 tags: [unverified]
 ---
@@ -37,20 +37,45 @@ nothing over the tracker. Split responsibilities:
 | The authoritative current story text | Personas, external systems, features (`Entity`) |
 | — | Raw story text *as fetched*, only as immutable dated `/sources/` captures backing the pages above |
 
-## Access paths to Azure DevOps (in order of preference)
+## Access paths to Azure DevOps (pick by use shape, not one ranking)
 
-1. **Azure DevOps MCP server** — Microsoft publishes an official one
-   (`microsoft/azure-devops-mcp`); the agent queries work items
-   directly, so "ingest epic 1234 and its children" is a single
-   request. Best for recurring use.
-2. **`az boards` CLI** (Azure CLI + `azure-devops` extension) — the
-   agent runs `az boards work-item show --id N` or WIQL queries during
-   ingestion. No MCP setup; needs `az login` or a PAT.
-3. **Paste/export into chat** — zero setup, fine occasionally, but the
+Field experience (first real retrieval pipeline, CRM project, 2026-07)
+refined the original MCP-first ranking: the right access path depends
+on whether the step is *judgment* or *mechanical* — the same
+code-vs-judgment split the bundle applies to its own
+[toolchain](/entities/okf-toolchain.md) vs skills.
+
+1. **Interactive identification and ad-hoc queries → MCP server**
+   (`microsoft/azure-devops-mcp`). "Find the story about the WOLI
+   layout change", exploratory WIQL, targeted parent-feature lookups
+   mid-analysis — conversation-shaped work where the agent's judgment
+   is the point.
+2. **Recurring retrieval pipeline → a script calling the REST API with
+   a PAT.** Fetch + attachment download + normalization + rev-stamping
+   is deterministic; putting it in a prompt means an LLM re-executes
+   (and can violate) every mechanical rule per run — in practice the
+   prompt accumulates defensive rules that are scar tissue from tool
+   misbehavior. A script with a version-pinned `api-version` is the
+   most stable interface, needs no CLI install, and the skill shrinks
+   to "run the script, report what it says." This bundle's concrete
+   implementation is the
+   [ado-workitem-sync toolchain](/entities/ado-workitem-sync.md).
+3. **`az boards` CLI** — middle ground when a script is overkill; no
+   MCP setup, needs `az login` or a PAT; comments/attachments get
+   awkward.
+4. **Paste/export into chat** — zero setup, fine occasionally, but the
    fetch time and provenance live only in the capture file you write.
 
 Record the org/project and where the PAT lives in the project's
 `CLAUDE.md` so sessions don't rediscover it.
+
+When the local retrieval cache is *mutable* (a refresh overwrites the
+raw payload rather than adding a dated capture), preserve provenance
+mechanically: record the tracker's revision number (ADO `System.Rev`)
+plus a retrieval timestamp in the normalized payload, and stamp any
+derived analysis with the revision it was based on. "Is this analysis
+stale?" then becomes a mechanical rev comparison — the tracker-flavored
+equivalent of the sha256 drift check.
 
 ## Capture mechanics and re-ingestion
 

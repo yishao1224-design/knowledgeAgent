@@ -1,0 +1,55 @@
+{
+  "IterationPath": "CRM\\OneCRM\\OneCRMsales\\sales.2026.6",
+  "State": "Closed",
+  "AssignedTo": "Atul Kumar",
+  "Title": "OneCRM Danfoss Connect - fix the conditions that make the WOLI read only",
+  "Description": "Converted from bug 2125434\nAs a DD + DCS Partner\nI want to make sure the Work Order Line Item page is read-only when the correct conditions apply\nso that I can complete the data and release the Work Order and complete the process\n\nCurrent situation: the banner appears on the page (preventing to edit and Save) incorrectly\n\n[IMGID:e1e01298-2516-4cc5-8356-8f62cfddde30]\n\nexample: Work Order Number 00019845 has status Scheduled and SAP Status Released , the Partner need to be able to edit the WOLI.\n\nRisk missing this feature: Partners cannot complete the process and release the Work Order.\n\nNotes:",
+  "AcceptanceCriteria": "Given I'm a DD+DCS Partner User connected to Danfoss Connect\nI'm working on a Work Order Line Item detail page, where the Work Order status is neither 'Closed, Completed, Reject, Cancelled, To be reviewed by Danfoss' or SAP status is neither ' Confirmed, Reject, Cancelled ' then I can Edit the Work Order line item details.\n\nIn the same way if the Work Order status either 'Closed, Completed, Reject, Cancelled, To be reviewed by Danfoss' or SAP status is either ' Confirmed, Reject, Cancelled ' then I see this banner:\n[IMGID:7471585f-ec29-44db-9f5d-8ff9075749be]\n\nand I cannot Edit the Work Order line item details.",
+  "Comment": [
+    {
+      "CreatedDate": "2026-06-04T03:30:05.82Z",
+      "CreatedBy": "CRM Automation System Account",
+      "Text": "Copado user story US-0009393 was automatically created"
+    },
+    {
+      "CreatedDate": "2026-06-03T09:50:01.4Z",
+      "CreatedBy": "Alessandro Passoni",
+      "Text": "@Yi Shao I confirm:\n\nlocks a WOLI when:\n-Work Order status is Closed, Completed, Rejected, Cancelled/Canceled, or To be reviewed by Danfoss\nor SAP status is Confirmed or Rejected\n\npoint 1 to 5 are already happening.\n\nWhen SAP Status = 'Released' then Partner cannot add new WOLI. This is also already happening.\n\n@Liliya Todorova"
+    },
+    {
+      "CreatedDate": "2026-06-03T09:00:53.39Z",
+      "CreatedBy": "Yi Shao",
+      "Text": "@Alessandro Passoni Could you please confirm below logic is correct?:\nlocks a WOLI when:\n-Work Order status is Closed, Completed, Rejected, Cancelled/Canceled, or To be reviewed by Danfoss\nor SAP status is Confirmed or Rejected\nwhen work order is in lock status:\n- woli popup will be read-only\n- add/delete woli button will be hidden or disabled\n- create service report will be disabled\n- Consumed Products section will be read-only\n- Complete & Confirm button will be hidden\n\nWhen SAP Status = 'Released' then Partner cannot add new WOLI.\n@Liliya Todorova"
+    },
+    {
+      "CreatedDate": "2026-06-03T08:17:26.983Z",
+      "CreatedBy": "Alessandro Passoni",
+      "Text": "Hi @Yi Shao @Liliya Todorova SAP Status 'Cancelled' is removed from Acceptance Criteria.\n\nWhen SAP Status = 'Released' then Partner cannot add new WOLI.\n\nWhen SAP Status = 'Released' AND WO_status NOT ( 'Closed, Completed, Reject, Cancelled, To be reviewed by Danfoss') THEN Partner CAN maintain Consumed Products."
+    },
+    {
+      "CreatedDate": "2026-06-03T07:31:44.797Z",
+      "CreatedBy": "Yi Shao",
+      "Text": "@Alessandro Passoni SAP Status doesn't have 'Cancelled' , please correct the AC [IMGID:5825cc55-ae10-4c38-8152-add45436e205] CC @Liliya Todorova"
+    },
+    {
+      "CreatedDate": "2026-06-03T06:38:52.36Z",
+      "CreatedBy": "Yi Shao",
+      "Text": "@Alessandro Passoni Can partner user created/delete new woli or maintain product consumed when work order sap status is Released? cc @Liliya Todorova"
+    },
+    {
+      "CreatedDate": "2026-06-01T13:53:37.26Z",
+      "CreatedBy": "Alessandro Passoni",
+      "Text": "@Yi Shao, please work on this one while waiting clarification about the Serial number.\nFYI @Liliya Todorova"
+    },
+    {
+      "CreatedDate": "2026-06-01T13:52:25.337Z",
+      "CreatedBy": "Alessandro Passoni",
+      "Text": "Hi @Arne Kampfer @Mansi Thakur @Thomas Opitz @Dusan Alasevic this has been discussed and confirmed during the meeting today 1st June 2026 I tag ass approved and will assign to developer.\n\nFyi @Liliya Todorova"
+    },
+    {
+      "CreatedDate": "2026-06-01T13:50:02.31Z",
+      "CreatedBy": "Alessandro Passoni",
+      "Text": "Copied from #2067993"
+    }
+  ]
+}

@@ -19,6 +19,7 @@ okf_version: "0.1"
 # Entities
 
 * [The Lifecycle Skill Suite](entities/lifecycle-skills.md) - The five canonical skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) that drive the knowledge lifecycle — one per phase, with strict division of responsibility.
+* [ado-workitem-sync — ADO Retrieval Toolchain](entities/ado-workitem-sync.md) - The scripts/ado.py + ado-workitem-sync skill pair that syncs Azure DevOps work items into local analysis folders — retrieve/normalize/staleness/stamp, rev-stamped provenance, judgment-only skill.
 * [codebase-memory-mcp](entities/codebase-memory-mcp.md) - MCP server by DeusData that indexes codebases into a queryable SQLite knowledge graph (tree-sitter + hybrid LSP) with automatic freshness via git watching.
 * [okf.py — the Mechanical Toolchain](entities/okf-toolchain.md) - The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
 
@@ -31,4 +32,5 @@ okf_version: "0.1"
 * [DeusData codebase-memory-mcp README](sources/2026-07-06-codebase-memory-mcp.md) - Condensed capture of the codebase-memory-mcp project README from GitHub (fetched 2026-07-06).
 * [Lifecycle skills (canonical SKILL.md files)](sources/2026-07-06-lifecycle-skills.md) - Faithful condensation of the five canonical lifecycle skills under skills/ (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) as of 2026-07-06.
 * [Open Knowledge Format (OKF) v0.1 Specification](sources/2026-07-05-okf-spec-v0-1.md) - Condensed capture of the OKF v0.1 spec from GoogleCloudPlatform/knowledge-catalog.
+* [ado.py + ado-workitem-sync skill (retrieval toolchain pair)](sources/2026-07-09-ado-workitem-sync.md) - Faithful condensation of scripts/ado.py and skills/ado-workitem-sync/SKILL.md — subcommands, normalization port provenance, rev-stamp staleness model — as of 2026-07-09.
 * [okf.py — mechanical toolchain (scripts/okf.py)](sources/2026-07-07-okf-toolchain.md) - Faithful condensation of scripts/okf.py — the six subcommands and the exact conformance/lifecycle rules its lint enforces, as of 2026-07-07.
