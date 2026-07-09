@@ -3,7 +3,7 @@ type: Schema
 title: Bundle Schema & Conventions
 description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, lifecycle rules.
 status: active
-updated: 2026-07-08
+updated: 2026-07-10
 ---
 
 # Bundle Schema & Conventions
@@ -33,7 +33,9 @@ kb/
 ├── queries/          # filed answers from kb-query worth keeping
 ├── archive/          # archived concepts (status: archived)
 └── sources/          # IMMUTABLE raw captures
-    └── YYYY-MM-DD-<slug>.md
+    ├── YYYY-MM-DD-<slug>.md
+    └── assets/       # load-bearing binary evidence (see Source assets)
+        └── YYYY-MM-DD-<slug>.<ext>
 ```
 
 # Concept frontmatter template
@@ -71,6 +73,30 @@ ingested: 2026-07-05
 sha256: <hash of the body below the frontmatter — okf.py drift checks it>
 ---
 ```
+
+# Source assets (binary evidence)
+
+Most binaries are **not** kept: extract their knowledge into the `.md`
+capture and point `source_url` at the authoritative copy (SharePoint,
+the tracker, a URL). Keep a binary in `kb/sources/assets/` only when
+**the pixels are the evidence** and there is no authoritative home —
+above all, dense architecture diagrams and annotated screenshots that
+cannot be fully extracted in one pass and will be re-read on later
+ingests and reviews.
+
+- Name: `assets/YYYY-MM-DD-<slug>.<ext>`, referenced from at least one
+  source capture, whose body says what the asset shows and what has
+  been extracted from it *so far* (an asset may yield more on a later
+  pass — note what remains unread).
+- Assets are **immutable like captures**: an updated diagram is a new
+  dated file, never an overwrite.
+- Trust caveat: `drift` hashes only `.md` bodies, so assets sit outside
+  the tamper check. The capture's written description of the asset is
+  the fallback tamper-evidence; a mismatch between description and
+  image is a review flag.
+- Size discipline: small images only. Decks/PDFs/videos stay at their
+  authoritative home; when in doubt, extract harder rather than commit
+  bigger.
 
 # Type registry
 

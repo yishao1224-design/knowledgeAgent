@@ -24,6 +24,18 @@ Read `kb/SCHEMA.md`, `kb/index.md`, and the last ~20 lines of
    `python scripts/okf.py drift --hash kb/sources/<file>.md`
 4. Never overwrite an existing capture. Same source again → new dated
    file; the old one stays for drift comparison.
+5. **Load-bearing visuals get kept, not just described.** When the
+   source is or contains an image whose pixels are the evidence —
+   especially a dense architecture diagram that can't be fully
+   extracted in one pass — copy it to
+   `kb/sources/assets/YYYY-MM-DD-<slug>.<ext>`, link it from the
+   capture, and state in the capture what the asset shows, what you
+   extracted this pass, and what remains unread (later ingests and
+   reviews will re-read it). Assets are immutable like captures; rules
+   and the trust caveat live in SCHEMA.md's *Source assets* section.
+   Binaries with an authoritative home elsewhere (decks, PDFs) are NOT
+   copied — extract their content and point `source_url` at the
+   original.
 
 Skip this step only when ingesting pure conversation takeaways with no
 external source; then concepts cite no `sources` and get
