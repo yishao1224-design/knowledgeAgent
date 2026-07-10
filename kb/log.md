@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-07-10
+* **Update**: added *Source assets* convention to [SCHEMA.md](/SCHEMA.md) — keep load-bearing visuals (dense architecture diagrams) as immutable files under sources/assets/, re-read on ingest and review; kb-ingest and kb-review skills gained the matching steps.
+
 ## 2026-07-09
 * **Ingestion**: ado-workitem-sync toolchain from [capture](/sources/2026-07-09-ado-workitem-sync.md); created [ado-workitem-sync entity](/entities/ado-workitem-sync.md), linked from [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md).
 * **Update**: refined access paths in [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md) from first field use — pick by judgment-vs-mechanical shape (MCP interactive, script+REST for pipelines), added rev-stamp provenance rule for mutable retrieval caches.

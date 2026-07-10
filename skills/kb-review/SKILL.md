@@ -24,7 +24,12 @@ and how much you'll cover this session.
 
 For each page in scope:
 
-1. Re-read the page and its `sources` captures.
+1. Re-read the page and its `sources` captures. If a capture references
+   a `sources/assets/` image (e.g. an architecture diagram), **re-read
+   the image itself**, not just the capture's description of it — dense
+   visuals yield claims on later passes that earlier ingests missed,
+   and a mismatch between the image and the capture's description is
+   itself a review flag (assets sit outside the drift check).
 2. If a source drifted or claims are time-sensitive, re-fetch the
    original `source_url`. Changed upstream → capture a NEW dated file
    in `kb/sources/` (never edit the old one) and diff against the old
