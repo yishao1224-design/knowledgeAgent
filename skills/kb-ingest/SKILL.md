@@ -53,16 +53,25 @@ overwrite: add a `## Contradictions` section to that page, tag it
 ## Step 3 — Write/update concepts
 
 For each page:
-- Full frontmatter per SCHEMA.md template. New pages start
-  `status: draft`; set `review_after` from the confidence table.
+- Pick `type` from SCHEMA.md's type registry and put the page in the
+  matching directory — `Entity` in `entities/` for a concrete nameable
+  thing (person, org, system, dataset, tool), `Comparison` in
+  `comparisons/`, `Query` in `queries/`, `Concept` in `concepts/` for
+  an idea/definition/explanation. **Never default to `type: Concept`**
+  just because the frontmatter template example shows it.
+- Full frontmatter per SCHEMA.md's page frontmatter template, `type`
+  set per the above. New pages start `status: draft`; set
+  `review_after` from the confidence table.
 - `sources:` lists the capture(s) from Step 1.
 - Externally-derived claims get a `# Citations` section.
-- Domain concepts (business rules, processes, system behavior) follow
-  the **domain-concept body template** in SCHEMA.md: required sections
-  `## Definition`, `## Key Behaviors` and/or `## Invariants`,
-  `## Related Concepts`; optional sections only when they have real
-  content — never `N/A` placeholders. Method/meta pages keep free
-  structure.
+- Domain concepts (`type: Concept` describing business rules,
+  processes, system behavior) follow the **domain-concept body
+  template** in SCHEMA.md: required sections `## Definition`,
+  `## Key Behaviors` and/or `## Invariants`, `## Related Concepts`;
+  optional sections only when they have real content — never `N/A`
+  placeholders. Everything else — `Entity`/`Comparison`/`Query` pages
+  and method/meta `Concept` pages — keeps free structure (see
+  SCHEMA.md's linked Entity example).
 - ≥ 2 outbound bundle-relative links, with the relationship stated in
   surrounding prose. Link to not-yet-written pages freely if they'd
   meet the threshold later. You may write links as `[[slug]]` or

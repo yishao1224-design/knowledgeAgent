@@ -1,6 +1,8 @@
 # Bundle Update Log
 
 ## 2026-07-10
+* **Update**: Lint now enforces the type registry — [SCHEMA.md](/SCHEMA.md)'s Type registry table is parsed by okf.py lint; unregistered types warn, known types in the wrong directory error (archive/ exempt).
+* **Update**: Fix type/template selection gap that let entity pages get created as type: Concept with the domain-concept body template — generalize [SCHEMA.md](/SCHEMA.md)'s frontmatter template to all types, scope the domain-concept body template explicitly to Concept pages, add type-selection guidance to kb-ingest's SKILL.md, and add a type registry to okf.py's SCHEMA_SEED so new projects bootstrap with the same rule.
 * **Update**: added *Source assets* convention to [SCHEMA.md](/SCHEMA.md) — keep load-bearing visuals (dense architecture diagrams) as immutable files under sources/assets/, re-read on ingest and review; kb-ingest and kb-review skills gained the matching steps.
 
 ## 2026-07-09

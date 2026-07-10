@@ -38,11 +38,17 @@ kb/
         └── YYYY-MM-DD-<slug>.<ext>
 ```
 
-# Concept frontmatter template
+# Page frontmatter template (all types)
+
+Shared by every page type — `Concept`, `Entity`, `Comparison`, `Query`.
+Set `type` and the directory to match: `Entity` pages live in
+`entities/`, `Comparison` in `comparisons/`, `Query` in `queries/`, per
+the type registry below. **Do not default to `type: Concept`** just
+because this template's example shows it.
 
 ```yaml
 ---
-type: Concept            # required (OKF). See type registry below.
+type: Concept            # required (OKF). Match to directory — see type registry below.
 title: Human Readable Title
 description: One sentence, used in index.md and previews.
 status: draft            # draft | active | needs_review | deprecated | archived
@@ -111,7 +117,10 @@ No central registry is required by OKF, but *this bundle* uses:
 | `Source` | `sources/` | Immutable raw capture |
 | `Schema` | root | This file only |
 
-Add new types here before first use.
+Add new types here before first use. **Lint enforces this table**: a
+`type` not listed here is a warning; a known `type` in the wrong
+directory is an error (`archive/` is exempt — archived pages keep
+their original type).
 
 # Tag taxonomy
 
@@ -134,11 +143,18 @@ Add new types here before first use.
 
 # Domain-concept body template
 
-Applies to `Concept` pages describing **domain** knowledge (business
-rules, processes, behavior of the systems the team builds). Method/meta
-pages — how this bundle itself works, engineering practices — keep free
-structure. General body conventions above still apply, including
-`# Citations` for externally-derived claims.
+Applies **only** to `Concept` pages describing **domain** knowledge
+(business rules, processes, behavior of the systems the team builds).
+
+It does **not** apply to `Entity`, `Comparison`, or `Query` pages, nor
+to method/meta `Concept` pages (how this bundle itself works,
+engineering practices) — all of those keep free structure instead:
+pick headings that fit the subject (e.g. `# Schema`, `# Related pages`)
+rather than forcing `## Definition`/`## Key Behaviors`. See
+[ado-workitem-sync.md](/entities/ado-workitem-sync.md) for a worked
+`Entity` example. General body conventions above still apply to every
+type regardless of body structure, including `# Citations` for
+externally-derived claims and the ≥2-outbound-link rule.
 
 Required sections: `## Definition`, at least one of `## Key Behaviors`
 or `## Invariants`, and `## Related Concepts`. Every other section is

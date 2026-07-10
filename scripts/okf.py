@@ -187,6 +187,26 @@ def taxonomy():
     return set(TAG_DEF_RE.findall(m.group(1)))
 
 
+TYPE_ROW_RE = re.compile(r"^\|\s*`([A-Za-z0-9_-]+)`\s*\|([^|]*)\|", re.M)
+
+
+def type_registry():
+    """Parse SCHEMA.md's 'Type registry' table into {type: top-level dir}
+    ('' = bundle root). None if SCHEMA.md or the section is absent."""
+    schema = KB / "SCHEMA.md"
+    if not schema.exists():
+        return None
+    text = schema.read_text(encoding="utf-8", errors="replace")
+    m = re.search(r"^#+\s*Type registry\s*$(.*?)(?=^#\s)", text, re.M | re.S)
+    if not m:
+        return None
+    reg = {}
+    for typ, where in TYPE_ROW_RE.findall(m.group(1)):
+        where = where.strip().strip("`").strip().rstrip("/")
+        reg[typ] = "" if where == "root" else where
+    return reg or None
+
+
 def parse_date(s):
     try:
         return datetime.strptime(str(s)[:10], "%Y-%m-%d").date()
@@ -200,6 +220,7 @@ def cmd_lint(args):
     errors, warns, infos = [], [], []
     files = concept_files()
     tags_known = taxonomy()
+    types_known = type_registry()
     by_key = build_resolver(files)   # for wiki-link resolution
     inbound = {}          # bundle path -> set of linking files
     all_paths = {p.resolve() for p in files}
@@ -233,8 +254,20 @@ def cmd_lint(args):
             continue
 
         # OKF conformance
-        if not str(meta.get("type", "")).strip():
+        typ = str(meta.get("type", "")).strip()
+        if not typ:
             errors.append(f"{r}: frontmatter has no non-empty 'type' (OKF §9)")
+        elif types_known is not None:
+            parts = p.relative_to(KB).parts
+            top = parts[0] if len(parts) > 1 else ""
+            if typ not in types_known:
+                warns.append(f"{r}: type '{typ}' not in SCHEMA.md type "
+                             f"registry — add it there before first use")
+            elif top != "archive" and top != types_known[typ]:
+                expected = (f"/{types_known[typ]}/" if types_known[typ]
+                            else "the bundle root")
+                errors.append(f"{r}: type '{typ}' belongs in {expected} "
+                              f"per SCHEMA.md type registry")
 
         # lifecycle profile
         status = str(meta.get("status", "")).strip()
@@ -507,11 +540,30 @@ template in the knowledgeAgent repo's kb/SCHEMA.md.)*
 
 *(one paragraph: what this knowledge base covers and for whom)*
 
-# Concept frontmatter template
+# Type registry
+
+| type | lives in | meaning |
+|------|----------|---------|
+| `Concept` | `concepts/` | An idea, definition, method, or explanation |
+| `Entity` | `entities/` | A concrete nameable thing (person, org, system, dataset, tool) |
+| `Comparison` | `comparisons/` | Structured X-vs-Y |
+| `Query` | `queries/` | A filed answer to a real question |
+| `Source` | `sources/` | Immutable raw capture |
+| `Schema` | root | This file only |
+
+Add new types here before first use. Lint enforces this table: an
+unlisted `type` is a warning; a known `type` in the wrong directory is
+an error (`archive/` is exempt).
+
+# Page frontmatter template (all types)
+
+Shared by every page type. Set `type` and the directory to match the
+registry above — **do not default to `type: Concept`** just because
+this example shows it.
 
 ```yaml
 ---
-type: Concept
+type: Concept            # match to directory — see type registry above
 title: Human Readable Title
 description: One sentence for index/previews.
 status: draft            # draft | active | needs_review | deprecated | archived
@@ -523,6 +575,13 @@ tags: []
 sources: []
 ---
 ```
+
+Only `type: Concept` pages describing **domain** knowledge (business
+rules, processes, system behavior) use the domain-concept body template
+(`## Definition`, `## Key Behaviors`/`## Invariants`,
+`## Related Concepts` — see the full template in the knowledgeAgent
+repo's kb/SCHEMA.md). `Entity`/`Comparison`/`Query` pages and
+method/meta `Concept` pages keep free structure instead.
 
 # Tag taxonomy
 
