@@ -5,7 +5,7 @@ description: The five canonical skills (kb-ingest, kb-query, kb-review, kb-curat
 status: active
 confidence: high
 created: 2026-07-06
-updated: 2026-07-07
+updated: 2026-07-11
 review_after: 2026-10-06
 tags: []
 sources:
@@ -33,6 +33,10 @@ copies `skills/` into a target repo as one of two required pieces.
 | kb-review | Verify | Work the queue (`stats` + `drift`); keep `active` a meaningful promise; verdict table from bump-and-extend down to deprecate |
 | kb-curate | Garden | Structure only — merge/split/archive/move; never changes what pages claim |
 | kb-lint | Audit | Mechanical health only — fix errors now, queue semantic issues for review/curate |
+
+Adjacent tooling: [MarkItDown](/entities/markitdown.md) is an assessed
+(not adopted) extraction helper for kb-ingest's binary-source capture
+rule — the skill itself does not reference it.
 
 ## Division of responsibility (the load-bearing rules)
 
