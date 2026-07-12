@@ -23,10 +23,12 @@ okf_version: "0.1"
 * [ado-workitem-sync — ADO Retrieval Toolchain](entities/ado-workitem-sync.md) - The scripts/ado.py + ado-workitem-sync skill pair that syncs Azure DevOps work items into local analysis folders — retrieve/normalize/staleness/stamp, rev-stamped provenance, judgment-only skill.
 * [codebase-memory-mcp](entities/codebase-memory-mcp.md) - MCP server by DeusData that indexes codebases into a queryable SQLite knowledge graph (tree-sitter + hybrid LSP) with automatic freshness via git watching.
 * [okf.py — the Mechanical Toolchain](entities/okf-toolchain.md) - The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
+* [openwiki](entities/openwiki.md) - LangChain's TypeScript CLI that auto-generates and schedule-refreshes agent-optimized wikis (repo docs or a personal brain) from pluggable connectors — the regenerate-often counterpart to this bundle's curated lifecycle.
 
 # Comparisons
 
 * [codebase-memory-mcp vs the kb wiki](comparisons/codebase-memory-mcp-vs-kb-wiki.md) - Why a derived code-knowledge graph and a curated OKF bundle are complementary layers, where they overlap (ADRs), and a phased integration plan.
+* [openwiki vs the kb bundle](comparisons/openwiki-vs-kb-bundle.md) - A generator product vs a curation discipline — where openwiki's regenerate-often bet and this bundle's lifecycle bet each win, their independent convergences, and what each could borrow.
 
 # Sources
 
@@ -35,4 +37,5 @@ okf_version: "0.1"
 * [Microsoft MarkItDown README](sources/2026-07-11-markitdown.md) - Condensed capture of the microsoft/markitdown project README from GitHub (fetched 2026-07-11).
 * [Open Knowledge Format (OKF) v0.1 Specification](sources/2026-07-05-okf-spec-v0-1.md) - Condensed capture of the OKF v0.1 spec from GoogleCloudPlatform/knowledge-catalog.
 * [ado.py + ado-workitem-sync skill (retrieval toolchain pair)](sources/2026-07-09-ado-workitem-sync.md) - Faithful condensation of scripts/ado.py and skills/ado-workitem-sync/SKILL.md — subcommands, normalization port provenance, rev-stamp staleness model — as of 2026-07-09.
+* [langchain-ai/openwiki README](sources/2026-07-12-openwiki.md) - Condensed capture of the openwiki project README from GitHub (fetched 2026-07-12) — CLI that auto-generates agent-optimized wikis for codebases and personal knowledge.
 * [okf.py — mechanical toolchain (scripts/okf.py)](sources/2026-07-07-okf-toolchain.md) - Faithful condensation of scripts/okf.py — the six subcommands and the exact conformance/lifecycle rules its lint enforces, as of 2026-07-07.

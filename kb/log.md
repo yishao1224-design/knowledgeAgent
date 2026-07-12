@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-07-12
+* **Ingestion**: openwiki (LangChain agent-wiki generator) from [capture](/sources/2026-07-12-openwiki.md); created [openwiki entity](/entities/openwiki.md) and [openwiki vs the kb bundle](/comparisons/openwiki-vs-kb-bundle.md) — regenerate-often vs curate-and-audit analysis, CI-refresh borrow noted for [automating-the-lifecycle](/concepts/automating-the-lifecycle.md).
+
 ## 2026-07-11
 * **Ingestion**: MarkItDown (Microsoft file-to-Markdown converter) from [capture](/sources/2026-07-11-markitdown.md); created [markitdown entity](/entities/markitdown.md) with capture-step fit assessment (option on the shelf, skills unchanged), cross-linked from [lifecycle-skills](/entities/lifecycle-skills.md).
 
