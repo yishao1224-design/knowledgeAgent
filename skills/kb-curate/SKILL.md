@@ -10,6 +10,10 @@ connects, not what it claims — claim verification belongs to kb-review.
 
 ## Step 0 — Orient
 
+> **First run in this project?** If there's no `kb/` bundle or no
+> `scripts/okf.py`, run the **kb-setup** skill first to scaffold them,
+> then continue.
+
 Read `kb/SCHEMA.md`, `kb/index.md`, recent `kb/log.md`. Run
 `python scripts/okf.py lint` and `okf.py stats` for a health picture:
 orphans, under-linked pages, taxonomy violations, status distribution.

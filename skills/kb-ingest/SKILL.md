@@ -10,6 +10,10 @@ concept pages.
 
 ## Step 0 — Orient (mandatory)
 
+> **First run in this project?** If there's no `kb/` bundle or no
+> `scripts/okf.py`, run the **kb-setup** skill first to scaffold them,
+> then continue.
+
 Read `kb/SCHEMA.md`, `kb/index.md`, and the last ~20 lines of
 `kb/log.md`. Identify existing pages that overlap the new material.
 **Update beats create** — see the page-creation threshold in SCHEMA.md.

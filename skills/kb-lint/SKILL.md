@@ -9,6 +9,10 @@ Mechanical health only. Lint tells you a page is overdue; deciding
 whether its claims still hold is kb-review's job — don't drift into
 content verification here.
 
+> **First run in this project?** If there's no `kb/` bundle or no
+> `scripts/okf.py`, run the **kb-setup** skill first to scaffold them,
+> then continue.
+
 ## Step 1 — Run the tooling
 
 ```

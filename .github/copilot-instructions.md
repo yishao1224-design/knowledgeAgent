@@ -35,6 +35,7 @@ Copilot Chat):
 
 | Prompt | Phase |
 |--------|-------|
+| `/kb-setup` | bootstrap `kb/` + `okf.py` (only needed in a project without them) |
 | `/kb-ingest` | capture a source into the bundle |
 | `/kb-query` | answer from the bundle with citations |
 | `/kb-review` | re-verify overdue/flagged pages |
