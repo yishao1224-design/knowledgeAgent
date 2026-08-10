@@ -10,6 +10,10 @@ recently enough to trust.
 
 ## Step 0 — Orient and build the queue
 
+> **First run in this project?** If there's no `kb/` bundle or no
+> `scripts/okf.py`, run the **kb-setup** skill first to scaffold them,
+> then continue.
+
 1. Read `kb/SCHEMA.md`; skim recent `kb/log.md`.
 2. `python scripts/okf.py stats` — the review queue lists every
    `needs_review` page and every `active` page past `review_after`.

@@ -1,5 +1,11 @@
 # Bundle Update Log
 
+## 2026-07-12
+* **Ingestion**: openwiki (LangChain agent-wiki generator) from [capture](/sources/2026-07-12-openwiki.md); created [openwiki entity](/entities/openwiki.md) and [openwiki vs the kb bundle](/comparisons/openwiki-vs-kb-bundle.md) — regenerate-often vs curate-and-audit analysis, CI-refresh borrow noted for [automating-the-lifecycle](/concepts/automating-the-lifecycle.md).
+
+## 2026-07-11
+* **Ingestion**: MarkItDown (Microsoft file-to-Markdown converter) from [capture](/sources/2026-07-11-markitdown.md); created [markitdown entity](/entities/markitdown.md) with capture-step fit assessment (option on the shelf, skills unchanged), cross-linked from [lifecycle-skills](/entities/lifecycle-skills.md).
+
 ## 2026-07-10
 * **Update**: Lint now enforces the type registry — [SCHEMA.md](/SCHEMA.md)'s Type registry table is parsed by okf.py lint; unregistered types warn, known types in the wrong directory error (archive/ exempt).
 * **Update**: Fix type/template selection gap that let entity pages get created as type: Concept with the domain-concept body template — generalize [SCHEMA.md](/SCHEMA.md)'s frontmatter template to all types, scope the domain-concept body template explicitly to Concept pages, add type-selection guidance to kb-ingest's SKILL.md, and add a type registry to okf.py's SCHEMA_SEED so new projects bootstrap with the same rule.

@@ -10,6 +10,10 @@ into it.
 
 ## Step 0 — Orient
 
+> **First run in this project?** If there's no `kb/` bundle or no
+> `scripts/okf.py`, run the **kb-setup** skill first to scaffold them,
+> then continue.
+
 Read `kb/SCHEMA.md` and `kb/index.md`. Locate candidate pages from the
 index descriptions; Grep `kb/` for terms the index doesn't surface.
 

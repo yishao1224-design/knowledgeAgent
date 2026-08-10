@@ -655,6 +655,16 @@ def cmd_init(args):
                 newline="\n")
             synced.append(name)
 
+    # 2b — refresh the toolchain copy bundled with the kb-setup skill so a
+    #      `npx skills add` install ships the current okf.py. scripts/okf.py
+    #      stays the single source of truth.
+    self_path = Path(__file__).resolve()
+    bundled = src / "kb-setup" / "okf.py"
+    if bundled.parent.exists() and bundled.resolve() != self_path:
+        if not bundled.exists() or bundled.read_bytes() != self_path.read_bytes():
+            shutil.copyfile(self_path, bundled)
+            made.append("skills/kb-setup/okf.py (refreshed toolchain bundle)")
+
     # 3 — regenerate index and report health
     cmd_index(args)
     for m in made:

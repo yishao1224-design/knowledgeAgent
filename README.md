@@ -22,6 +22,8 @@ knowledgeAgent/
 │   ├── concepts/ entities/ comparisons/ queries/ archive/
 │   └── sources/         #   IMMUTABLE raw captures, sha256-verified
 ├── skills/              # canonical lifecycle skills (edit these)
+│   ├── kb-setup/        #   bootstrap: scaffold kb/ + okf.py into a fresh project
+│   │   └── okf.py       #     toolchain bundled for `npx skills add` (auto-synced)
 │   ├── kb-ingest/       #   capture: source → snapshot → concept pages
 │   ├── kb-query/        #   serve: answer with citations + trust labels
 │   ├── kb-review/       #   verify: work the review queue against sources
@@ -44,6 +46,33 @@ python scripts/okf.py lint     # health check (exit 1 on errors)
 
 Then open the repo in Claude Code and say e.g. *"add this article to the
 knowledge base"* — the `kb-ingest` skill drives the rest.
+
+## Install into another project (`npx skills add`)
+
+The lifecycle skills are published through the open
+[agent-skills ecosystem](https://github.com/vercel-labs/skills), so any
+project can pull them with the `skills` CLI — no clone required. It works
+with Claude Code, Cursor, Codex, Copilot, and
+[70+ other agents](https://github.com/vercel-labs/skills#supported-agents).
+
+```sh
+# everything (the six kb-* skills)
+npx skills add yishao1224-design/knowledgeAgent --skill 'kb-*'
+
+# or just what you need
+npx skills add yishao1224-design/knowledgeAgent --skill kb-setup --skill kb-ingest --skill kb-query
+
+# preview what's available first
+npx skills add yishao1224-design/knowledgeAgent --list
+```
+
+A bare `SKILL.md` doesn't carry the `okf.py` toolchain or the `kb/`
+bundle, so **run `kb-setup` once first** in the target project — just ask
+your agent to *"set up the knowledge base"*. It drops `scripts/okf.py`
+(bundled inside the skill) into place and runs `okf.py init` to scaffold
+`kb/`. The other skills detect a missing bundle and point you at
+`kb-setup` automatically. After that, `kb-ingest` / `kb-query` / etc.
+behave exactly as they do in this repo.
 
 ## Agent support
 
