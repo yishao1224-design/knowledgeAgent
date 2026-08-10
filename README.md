@@ -56,8 +56,10 @@ with Claude Code, Cursor, Codex, Copilot, and
 [70+ other agents](https://github.com/vercel-labs/skills#supported-agents).
 
 ```sh
-# everything (the six kb-* skills)
-npx skills add yishao1224-design/knowledgeAgent --skill 'kb-*'
+# the six kb-* skills (--skill takes exact names, not globs)
+npx skills add yishao1224-design/knowledgeAgent \
+  --skill kb-setup --skill kb-ingest --skill kb-query \
+  --skill kb-review --skill kb-curate --skill kb-lint
 
 # or just what you need
 npx skills add yishao1224-design/knowledgeAgent --skill kb-setup --skill kb-ingest --skill kb-query
@@ -65,6 +67,9 @@ npx skills add yishao1224-design/knowledgeAgent --skill kb-setup --skill kb-inge
 # preview what's available first
 npx skills add yishao1224-design/knowledgeAgent --list
 ```
+
+(`--skill '*'` installs *all* skills in the repo — that also pulls in the
+unrelated `ado-workitem-sync`, so prefer naming the `kb-` skills.)
 
 A bare `SKILL.md` doesn't carry the `okf.py` toolchain or the `kb/`
 bundle, so **run `kb-setup` once first** in the target project — just ask
