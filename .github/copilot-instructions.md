@@ -41,6 +41,7 @@ Copilot Chat):
 | `/kb-review` | re-verify overdue/flagged pages |
 | `/kb-curate` | merge, split, archive, restructure |
 | `/kb-lint` | mechanical health audit |
+| `/kb-publish-ado` | render the bundle into an Azure DevOps wiki |
 
 Each is a wrapper around the canonical workflow in
 `skills/<name>/SKILL.md` — the SKILL.md is the source of truth. Prompt

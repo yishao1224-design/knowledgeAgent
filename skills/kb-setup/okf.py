@@ -655,15 +655,24 @@ def cmd_init(args):
                 newline="\n")
             synced.append(name)
 
-    # 2b — refresh the toolchain copy bundled with the kb-setup skill so a
-    #      `npx skills add` install ships the current okf.py. scripts/okf.py
-    #      stays the single source of truth.
-    self_path = Path(__file__).resolve()
-    bundled = src / "kb-setup" / "okf.py"
-    if bundled.parent.exists() and bundled.resolve() != self_path:
-        if not bundled.exists() or bundled.read_bytes() != self_path.read_bytes():
-            shutil.copyfile(self_path, bundled)
-            made.append("skills/kb-setup/okf.py (refreshed toolchain bundle)")
+    # 2b — refresh toolchain copies bundled inside skills so a
+    #      `npx skills add` install ships current scripts. The files in
+    #      scripts/ stay the single source of truth.
+    scripts_dir = Path(__file__).resolve().parent
+    bundles = [
+        ("okf.py", src / "kb-setup" / "okf.py"),
+        ("kb_wiki.py", src / "kb-publish-ado" / "kb_wiki.py"),
+    ]
+    for fname, bundled in bundles:
+        source_file = scripts_dir / fname
+        if not source_file.exists() or not bundled.parent.exists():
+            continue
+        if bundled.resolve() == source_file.resolve():
+            continue
+        if not bundled.exists() or bundled.read_bytes() != source_file.read_bytes():
+            shutil.copyfile(source_file, bundled)
+            made.append(f"skills/{bundled.parent.name}/{fname} "
+                        f"(refreshed toolchain bundle)")
 
     # 3 — regenerate index and report health
     cmd_index(args)
