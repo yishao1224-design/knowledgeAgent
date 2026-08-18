@@ -1,0 +1,3 @@
+runtime/knowledge-agent/** text eol=lf
+lib/agent/fixed-runtime.generated.ts text eol=lf
+scripts/generate-fixed-runtime.mjs text eol=lf

@@ -1,0 +1,15 @@
+{
+  "runtimeVersion": "knowledge-agent-2026.08.15.1",
+  "sourceRepository": "https://github.com/yishao1224-design/knowledgeAgent",
+  "sourceCommit": "5973ecd922e27ac66cd42215e025d829db2adc4e",
+  "executionPolicy": {
+    "skills": "loaded-by-pi",
+    "okfScript": "bundled-and-hash-verified",
+    "pythonExecution": "requires-container-runtime"
+  },
+  "files": {
+    "skills/kb-query/SKILL.md": "2bc6e400f3147a6feeedd0a8d64dc04bd48e21ffe97426c7fffd2d8c2c8848a7",
+    "skills/kb-ingest/SKILL.md": "e54ab3b85dbda8ee22dd4c6acf9fd6a9dbad683f5b98ccbcdb13ff3c3a400460",
+    "scripts/okf.py": "82bfb04a82b6cf71fd6fba52bfc4d24427c1017152e4782a2fc2a76fa7e9db10"
+  }
+}
