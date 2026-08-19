@@ -1,12 +1,13 @@
 import { shallowCloneRepository } from "@/lib/git-repository";
+import type { RepositoryAuthInput } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { repository?: string; branch?: string };
+    const body = (await request.json()) as { repository?: string; branch?: string; auth?: RepositoryAuthInput };
     if (!body.repository) return Response.json({ error: "请填写仓库地址。" }, { status: 400 });
-    const result = await shallowCloneRepository(body.repository, body.branch);
+    const result = await shallowCloneRepository(body.repository, body.branch, body.auth);
     const { files: _files, ...snapshot } = result;
     void _files;
     return Response.json(snapshot, { headers: { "Cache-Control": "no-store" } });

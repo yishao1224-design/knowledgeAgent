@@ -9,7 +9,7 @@ import {
   validateIngestInput,
   type IngestInput,
 } from "../ingest";
-import type { AgentModelInput, IngestPreview } from "../types";
+import type { AgentModelInput, IngestPreview, RepositoryAuthInput } from "../types";
 import { createFixedSkillTool, fixedRuntimeTrace } from "./fixed-runtime";
 import {
   createReadOnlyRepositoryTools,
@@ -17,7 +17,7 @@ import {
 } from "./repo-tools";
 import { runPiToolAgent } from "./runtime";
 
-type CloneRepository = (repository: string, branch?: string) => Promise<LoadedRepository>;
+type CloneRepository = (repository: string, branch?: string, auth?: RepositoryAuthInput) => Promise<LoadedRepository>;
 type RunToolAgent = (input: {
   model: AgentModelInput | undefined;
   systemPrompt: string;
@@ -54,6 +54,7 @@ export async function runIngestAgent(
   input: {
     repository: string;
     branch?: string;
+    auth?: RepositoryAuthInput;
     material: IngestInput;
     model?: AgentModelInput;
   },
@@ -64,7 +65,7 @@ export async function runIngestAgent(
 ): Promise<IngestPreview> {
   const material = validateIngestInput(input.material);
   const cloneStartedAt = performance.now();
-  const repository = await (dependencies.cloneRepository || shallowCloneRepository)(input.repository, input.branch);
+  const repository = await (dependencies.cloneRepository || shallowCloneRepository)(input.repository, input.branch, input.auth);
   const recorder = createRepositoryToolRecorder();
   recorder.steps.push({
     node: "shallow_clone",

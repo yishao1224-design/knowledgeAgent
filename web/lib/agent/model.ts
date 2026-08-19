@@ -5,7 +5,7 @@ import {
   type MutableModels,
 } from "@earendil-works/pi-ai";
 import { openAICompletionsApi } from "@earendil-works/pi-ai/api/openai-completions.lazy";
-import type { AgentModelInput } from "../types";
+import type { AgentModelInput, ModelConnectionTestResponse } from "../types";
 
 const DEFAULT_BASE_URL = "https://api.openai.com/v1";
 const DEFAULT_MODEL = "gpt-4.1-mini";
@@ -48,7 +48,7 @@ export function resolveAgentModel(input?: AgentModelInput): ResolvedAgentModel {
   const apiKey = input?.apiKey?.trim() || "";
   const modelId = input?.model?.trim() || DEFAULT_MODEL;
   if (!apiKey) throw new Error("请填写本次会话使用的模型 API Key。");
-  if (apiKey.length > 512) throw new Error("模型 API Key 格式不正确。");
+  if (apiKey.length > 4_096) throw new Error("模型 API Key 格式不正确。");
   if (!/^[A-Za-z0-9._:/-]{1,160}$/.test(modelId)) throw new Error("模型名称格式不正确。");
 
   return {
@@ -104,6 +104,61 @@ export function safeAgentError(error: unknown, apiKey?: string): Error {
   const raw = error instanceof Error ? error.message : typeof error === "string" ? error : fallback;
   const redacted = apiKey ? raw.split(apiKey).join("[redacted]") : raw;
   return new Error(redacted.slice(0, 600) || fallback);
+}
+
+export async function testAgentModelConnection(input?: AgentModelInput): Promise<ModelConnectionTestResponse> {
+  let config: ResolvedAgentModel;
+  try {
+    config = resolveAgentModel(input);
+  } catch (error) {
+    return {
+      ok: false,
+      baseUrl: input?.baseUrl?.trim() || DEFAULT_BASE_URL,
+      model: input?.model?.trim() || DEFAULT_MODEL,
+      message: error instanceof Error ? error.message : "模型配置无效。",
+    };
+  }
+
+  try {
+    const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${config.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: config.modelId,
+        messages: [{ role: "user", content: "Reply with OK." }],
+        max_tokens: 1,
+        stream: false,
+      }),
+    });
+    if (response.ok) {
+      return {
+        ok: true,
+        baseUrl: config.baseUrl,
+        model: config.modelId,
+        status: response.status,
+        message: "模型连接测试成功。",
+      };
+    }
+
+    const detail = (await response.text()).replace(config.apiKey, "[redacted]").slice(0, 300).trim();
+    return {
+      ok: false,
+      baseUrl: config.baseUrl,
+      model: config.modelId,
+      status: response.status,
+      message: detail ? `模型连接失败：${detail}` : `模型连接失败：HTTP ${response.status}`,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      baseUrl: config.baseUrl,
+      model: config.modelId,
+      message: safeAgentError(error, config.apiKey).message,
+    };
+  }
 }
 
 export const DEFAULT_AGENT_MODEL = {

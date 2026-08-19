@@ -1,5 +1,5 @@
 import { runIngestAgent } from "@/lib/agent/ingest-agent";
-import type { AgentModelInput } from "@/lib/types";
+import type { AgentModelInput, RepositoryAuthInput } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -11,12 +11,14 @@ export async function POST(request: Request) {
       title?: string;
       text?: string;
       sourceUrl?: string;
+      auth?: RepositoryAuthInput;
       model?: AgentModelInput;
     };
     if (!body.repository) return Response.json({ error: "请填写仓库地址。" }, { status: 400 });
     const result = await runIngestAgent({
       repository: body.repository,
       branch: body.branch,
+      auth: body.auth,
       model: body.model,
       material: {
         title: body.title || "",

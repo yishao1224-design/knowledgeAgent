@@ -3,12 +3,12 @@ import {
   shallowCloneRepository,
   type LoadedRepository,
 } from "../git-repository";
-import type { AgentModelInput, AskResponse, Citation, KnowledgePage } from "../types";
+import type { AgentModelInput, AskResponse, Citation, KnowledgePage, RepositoryAuthInput } from "../types";
 import { createFixedSkillTool, fixedRuntimeTrace } from "./fixed-runtime";
 import { createReadOnlyRepositoryTools, createRepositoryToolRecorder } from "./repo-tools";
 import { runPiToolAgent } from "./runtime";
 
-type CloneRepository = (repository: string, branch?: string) => Promise<LoadedRepository>;
+type CloneRepository = (repository: string, branch?: string, auth?: RepositoryAuthInput) => Promise<LoadedRepository>;
 type RunToolAgent = (input: {
   model: AgentModelInput | undefined;
   systemPrompt: string;
@@ -55,6 +55,7 @@ export async function runQueryAgent(
   input: {
     repository: string;
     branch?: string;
+    auth?: RepositoryAuthInput;
     question: string;
     model?: AgentModelInput;
   },
@@ -68,7 +69,7 @@ export async function runQueryAgent(
   if (question.length > 4_000) throw new Error("单次问题不能超过 4,000 个字符。");
 
   const cloneStartedAt = performance.now();
-  const repository = await (dependencies.cloneRepository || shallowCloneRepository)(input.repository, input.branch);
+  const repository = await (dependencies.cloneRepository || shallowCloneRepository)(input.repository, input.branch, input.auth);
   const recorder = createRepositoryToolRecorder();
   recorder.steps.push({
     node: "shallow_clone",

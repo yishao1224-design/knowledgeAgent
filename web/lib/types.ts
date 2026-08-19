@@ -76,6 +76,19 @@ export interface AgentModelInput {
   apiKey?: string;
 }
 
+export interface ModelConnectionTestResponse {
+  ok: boolean;
+  baseUrl: string;
+  model: string;
+  status?: number;
+  message: string;
+}
+
+export interface RepositoryAuthInput {
+  username?: string;
+  password?: string;
+}
+
 export interface AskResponse {
   answer: string;
   commit: string;

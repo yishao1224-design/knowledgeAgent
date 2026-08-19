@@ -1,5 +1,5 @@
 import { runQueryAgent } from "@/lib/agent/query-agent";
-import type { AgentModelInput } from "@/lib/types";
+import type { AgentModelInput, RepositoryAuthInput } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +8,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       repository?: string;
       branch?: string;
+      auth?: RepositoryAuthInput;
       question?: string;
       model?: AgentModelInput;
     };
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
     const result = await runQueryAgent({
       repository: body.repository,
       branch: body.branch,
+      auth: body.auth,
       question: body.question.trim(),
       model: body.model,
     });

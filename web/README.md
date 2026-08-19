@@ -2,14 +2,16 @@
 
 A database-free web workspace for OKF knowledge bundles. Each import, question,
 and ingest preview performs a new, in-memory, depth-one clone of the selected
-public Git repository. No repository clone or conversation is retained by the
-server.
+public or authenticated Git repository. No repository clone or conversation is
+retained by the server.
 
 ## What is included
 
-- GitHub, GitLab, Bitbucket, and Gitee HTTPS repository validation.
+- GitHub, GitLab, Bitbucket, Gitee, and Azure DevOps HTTPS repository validation.
+- Optional session-only repository username/password authentication for clone requests.
 - `depth: 1`, `singleBranch: true`, no-tag clone through `isomorphic-git`.
 - Stateless Pi Agent Core tool loops for query and ingest execution.
+- A model connection test endpoint for OpenAI-compatible endpoint, model, and API key validation.
 - Hash-verified, fixed-version `kb-query` and `kb-ingest` skills loaded as Pi's mandatory first tool call.
 - The original `scripts/okf.py` bundled with a pinned source commit and SHA-256 manifest.
 - OKF frontmatter parsing, lifecycle badges, Markdown rendering, and bundle links.
@@ -63,7 +65,7 @@ npm test
 
 ## Execution limits
 
-- Public HTTPS repositories only.
+- Public or authenticated HTTPS repositories only.
 - Maximum 1,200 Markdown files under `kb/`.
 - Maximum 1 MB per KB Markdown file and 12 MB total KB Markdown content.
 - Requires `kb/SCHEMA.md`, `kb/index.md`, and `kb/log.md`.

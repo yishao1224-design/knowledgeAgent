@@ -28,7 +28,7 @@ import {
   Workflow,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, type PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
@@ -38,6 +38,7 @@ import type {
   IngestPreview,
   KnowledgePage,
   KnowledgeStatus,
+  ModelConnectionTestResponse,
   RepositorySnapshot,
   WorkflowTrace,
 } from "@/lib/types";
@@ -45,6 +46,11 @@ import type {
 const DEFAULT_REPOSITORY = "https://github.com/yishao1224-design/knowledgeAgent";
 const DEFAULT_MODEL_ENDPOINT = "https://api.openai.com/v1";
 const DEFAULT_MODEL = "gpt-4.1-mini";
+const DEFAULT_AGENT_WIDTH = 370;
+const MIN_AGENT_WIDTH = 330;
+const MIN_DOCUMENT_WIDTH = 240;
+const DESKTOP_SIDEBAR_WIDTH = 254;
+const COMPACT_SIDEBAR_WIDTH = 230;
 
 const SECTION_LABELS: Record<string, string> = {
   root: "Bundle",
@@ -137,14 +143,19 @@ function EmptyWorkspace({ onOpen }: { onOpen: () => void }) {
 export default function Home() {
   const [repository, setRepository] = useState(DEFAULT_REPOSITORY);
   const [branch, setBranch] = useState("");
+  const [repositoryUsername, setRepositoryUsername] = useState("");
+  const [repositoryPassword, setRepositoryPassword] = useState("");
   const [modelEndpoint, setModelEndpoint] = useState(DEFAULT_MODEL_ENDPOINT);
   const [modelName, setModelName] = useState(DEFAULT_MODEL);
   const [apiKey, setApiKey] = useState("");
+  const [testingModel, setTestingModel] = useState(false);
+  const [modelConnection, setModelConnection] = useState<ModelConnectionTestResponse | null>(null);
   const [snapshot, setSnapshot] = useState<RepositorySnapshot | null>(null);
   const [selectedPath, setSelectedPath] = useState("");
   const [query, setQuery] = useState("");
   const [importOpen, setImportOpen] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [agentWidth, setAgentWidth] = useState(DEFAULT_AGENT_WIDTH);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [agentMode, setAgentMode] = useState<"ask" | "ingest">("ask");
@@ -164,6 +175,7 @@ export default function Home() {
   const [preview, setPreview] = useState<IngestPreview | null>(null);
   const [patchOpen, setPatchOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const workspaceRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const savedRepo = window.localStorage.getItem("kb-workspace-repository");
@@ -174,7 +186,15 @@ export default function Home() {
     if (savedBranch) setBranch(savedBranch);
     if (savedEndpoint) setModelEndpoint(savedEndpoint);
     if (savedModel) setModelName(savedModel);
+    const savedAgentWidth = Number(window.localStorage.getItem("kb-workspace-agent-width"));
+    if (Number.isFinite(savedAgentWidth)) {
+      setAgentWidth(Math.max(MIN_AGENT_WIDTH, savedAgentWidth));
+    }
   }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("kb-workspace-agent-width", String(agentWidth));
+  }, [agentWidth]);
 
   const selectedPage = snapshot?.pages.find((page) => page.bundlePath === selectedPath) || null;
   const visiblePages = useMemo(() => {
@@ -198,12 +218,37 @@ export default function Home() {
     return groups;
   }, [visiblePages]);
 
+  const repositoryAuth = repositoryUsername.trim() || repositoryPassword
+    ? { username: repositoryUsername, password: repositoryPassword }
+    : undefined;
+
+  async function testModelConnection() {
+    setTestingModel(true);
+    setError("");
+    setModelConnection(null);
+    try {
+      const result = await requestJson<ModelConnectionTestResponse>("/api/runtime/test", {
+        model: { baseUrl: modelEndpoint, model: modelName, apiKey },
+      });
+      setModelConnection(result);
+    } catch (cause) {
+      setModelConnection({
+        ok: false,
+        baseUrl: modelEndpoint,
+        model: modelName,
+        message: cause instanceof Error ? cause.message : "模型连接测试失败。",
+      });
+    } finally {
+      setTestingModel(false);
+    }
+  }
+
   async function importRepository() {
     setLoading(true);
     setError("");
     setPreview(null);
     try {
-      const result = await requestJson<RepositorySnapshot>("/api/repository", { repository, branch });
+      const result = await requestJson<RepositorySnapshot>("/api/repository", { repository, branch, auth: repositoryAuth });
       setSnapshot(result);
       const first = result.pages.find((page) => page.section === "concepts") || result.pages[0];
       setSelectedPath(first?.bundlePath || "");
@@ -237,6 +282,7 @@ export default function Home() {
       const result = await requestJson<AskResponse>("/api/ask", {
         repository,
         branch: snapshot.branch,
+        auth: repositoryAuth,
         question: clean,
         model: { baseUrl: modelEndpoint, model: modelName, apiKey },
       });
@@ -271,6 +317,7 @@ export default function Home() {
       const result = await requestJson<IngestPreview>("/api/ingest", {
         repository,
         branch: snapshot.branch,
+        auth: repositoryAuth,
         title: ingestTitle,
         sourceUrl: ingestUrl,
         text: ingestText,
@@ -306,6 +353,36 @@ export default function Home() {
     if (!href?.startsWith("/")) return;
     const clean = href.split("#")[0];
     if (snapshot?.pages.some((page) => page.bundlePath === clean)) setSelectedPath(clean);
+  }
+
+  function startAgentResize(event: PointerEvent<HTMLButtonElement>) {
+    if (window.innerWidth <= 680) return;
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = agentWidth;
+    const workspaceWidth = workspaceRef.current?.getBoundingClientRect().width || window.innerWidth;
+    const sidebarWidth = sidebarOpen && window.innerWidth > 900
+      ? window.innerWidth <= 1120 ? COMPACT_SIDEBAR_WIDTH : DESKTOP_SIDEBAR_WIDTH
+      : 0;
+    const availableWidth = workspaceWidth - sidebarWidth - MIN_DOCUMENT_WIDTH;
+    const maxWidth = Math.max(MIN_AGENT_WIDTH, availableWidth);
+
+    function resize(moveEvent: globalThis.PointerEvent) {
+      const nextWidth = startWidth + startX - moveEvent.clientX;
+      setAgentWidth(Math.min(maxWidth, Math.max(MIN_AGENT_WIDTH, Math.round(nextWidth))));
+    }
+
+    function stopResize() {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("pointermove", resize);
+      window.removeEventListener("pointerup", stopResize);
+    }
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("pointermove", resize);
+    window.addEventListener("pointerup", stopResize, { once: true });
   }
 
   return (
@@ -355,7 +432,11 @@ export default function Home() {
       {!snapshot ? (
         <EmptyWorkspace onOpen={() => setImportOpen(true)} />
       ) : (
-        <main className={`workspace ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
+        <main
+          ref={workspaceRef}
+          className={`workspace ${sidebarOpen ? "" : "sidebar-collapsed"}`}
+          style={{ "--agent-width": `${agentWidth}px` } as CSSProperties}
+        >
           <aside className="library-panel">
             <div className="panel-heading">
               <div><span className="panel-kicker">LIBRARY</span><strong>{snapshot.stats.pages} pages</strong></div>
@@ -451,6 +532,7 @@ export default function Home() {
           </article>
 
           <aside className="agent-panel">
+            <button className="agent-resize-handle" onPointerDown={startAgentResize} aria-label="Resize agent panel" />
             <div className="agent-heading">
               <div className="agent-avatar"><Bot size={18} /></div>
               <div><strong>Knowledge agent</strong><span>Pi Agent · fixed skills</span></div>
@@ -585,19 +667,37 @@ export default function Home() {
             <p>Every Pi Agent run starts with a brand-new depth-one clone and a hash-verified fixed workflow skill. Nothing is cached or shared with another user.</p>
             <label>Repository URL<input value={repository} onChange={(event) => setRepository(event.target.value)} placeholder="https://github.com/owner/repo" /></label>
             <label>Branch <span>optional</span><input value={branch} onChange={(event) => setBranch(event.target.value)} placeholder="default branch" /></label>
+            <div className="agent-config-heading"><KeyRound size={13} /><span>REPOSITORY CREDENTIALS</span></div>
+            <div className="agent-config-row">
+              <label>Username <span>optional</span><input value={repositoryUsername} onChange={(event) => { setRepositoryUsername(event.target.value); setError(""); }} placeholder="Azure DevOps username" autoComplete="username" spellCheck={false} /></label>
+              <label>Password or PAT <span>session only</span><input type="password" value={repositoryPassword} onChange={(event) => { setRepositoryPassword(event.target.value); setError(""); }} placeholder="token or password" autoComplete="current-password" spellCheck={false} /></label>
+            </div>
+            <p className="agent-key-note">Repository credentials stay in this tab and are sent only to clone the selected repository. They are never stored by the workspace.</p>
             <div className="agent-config-heading"><KeyRound size={13} /><span>PI AGENT MODEL</span></div>
             <div className="agent-config-row">
               <label>OpenAI-compatible Endpoint<input value={modelEndpoint} onChange={(event) => setModelEndpoint(event.target.value)} placeholder={DEFAULT_MODEL_ENDPOINT} spellCheck={false} /></label>
               <label>Model<input value={modelName} onChange={(event) => setModelName(event.target.value)} placeholder={DEFAULT_MODEL} spellCheck={false} /></label>
             </div>
             <label>API Key <span>session only</span><input type="password" value={apiKey} onChange={(event) => { setApiKey(event.target.value); setError(""); }} placeholder="sk-…" autoComplete="new-password" spellCheck={false} /></label>
-            <p className="agent-key-note">API Key stays in this tab and is sent only with Ask or Ingest requests. It is never stored by the workspace.</p>
+            <div className="model-test-row">
+              <p className="agent-key-note">API Key stays in this tab and is sent only with Ask, Ingest, or Test connection requests. It is never stored by the workspace.</p>
+              <button className="secondary-button" onClick={testModelConnection} disabled={testingModel || !apiKey.trim()}>
+                {testingModel ? <LoaderCircle size={14} className="spin" /> : <ShieldCheck size={14} />}
+                Test connection
+              </button>
+            </div>
+            {modelConnection && (
+              <div className={modelConnection.ok ? "model-test-result passed" : "model-test-result failed"}>
+                {modelConnection.ok ? <Check size={15} /> : <CircleAlert size={15} />}
+                <span>{modelConnection.message}</span>
+              </div>
+            )}
             {error && <div className="dialog-error"><CircleAlert size={15} /> {error}</div>}
             <button className="primary-button dialog-submit" onClick={importRepository} disabled={loading || !repository.trim()}>
               {loading ? <LoaderCircle size={16} className="spin" /> : <GitBranch size={16} />}
               {loading ? "Shallow cloning…" : "Open knowledge base"}
             </button>
-            <div className="dialog-security"><ShieldCheck size={14} /><span>HTTPS only · public repositories · no submodules · 12 MB KB limit</span></div>
+            <div className="dialog-security"><ShieldCheck size={14} /><span>HTTPS only · public or authenticated repositories · no submodules · 12 MB KB limit</span></div>
           </section>
         </div>
       )}

@@ -10,6 +10,8 @@ import { createIngestPreview } from "../lib/ingest";
 import { runQueryAgent } from "../lib/agent/query-agent";
 import { runIngestAgent } from "../lib/agent/ingest-agent";
 import { fixedRuntimeAssets } from "../lib/agent/fixed-runtime";
+import { resolveAgentModel, testAgentModelConnection } from "../lib/agent/model";
+import { normalizeRepositoryUrl, shallowCloneRepository } from "../lib/git-repository";
 import type { LoadedRepository } from "../lib/git-repository";
 
 const repoRoot = fileURLToPath(new URL("../../", import.meta.url));
@@ -69,6 +71,45 @@ test("bundles hash-verified fixed skills and the original okf.py", () => {
   assert.equal(hash(runtime.ingestSkill), runtime.manifest.files["skills/kb-ingest/SKILL.md"]);
   assert.equal(hash(runtime.okfScript), runtime.manifest.files["scripts/okf.py"]);
   assert.match(runtime.okfScript, /def\s+cmd_lint|def\s+lint/);
+});
+
+test("normalizes supported public repository URLs", () => {
+  assert.equal(
+    normalizeRepositoryUrl("https://dev.azure.com/example-org/Knowledge Project/_git/okf-bundle?path=/kb"),
+    "https://dev.azure.com/example-org/Knowledge%20Project/_git/okf-bundle",
+  );
+  assert.equal(
+    normalizeRepositoryUrl("https://example-org@dev.azure.com/example-org/Knowledge%20Project/_git/okf-bundle"),
+    "https://dev.azure.com/example-org/Knowledge%20Project/_git/okf-bundle",
+  );
+  assert.equal(
+    normalizeRepositoryUrl("https://example-org.visualstudio.com/Knowledge%20Project/_git/okf-bundle/"),
+    "https://example-org.visualstudio.com/Knowledge%20Project/_git/okf-bundle",
+  );
+  assert.throws(
+    () => normalizeRepositoryUrl("https://dev.azure.com/example-org/Knowledge%20Project/okf-bundle"),
+    /Azure DevOps 仓库地址/,
+  );
+});
+
+test("requires repository username and password to be provided together", async () => {
+  await assert.rejects(
+    shallowCloneRepository("https://dev.azure.com/example-org/Knowledge%20Project/_git/okf-bundle", undefined, {
+      username: "example-org",
+    }),
+    /仓库用户名和密码需要同时填写/,
+  );
+});
+
+test("validates model configuration before running an agent", async () => {
+  const longApiKey = `sk-${"a".repeat(900)}`;
+  const config = resolveAgentModel({ apiKey: longApiKey, baseUrl: "https://api.example.com/v1", model: "example-model" });
+  assert.equal(config.apiKey, longApiKey);
+  assert.equal(config.baseUrl, "https://api.example.com/v1");
+
+  const result = await testAgentModelConnection({ baseUrl: "https://api.example.com/v1", model: "example-model" });
+  assert.equal(result.ok, false);
+  assert.match(result.message, /API Key/);
 });
 
 test("lets Pi choose repository tools for a grounded query", async () => {
