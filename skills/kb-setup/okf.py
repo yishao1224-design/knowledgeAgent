@@ -661,7 +661,6 @@ def cmd_init(args):
     scripts_dir = Path(__file__).resolve().parent
     bundles = [
         ("okf.py", src / "kb-setup" / "okf.py"),
-        ("kb_wiki.py", src / "kb-publish-ado" / "kb_wiki.py"),
     ]
     for fname, bundled in bundles:
         source_file = scripts_dir / fname

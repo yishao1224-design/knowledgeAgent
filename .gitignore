@@ -5,9 +5,6 @@
 # video intro assets
 video-intro/
 
-# generated ADO wiki export (belongs in the <Project>.wiki repo, not here)
-dist/
-
 __pycache__/
 *.pyc
 .examples/*.
