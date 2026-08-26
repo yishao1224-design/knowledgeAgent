@@ -1,5 +1,9 @@
 # Bundle Update Log
 
+## 2026-08-26
+* **Update**: repointed referrers of the deprecated [ado-workitem-sync](/entities/ado-workitem-sync.md) — [SCHEMA.md](/SCHEMA.md) now cites [okf-toolchain](/entities/okf-toolchain.md) as its worked Entity example, and [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md) plus [openwiki-vs-kb-bundle](/comparisons/openwiki-vs-kb-bundle.md) now describe the toolchain in the past tense instead of as a shipping implementation.
+* **Deprecation**: [ado-workitem-sync](/entities/ado-workitem-sync.md) — the ADO retrieval toolchain (scripts/ado.py, scripts/test_ado.py, the ado-workitem-sync skill) was removed from the repo, so the page it documents has no live subject. No superseded_by: nothing replaces it; a `## Deprecation` section carries the reason and points at the tool-independent pattern in [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md) and [okf-toolchain](/entities/okf-toolchain.md). Kept in place — 3 inbound links, and the rev-stamp provenance design is still worth reading.
+
 ## 2026-07-12
 * **Ingestion**: openwiki (LangChain agent-wiki generator) from [capture](/sources/2026-07-12-openwiki.md); created [openwiki entity](/entities/openwiki.md) and [openwiki vs the kb bundle](/comparisons/openwiki-vs-kb-bundle.md) — regenerate-often vs curate-and-audit analysis, CI-refresh borrow noted for [automating-the-lifecycle](/concepts/automating-the-lifecycle.md).
 

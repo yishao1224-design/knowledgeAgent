@@ -5,7 +5,7 @@ description: How to feed user stories from a work-item tracker (e.g. Azure DevOp
 status: active
 confidence: low
 created: 2026-07-06
-updated: 2026-07-09
+updated: 2026-08-26
 review_after: 2026-08-08
 tags: [unverified]
 ---
@@ -57,9 +57,11 @@ code-vs-judgment split the bundle applies to its own
    prompt accumulates defensive rules that are scar tissue from tool
    misbehavior. A script with a version-pinned `api-version` is the
    most stable interface, needs no CLI install, and the skill shrinks
-   to "run the script, report what it says." This bundle's concrete
-   implementation is the
-   [ado-workitem-sync toolchain](/entities/ado-workitem-sync.md).
+   to "run the script, report what it says." This bundle carried a
+   worked implementation of exactly this shape until 2026-08-26, when
+   ADO integration was dropped — the
+   [retired ado-workitem-sync toolchain](/entities/ado-workitem-sync.md)
+   is kept as the design record, not as runnable code.
 3. **`az boards` CLI** — middle ground when a script is overkill; no
    MCP setup, needs `az login` or a PAT; comments/attachments get
    awkward.
