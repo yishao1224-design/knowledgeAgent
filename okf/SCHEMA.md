@@ -23,7 +23,7 @@ renamed to fit the domain — update this file and re-run
 # Directory layout
 
 ```
-kb/
+okf/            # default name; a project may choose another
 ├── index.md          # generated catalog (okf.py index)
 ├── log.md            # append-only history (okf.py log)
 ├── SCHEMA.md         # this file
@@ -84,7 +84,7 @@ sha256: <hash of the body below the frontmatter — okf.py drift checks it>
 
 Most binaries are **not** kept: extract their knowledge into the `.md`
 capture and point `source_url` at the authoritative copy (SharePoint,
-the tracker, a URL). Keep a binary in `kb/sources/assets/` only when
+the tracker, a URL). Keep a binary in `sources/assets/` only when
 **the pixels are the evidence** and there is no authoritative home —
 above all, dense architecture diagrams and annotated screenshots that
 cannot be fully extracted in one pass and will be re-read on later
@@ -263,4 +263,4 @@ warning.
 `* **Verb**: text with [links](/path.md).` Verbs in use: **Creation**,
 **Update**, **Review**, **Merge**, **Split**, **Deprecation**,
 **Archive**, **Ingestion**, **Lint-fix**. Rotate at ~500 entries
-(`okf.py log` warns; move old entries to `kb/archive/log-YYYY.md`).
+(`okf.py log` warns; move old entries to `archive/log-YYYY.md`).

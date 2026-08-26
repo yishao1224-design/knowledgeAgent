@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
-"""okf.py — mechanical toolchain for the OKF bundle in kb/.
+"""okf.py — mechanical toolchain for an OKF bundle (default: okf/).
 
 Subcommands:
-  init             bootstrap kb/ skeleton + sync skills/ to per-tool copies
-                   (.claude/skills/ for Claude Code, .github/prompts/ for Copilot)
+  init             bootstrap the bundle skeleton + sync skills/ to per-tool
+                   copies (.claude/skills/, .github/prompts/ for Copilot)
   lint             conformance + lifecycle audit (exit 1 on errors)
   lint --inbound P list files linking to bundle path P (safe-delete check)
-  index            regenerate kb/index.md from the tree + frontmatter
+  index            regenerate the bundle's index.md from tree + frontmatter
   links            expand [[slug]] shorthand into canonical bundle links
   log "MESSAGE"    prepend a log entry under today's date
   stats            counts by type/status, review queue
   drift            verify sha256 of sources/ captures
   drift --hash F   print sha256 of a file's body (for new captures)
+
+Every subcommand takes --bundle NAME to point at a differently-named
+bundle directory. Without it the bundle is auto-detected (any top-level
+directory holding a SCHEMA.md), falling back to the okf/ default.
 
 Stdlib only. Uses PyYAML if installed, else a minimal frontmatter parser
 sufficient for the SCHEMA.md templates (scalars, inline lists, block lists).
@@ -25,7 +29,12 @@ from datetime import date, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-KB = ROOT / "kb"
+DEFAULT_BUNDLE = "okf"
+# Resolved by main() before any subcommand runs; see resolve_bundle().
+KB = ROOT / DEFAULT_BUNDLE
+# Never scanned when sniffing for an existing bundle.
+NON_BUNDLE_DIRS = {".git", ".github", ".claude", ".agents", ".cursor",
+                   "node_modules", "scripts", "skills", "dist", "__pycache__"}
 RESERVED = {"index.md", "log.md"}
 STATUSES = {"draft", "active", "needs_review", "deprecated", "archived"}
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
@@ -456,7 +465,8 @@ def cmd_log(args):
     n = text.count("\n* ") + text.count("\n*\t")
     print(f"logged under {heading} ({n} entries total)")
     if n > 500:
-        print("WARN: log.md exceeds 500 entries — rotate old years to kb/archive/log-YYYY.md")
+        print(f"WARN: log.md exceeds 500 entries — rotate old years to "
+              f"{KB.name}/archive/log-YYYY.md")
     return 0
 
 
@@ -534,7 +544,7 @@ updated: {today}
 
 *(Starter schema written by `okf.py init`. Flesh out the Domain, type
 registry, and tag taxonomy on first real ingestion — see the full
-template in the knowledgeAgent repo's kb/SCHEMA.md.)*
+template in the knowledgeAgent repo's SCHEMA.md.)*
 
 # Domain
 
@@ -580,7 +590,7 @@ Only `type: Concept` pages describing **domain** knowledge (business
 rules, processes, system behavior) use the domain-concept body template
 (`## Definition`, `## Key Behaviors`/`## Invariants`,
 `## Related Concepts` — see the full template in the knowledgeAgent
-repo's kb/SCHEMA.md). `Entity`/`Comparison`/`Query` pages and
+repo's SCHEMA.md). `Entity`/`Comparison`/`Query` pages and
 method/meta `Concept` pages keep free structure instead.
 
 # Tag taxonomy
@@ -605,7 +615,7 @@ description: {desc}
 
 You are working in the knowledgeAgent repo. If you have not already
 this session, read `.github/copilot-instructions.md` (operating
-contract) and `kb/SCHEMA.md` (bundle conventions).
+contract) and the bundle's `SCHEMA.md` (bundle conventions).
 
 Then read `skills/{name}/SKILL.md` and execute its workflow for the
 user's request. Do not skip Step 0 (orientation) or the close-out
@@ -622,7 +632,7 @@ def cmd_init(args):
         p = KB / d
         if not p.exists():
             p.mkdir(parents=True)
-            made.append(f"kb/{d}/")
+            made.append(f"{KB.name}/{d}/")
     today = date.today().isoformat()
     seeds = {
         KB / "SCHEMA.md": SCHEMA_SEED.format(today=today),
@@ -631,7 +641,7 @@ def cmd_init(args):
     for path, content in seeds.items():
         if not path.exists():
             path.write_text(content, encoding="utf-8", newline="\n")
-            made.append(f"kb/{path.name}")
+            made.append(f"{KB.name}/{path.name}")
 
     # 2 — sync canonical skills/ to per-tool copies:
     #     .claude/skills/ (Claude Code) and .github/prompts/ (Copilot)
@@ -683,25 +693,65 @@ def cmd_init(args):
     return cmd_lint(argparse.Namespace(inbound=None))
 
 
+# ------------------------------------------------------------- resolution
+
+def detect_bundle(root):
+    """Return the existing bundle directory under root, or None.
+
+    A bundle is any top-level directory holding a SCHEMA.md. This is what
+    keeps projects that predate the okf default — or that chose their own
+    name at setup — working with no flag and no config file. Ambiguity is
+    reported rather than guessed at: two candidates mean the caller must
+    say which with --bundle.
+    """
+    found = [p for p in sorted(root.iterdir())
+             if p.is_dir() and p.name not in NON_BUNDLE_DIRS
+             and (p / "SCHEMA.md").is_file()]
+    if len(found) > 1:
+        names = ", ".join(p.name for p in found)
+        print(f"ERROR: several bundles found ({names}) — pick one with "
+              f"--bundle NAME", file=sys.stderr)
+        raise SystemExit(2)
+    return found[0] if found else None
+
+
+def resolve_bundle(args):
+    """Set the module-level KB from --bundle, detection, or the default."""
+    global KB
+    if getattr(args, "bundle", None):
+        KB = (ROOT / args.bundle).resolve()
+        return
+    existing = detect_bundle(ROOT)
+    KB = existing if existing else ROOT / DEFAULT_BUNDLE
+
+
 # ------------------------------------------------------------------- main
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    # --bundle is accepted after any subcommand, e.g. `okf.py init --bundle wiki`
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--bundle", metavar="NAME",
+                        help=f"bundle directory (default: auto-detect, "
+                             f"else {DEFAULT_BUNDLE}/)")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("init")
-    p = sub.add_parser("lint");  p.add_argument("--inbound", metavar="PATH")
-    sub.add_parser("index")
-    sub.add_parser("links")
-    p = sub.add_parser("log");   p.add_argument("message")
-    sub.add_parser("stats")
-    p = sub.add_parser("drift"); p.add_argument("--hash", metavar="FILE")
+    sub.add_parser("init", parents=[common])
+    p = sub.add_parser("lint", parents=[common])
+    p.add_argument("--inbound", metavar="PATH")
+    sub.add_parser("index", parents=[common])
+    sub.add_parser("links", parents=[common])
+    p = sub.add_parser("log", parents=[common]);   p.add_argument("message")
+    sub.add_parser("stats", parents=[common])
+    p = sub.add_parser("drift", parents=[common])
+    p.add_argument("--hash", metavar="FILE")
     args = ap.parse_args()
+    resolve_bundle(args)
     if args.cmd == "init":
         KB.mkdir(exist_ok=True)
     elif not KB.exists():
-        print(f"ERROR: bundle not found at {KB} — run 'okf.py init'",
-              file=sys.stderr)
+        print(f"ERROR: bundle not found at {KB} — run 'okf.py init'"
+              f" (or pass --bundle NAME)", file=sys.stderr)
         return 2
     return {"init": cmd_init, "lint": cmd_lint, "index": cmd_index,
             "links": cmd_links, "log": cmd_log, "stats": cmd_stats,

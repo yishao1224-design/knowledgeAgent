@@ -5,7 +5,7 @@ description: LangChain's TypeScript CLI that auto-generates and schedule-refresh
 status: active
 confidence: medium
 created: 2026-07-12
-updated: 2026-07-12
+updated: 2026-08-26
 review_after: 2026-10-12
 tags: []
 sources:
@@ -33,7 +33,7 @@ documentation updates [1].
 
 ## Relation to this bundle
 
-Same problem as the kb/ bundle — an agent-maintained, agent-consumed
+Same problem as the OKF bundle — an agent-maintained, agent-consumed
 knowledge base — solved with the opposite bet: openwiki treats
 knowledge as **cheap and regenerable** (staleness is handled by
 scheduled re-synthesis, with no per-page lifecycle), where the bundle

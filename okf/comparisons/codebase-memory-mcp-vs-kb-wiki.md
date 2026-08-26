@@ -5,7 +5,7 @@ description: Why a derived code-knowledge graph and a curated OKF bundle are com
 status: active
 confidence: medium
 created: 2026-07-06
-updated: 2026-07-06
+updated: 2026-08-26
 review_after: 2026-10-06
 tags: []
 sources:
@@ -20,7 +20,7 @@ agent-memory problem, and each covers the other's weakness.
 
 # Schema
 
-| | [codebase-memory-mcp](/entities/codebase-memory-mcp.md) | kb/ bundle ([OKF](/concepts/open-knowledge-format.md) + lifecycle) |
+| | [codebase-memory-mcp](/entities/codebase-memory-mcp.md) | the OKF bundle ([OKF](/concepts/open-knowledge-format.md) + lifecycle) |
 |---|---|---|
 | Nature | **Index** (cache) | **Corpus** (asset) |
 | Content | What the code *is*: definitions, call graphs, imports [1] | What we *decided and learned*: rationale, external facts, contradictions |
@@ -41,7 +41,7 @@ months.
 1. **ADRs have two candidate homes.** The tool's `manage_adr` stores
    decision records in its own storage [1]; the bundle is built for
    exactly that content with a better deal (portable, versioned,
-   lifecycle-managed, readable by any OKF consumer). Resolution: kb/
+   lifecycle-managed, readable by any OKF consumer). Resolution: the
    wins; don't use `manage_adr`.
 2. **Divergent staleness clocks** are a feature only if content is
    routed to the right side (see rule above).
@@ -70,7 +70,7 @@ without the MCP server.
   existing ADRs as a `Decision` concept type.
 
 Caveat: for the knowledgeAgent repo itself the pairing is moot (no
-code to index); it pays off where the kb/ pattern is deployed inside
+code to index); it pays off where the bundle pattern is deployed inside
 an actual codebase.
 
 # Citations

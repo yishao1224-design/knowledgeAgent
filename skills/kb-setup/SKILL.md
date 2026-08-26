@@ -1,6 +1,6 @@
 ---
 name: kb-setup
-description: Scaffold the kb/ knowledge bundle and its okf.py toolchain into a project that doesn't have them yet. Run this once before the other kb-* lifecycle skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) when the project has no kb/ directory — for example right after installing the skills with `npx skills add`.
+description: Scaffold the OKF knowledge bundle (default okf/) and its okf.py toolchain into a project that doesn't have them yet. Run this once before the other kb-* lifecycle skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) when the project has no bundle directory — for example right after installing the skills with `npx skills add`.
 ---
 
 # kb-setup — Bootstrap the knowledge bundle
@@ -8,22 +8,25 @@ description: Scaffold the kb/ knowledge bundle and its okf.py toolchain into a p
 The other `kb-*` skills assume the project already has:
 
 - `scripts/okf.py` — the mechanical toolchain they call.
-- a `kb/` **OKF bundle** — `kb/SCHEMA.md`, `kb/index.md`, `kb/log.md`,
-  and the `concepts/ entities/ comparisons/ queries/ sources/ archive/`
-  directories.
+- an **OKF bundle** directory — `SCHEMA.md`, `index.md`, `log.md`, and
+  the `concepts/ entities/ comparisons/ queries/ sources/ archive/`
+  subdirectories. The default location is `okf/`; the user may pick a
+  different name at Step 2 below, and every skill discovers it
+  automatically thereafter.
 
 When those don't exist yet (a fresh project, or right after
 `npx skills add …`), run this skill once to lay them down. It is
 idempotent: it never overwrites an existing `scripts/okf.py` or an
-existing `kb/` bundle.
+existing bundle.
 
 ## Step 0 — Check whether setup is even needed
 
 From the project root:
 
-- If both `scripts/okf.py` **and** `kb/SCHEMA.md` already exist, the
-  bundle is set up. Stop here and tell the user there's nothing to do —
-  point them at `kb-ingest` / `kb-query` instead.
+- If `scripts/okf.py` exists **and** some top-level directory holds a
+  `SCHEMA.md` (`okf/SCHEMA.md`, or whatever name this project chose),
+  the bundle is set up. Stop here and tell the user there's nothing to
+  do — point them at `kb-ingest` / `kb-query` instead.
 - Otherwise continue.
 
 ## Step 1 — Place the toolchain at `scripts/okf.py`
@@ -50,21 +53,37 @@ To find the bundled copy:
 `okf.py` is stdlib-only Python 3; it uses PyYAML if present but falls
 back to a built-in frontmatter parser otherwise, so no install step is
 required. It resolves the bundle relative to itself
-(`<project>/scripts/okf.py` → `<project>/kb/`), which is why it must live
-at `scripts/okf.py`.
+(`<project>/scripts/okf.py` → `<project>/okf/`), which is why it must
+live at `scripts/okf.py`.
 
-## Step 2 — Scaffold the bundle
+## Step 2 — Ask where the bundle should live, then scaffold
 
-Run:
+**Ask the user what to name the bundle directory before creating it.**
+Offer `okf/` as the default and accept it without further discussion if
+they don't care. Some projects will want a name that says what the
+knowledge is rather than what format it's in — `knowledge/`, `wiki/`,
+`docs/kb/` — and any of those work identically.
+
+Do not suggest a dot-prefixed name. The bundle is content people read
+and edit, so hiding it from `ls` and from file explorers works against
+it; dot-directories are for tooling config.
+
+Then run `init`, passing `--bundle` only when they chose a non-default name:
 
 ```
-python scripts/okf.py init
+python scripts/okf.py init                      # → okf/
+python scripts/okf.py init --bundle knowledge   # → knowledge/
 ```
 
-This creates the `kb/` skeleton (empty type directories, a seed
-`kb/SCHEMA.md`, a seed `kb/log.md`), regenerates `kb/index.md`, and runs
-a health check. It only creates what's missing — existing files are left
-untouched.
+This creates the skeleton (empty type directories, a seed `SCHEMA.md`,
+a seed `log.md`), regenerates `index.md`, and runs a health check. It
+only creates what's missing — existing files are left untouched.
+
+**The name is recorded by the directory itself, not by a config file.**
+Every later `okf.py` call finds the bundle by looking for a top-level
+directory containing `SCHEMA.md`, so no flag is needed again. Pass
+`--bundle` afterwards only to disambiguate when a project genuinely
+holds more than one bundle — okf.py errors out rather than guessing.
 
 > The `init` command also tries to sync a canonical `skills/` folder to
 > per-tool copies. In an installed project there usually is no top-level
@@ -73,7 +92,7 @@ untouched.
 
 ## Step 3 — Make the schema real
 
-The seed `kb/SCHEMA.md` is a starter. Before the first real ingestion,
+The seed `SCHEMA.md` is a starter. Before the first real ingestion,
 fill in — with the user — the **Domain** paragraph (what this knowledge
 base covers and for whom) and extend the **type registry** and **tag
 taxonomy** to fit their material. Everything else in the lifecycle keys

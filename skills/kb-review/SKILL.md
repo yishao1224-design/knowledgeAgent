@@ -1,6 +1,6 @@
 ---
 name: kb-review
-description: Work the review queue of the kb/ knowledge bundle — re-verify overdue or flagged concepts against their sources, resolve contradictions, and promote or demote lifecycle status. Use when the user asks to review, verify, refresh, or check staleness of the knowledge base, or on a maintenance schedule.
+description: Work the review queue of the OKF knowledge bundle — re-verify overdue or flagged concepts against their sources, resolve contradictions, and promote or demote lifecycle status. Use when the user asks to review, verify, refresh, or check staleness of the knowledge base, or on a maintenance schedule.
 ---
 
 # kb-review — Verify phase of the knowledge lifecycle
@@ -10,11 +10,15 @@ recently enough to trust.
 
 ## Step 0 — Orient and build the queue
 
-> **First run in this project?** If there's no `kb/` bundle or no
+> **First run in this project?** If there's no bundle directory or no
 > `scripts/okf.py`, run the **kb-setup** skill first to scaffold them,
 > then continue.
+>
+> Paths below assume the default bundle location, `okf/`. A project
+> may have chosen another name at setup — whichever top-level directory
+> holds `SCHEMA.md` is the bundle, and `okf.py` finds it on its own.
 
-1. Read `kb/SCHEMA.md`; skim recent `kb/log.md`.
+1. Read `okf/SCHEMA.md`; skim recent `okf/log.md`.
 2. `python scripts/okf.py stats` — the review queue lists every
    `needs_review` page and every `active` page past `review_after`.
 3. `python scripts/okf.py drift` — drifted sources put their dependent
@@ -36,7 +40,7 @@ For each page in scope:
    itself a review flag (assets sit outside the drift check).
 2. If a source drifted or claims are time-sensitive, re-fetch the
    original `source_url`. Changed upstream → capture a NEW dated file
-   in `kb/sources/` (never edit the old one) and diff against the old
+   in `okf/sources/` (never edit the old one) and diff against the old
    capture.
 3. Decide per claim: still true / changed / can't verify.
 

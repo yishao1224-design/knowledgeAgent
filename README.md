@@ -15,14 +15,14 @@ honest.
 ```
 knowledgeAgent/
 ├── CLAUDE.md            # agent operating contract (session protocol, hard rules)
-├── kb/                  # the OKF bundle — all knowledge lives here
+├── okf/                # the OKF bundle — all knowledge lives here
 │   ├── SCHEMA.md        #   bundle conventions: types, tags, templates, cadences
 │   ├── index.md         #   generated catalog (okf.py index)
 │   ├── log.md           #   append-only change history
 │   ├── concepts/ entities/ comparisons/ queries/ archive/
 │   └── sources/         #   IMMUTABLE raw captures, sha256-verified
 ├── skills/              # canonical lifecycle skills (edit these)
-│   ├── kb-setup/        #   bootstrap: scaffold kb/ + okf.py into a fresh project
+│   ├── kb-setup/        #   bootstrap: scaffold okf/ + okf.py into a fresh project
 │   │   └── okf.py       #     toolchain bundled for `npx skills add` (auto-synced)
 │   ├── kb-ingest/       #   capture: source → snapshot → concept pages
 │   ├── kb-query/        #   serve: answer with citations + trust labels
@@ -41,7 +41,7 @@ knowledgeAgent/
 ## Quickstart
 
 ```sh
-python scripts/okf.py init     # bootstrap kb/ skeleton + sync skills
+python scripts/okf.py init     # bootstrap okf/ skeleton + sync skills
 python scripts/okf.py lint     # health check (exit 1 on errors)
 ```
 
@@ -69,11 +69,11 @@ npx skills add yishao1224-design/knowledgeAgent --skill kb-setup --skill kb-inge
 npx skills add yishao1224-design/knowledgeAgent --list
 ```
 
-A bare `SKILL.md` doesn't carry the `okf.py` toolchain or the `kb/`
+A bare `SKILL.md` doesn't carry the `okf.py` toolchain or the `okf/`
 bundle, so **run `kb-setup` once first** in the target project — just ask
 your agent to *"set up the knowledge base"*. It drops `scripts/okf.py`
 (bundled inside the skill) into place and runs `okf.py init` to scaffold
-`kb/`. The other skills detect a missing bundle and point you at
+`okf/`. The other skills detect a missing bundle and point you at
 `kb-setup` automatically. After that, `kb-ingest` / `kb-query` / etc.
 behave exactly as they do in this repo.
 
@@ -115,7 +115,7 @@ draft ──> active ──> needs_review ──> active     (re-verified)
 python scripts/okf.py init                 # bootstrap + sync skills → .claude/skills/
 python scripts/okf.py lint                 # OKF conformance + lifecycle audit
 python scripts/okf.py lint --inbound /p.md # who links here? (safe-delete check)
-python scripts/okf.py index                # regenerate kb/index.md
+python scripts/okf.py index                # regenerate okf/index.md
 python scripts/okf.py log "**Verb**: msg"  # prepend a dated log entry
 python scripts/okf.py stats                # counts + review queue
 python scripts/okf.py drift                # verify source hashes
@@ -123,6 +123,27 @@ python scripts/okf.py drift --hash FILE    # hash a new capture's body
 ```
 
 No dependencies beyond Python 3 stdlib (PyYAML used if present).
+
+### Where the bundle lives
+
+`okf/` is the default. Nothing records the choice in a config file —
+**the directory itself is the record**: every command finds the bundle
+by looking for a top-level directory containing `SCHEMA.md`. So a
+project that predates this default, or that picked its own name at
+setup, keeps working with no flag and no migration.
+
+```sh
+python scripts/okf.py init                    # → okf/
+python scripts/okf.py init --bundle knowledge # → knowledge/
+python scripts/okf.py lint --bundle knowledge # only needed to disambiguate
+```
+
+`kb-setup` asks which name you want before scaffolding. Pass
+`--bundle` to later commands only when a project genuinely holds more
+than one bundle — `okf.py` reports the ambiguity rather than guessing.
+The default is deliberately **not** dot-prefixed: the bundle is content
+people read and edit, not tooling config, so it stays visible in `ls`,
+in file explorers, and in GitHub's root listing.
 
 ## Relationship to OKF
 
@@ -141,7 +162,7 @@ Improvements layered on top of the base spec:
    by `okf.py drift`.
 4. **Graph-aware deprecation** — `superseded_by` plus inbound-link
    queries mean links are never silently broken.
-5. **Governed vocabulary** — types and tags registered in `kb/SCHEMA.md`
+5. **Governed vocabulary** — types and tags registered in `okf/SCHEMA.md`
    before first use.
 
 Skills live canonically in `skills/`; edit them there and re-run

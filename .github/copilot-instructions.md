@@ -1,28 +1,28 @@
 # Copilot instructions for knowledgeAgent
 
 This repo is an agent-maintained knowledge base: an OKF v0.1 bundle in
-`kb/` with a lifecycle profile (status, review dates, hash-verified
+`okf/` with a lifecycle profile (status, review dates, hash-verified
 immutable sources).
 
 The authoritative operating contract is [CLAUDE.md](../CLAUDE.md) —
-agent-agnostic despite the name. Read it plus `kb/SCHEMA.md` before
-modifying anything under `kb/`. [AGENTS.md](../AGENTS.md) restates the
+agent-agnostic despite the name. Read it plus `okf/SCHEMA.md` before
+modifying anything under `okf/`. [AGENTS.md](../AGENTS.md) restates the
 non-negotiable rules.
 
 ## Session protocol
 
-Orient before acting: read `kb/SCHEMA.md`, then `kb/index.md`, then the
-last ~20 lines of `kb/log.md`. Never create a concept page without
+Orient before acting: read `okf/SCHEMA.md`, then `okf/index.md`, then the
+last ~20 lines of `okf/log.md`. Never create a concept page without
 checking the index for an existing page on the same subject — update
 beats create.
 
 ## Hard rules (short form)
 
-- `kb/sources/` is immutable; new capture = new dated file with a
+- `okf/sources/` is immutable; new capture = new dated file with a
   `sha256` of its body (`python scripts/okf.py drift --hash FILE`).
-- Every `kb/` edit gets a `python scripts/okf.py log "..."` entry.
-- Frontmatter per `kb/SCHEMA.md` templates; `type` is mandatory (OKF).
-- Links are bundle-relative (`/concepts/x.md` = `kb/concepts/x.md`) in
+- Every `okf/` edit gets a `python scripts/okf.py log "..."` entry.
+- Frontmatter per `okf/SCHEMA.md` templates; `type` is mandatory (OKF).
+- Links are bundle-relative (`/concepts/x.md` = `okf/concepts/x.md`) in
   committed files. `[[slug]]` shorthand is fine while drafting — run
   `python scripts/okf.py links` to expand it before `index`/`lint`.
 - Deprecate, never delete; end every editing session with
@@ -35,7 +35,7 @@ Copilot Chat):
 
 | Prompt | Phase |
 |--------|-------|
-| `/kb-setup` | bootstrap `kb/` + `okf.py` (only needed in a project without them) |
+| `/kb-setup` | bootstrap `okf/` + `okf.py` (only needed in a project without them) |
 | `/kb-ingest` | capture a source into the bundle |
 | `/kb-query` | answer from the bundle with citations |
 | `/kb-review` | re-verify overdue/flagged pages |
