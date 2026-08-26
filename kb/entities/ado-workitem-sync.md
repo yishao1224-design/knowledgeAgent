@@ -1,18 +1,35 @@
 ---
 type: Entity
 title: ado-workitem-sync — ADO Retrieval Toolchain
-description: The scripts/ado.py + ado-workitem-sync skill pair that syncs Azure DevOps work items into local analysis folders — retrieve/normalize/staleness/stamp, rev-stamped provenance, judgment-only skill.
-status: active
+description: Removed 2026-08-26 — the scripts/ado.py + ado-workitem-sync skill pair that synced Azure DevOps work items into local analysis folders; kept for the rev-stamp provenance and code-vs-judgment design record.
+status: deprecated
 confidence: medium
 created: 2026-07-09
-updated: 2026-07-09
-review_after: 2026-10-09
+updated: 2026-08-26
 tags: []
 sources:
   - /sources/2026-07-09-ado-workitem-sync.md
 ---
 
 # ado-workitem-sync — ADO Retrieval Toolchain
+
+## Deprecation
+
+**Deprecated 2026-08-26. The toolchain this page documents no longer
+exists in the repo.** `scripts/ado.py`, `scripts/test_ado.py`, and the
+`ado-workitem-sync` skill were removed when Azure DevOps integration was
+dropped from the project; nothing replaces them, so there is no
+`superseded_by` target. Everything below describes the tool **as it
+stood at removal** and is kept for history — do not read it as a
+description of anything currently shipping.
+
+What survives the removal is the *pattern*, not the code: the
+code-vs-judgment split and the rev-stamp provenance model are stated
+tool-independently in
+[ingesting requirements from ticket systems](/concepts/ingesting-requirements-from-ticket-systems.md),
+and the same design philosophy still ships in
+[okf.py](/entities/okf-toolchain.md). A future tracker integration
+should start from those pages, not from this one.
 
 The code/skill pair that implements the *retrieve* leg of the
 [user story analysis workflow](/concepts/user-story-analysis-workflow.md):

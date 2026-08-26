@@ -33,7 +33,7 @@ integrations [1].
 | Lifecycle | Implicit — pages rewritten on the next run | Explicit: `draft → active → needs_review → deprecated → archived` with `review_after` |
 | Staleness/drift | Scheduled re-runs (LaunchAgents, CI) [1] | Review queue (kb-review), `needs_review` flag, source-hash drift detection |
 | Provenance | Raw connector manifests in `~/.openwiki/connectors/<name>/raw/` [1] | Immutable dated captures in `/sources/`, never edited |
-| Ingestion | Built-in connectors: git, Gmail, Notion, X, HN, Tavily [1] | Conversational (kb-ingest) plus bespoke scripts (e.g. [ado-workitem-sync](/entities/ado-workitem-sync.md)) |
+| Ingestion | Built-in connectors: git, Gmail, Notion, X, HN, Tavily [1] | Conversational (kb-ingest) plus bespoke scripts (e.g. the retired [ado-workitem-sync](/entities/ado-workitem-sync.md)) |
 | Deletion story | Overwritten on regeneration | Deprecate-don't-delete, supersession links, archive at zero inbound links |
 | LLM dependency | Own provider layer + API keys [1] | None — runs inside whatever agent hosts the session |
 | Automation | First-class: CI PRs, schedulers [1] | Session-driven; automation is a documented aspiration |

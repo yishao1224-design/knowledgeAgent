@@ -3,7 +3,7 @@ type: Schema
 title: Bundle Schema & Conventions
 description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, lifecycle rules.
 status: active
-updated: 2026-07-10
+updated: 2026-08-26
 ---
 
 # Bundle Schema & Conventions
@@ -151,7 +151,7 @@ to method/meta `Concept` pages (how this bundle itself works,
 engineering practices) — all of those keep free structure instead:
 pick headings that fit the subject (e.g. `# Schema`, `# Related pages`)
 rather than forcing `## Definition`/`## Key Behaviors`. See
-[ado-workitem-sync.md](/entities/ado-workitem-sync.md) for a worked
+[okf-toolchain.md](/entities/okf-toolchain.md) for a worked
 `Entity` example. General body conventions above still apply to every
 type regardless of body structure, including `# Citations` for
 externally-derived claims and the ≥2-outbound-link rule.

@@ -28,17 +28,14 @@ knowledgeAgent/
 │   ├── kb-query/        #   serve: answer with citations + trust labels
 │   ├── kb-review/       #   verify: work the review queue against sources
 │   ├── kb-curate/       #   garden: merge, split, archive, restructure
-│   ├── kb-lint/         #   audit: mechanical health, fix or queue
-│   └── kb-publish-ado/  #   publish: render bundle → Azure DevOps wiki
-│       └── kb_wiki.py   #     exporter bundled for `npx skills add` (auto-synced)
+│   └── kb-lint/         #   audit: mechanical health, fix or queue
 ├── AGENTS.md            # cross-agent entry point (Copilot coding agent, Codex, …)
 ├── .claude/skills/      # generated copies for Claude Code discovery (okf.py init)
 ├── .github/
 │   ├── copilot-instructions.md   # GitHub Copilot repo instructions
 │   └── prompts/         # generated Copilot prompt files (/kb-ingest, …)
 └── scripts/
-    ├── okf.py           # stdlib-only bundle toolchain
-    └── kb_wiki.py       # one-way exporter: kb/ → Azure DevOps wiki tree
+    └── okf.py           # stdlib-only bundle toolchain
 ```
 
 ## Quickstart
@@ -63,8 +60,7 @@ with Claude Code, Cursor, Codex, Copilot, and
 # the kb-* skills (--skill takes exact names, not globs)
 npx skills add yishao1224-design/knowledgeAgent \
   --skill kb-setup --skill kb-ingest --skill kb-query \
-  --skill kb-review --skill kb-curate --skill kb-lint \
-  --skill kb-publish-ado
+  --skill kb-review --skill kb-curate --skill kb-lint
 
 # or just what you need
 npx skills add yishao1224-design/knowledgeAgent --skill kb-setup --skill kb-ingest --skill kb-query
@@ -72,9 +68,6 @@ npx skills add yishao1224-design/knowledgeAgent --skill kb-setup --skill kb-inge
 # preview what's available first
 npx skills add yishao1224-design/knowledgeAgent --list
 ```
-
-(`--skill '*'` installs *all* skills in the repo — that also pulls in the
-unrelated `ado-workitem-sync`, so prefer naming the `kb-` skills.)
 
 A bare `SKILL.md` doesn't carry the `okf.py` toolchain or the `kb/`
 bundle, so **run `kb-setup` once first** in the target project — just ask
@@ -130,27 +123,6 @@ python scripts/okf.py drift --hash FILE    # hash a new capture's body
 ```
 
 No dependencies beyond Python 3 stdlib (PyYAML used if present).
-
-## Publish to an Azure DevOps wiki
-
-The bundle can be published *out* as a browsable ADO wiki — kb/ stays
-the source of truth, the wiki is a generated view. The `kb-publish-ado`
-skill drives it; the mechanics live in `scripts/kb_wiki.py`:
-
-```sh
-python scripts/kb_wiki.py export                 # → dist/ado-wiki/
-python scripts/kb_wiki.py export --include-sources
-```
-
-The exporter strips YAML frontmatter into a status/trust banner
-(⚠️ needs_review, 🛑 deprecated), rewrites bundle-relative links to ADO
-wiki page paths (citations to excluded sources fall back to their
-`source_url`), and emits `Section.md` + `Section/` folders with `.order`
-files so ADO renders a real table of contents. Copy the contents of
-`dist/ado-wiki/` into your `<Project>.wiki` Git checkout (branch
-`wikiMain`) and push — or point ADO's *publish code as wiki* at the
-folder. See the [ADO wiki file-structure docs](https://learn.microsoft.com/en-us/azure/devops/project/wiki/wiki-file-structure)
-for the repo conventions.
 
 ## Relationship to OKF
 
