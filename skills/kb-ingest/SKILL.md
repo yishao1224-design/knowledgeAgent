@@ -1,6 +1,6 @@
 ---
 name: kb-ingest
-description: Capture a source (URL, file, pasted text, or conversation takeaways) into the kb/ knowledge bundle — snapshot it immutably, then create or update concept pages. Use when the user shares material to remember, says "add this to the knowledge base", "ingest", "save this", or provides articles/docs/notes to incorporate.
+description: Capture a source (URL, file, pasted text, or conversation takeaways) into the OKF knowledge bundle — snapshot it immutably, then create or update concept pages. Use when the user shares material to remember, says "add this to the knowledge base", "ingest", "save this", or provides articles/docs/notes to incorporate.
 ---
 
 # kb-ingest — Capture phase of the knowledge lifecycle
@@ -10,29 +10,33 @@ concept pages.
 
 ## Step 0 — Orient (mandatory)
 
-> **First run in this project?** If there's no `kb/` bundle or no
+> **First run in this project?** If there's no bundle directory or no
 > `scripts/okf.py`, run the **kb-setup** skill first to scaffold them,
 > then continue.
+>
+> Paths below assume the default bundle location, `okf/`. A project
+> may have chosen another name at setup — whichever top-level directory
+> holds `SCHEMA.md` is the bundle, and `okf.py` finds it on its own.
 
-Read `kb/SCHEMA.md`, `kb/index.md`, and the last ~20 lines of
-`kb/log.md`. Identify existing pages that overlap the new material.
+Read `okf/SCHEMA.md`, `okf/index.md`, and the last ~20 lines of
+`okf/log.md`. Identify existing pages that overlap the new material.
 **Update beats create** — see the page-creation threshold in SCHEMA.md.
 
 ## Step 1 — Capture the source
 
 1. Fetch/read the source. For URLs use WebFetch; for files read them.
-2. Write `kb/sources/YYYY-MM-DD-<slug>.md` with the Source frontmatter
+2. Write `okf/sources/YYYY-MM-DD-<slug>.md` with the Source frontmatter
    template from SCHEMA.md. The body is the captured content (verbatim
    or a faithful condensation — say which in the description).
 3. Compute the hash and put it in the frontmatter:
-   `python scripts/okf.py drift --hash kb/sources/<file>.md`
+   `python scripts/okf.py drift --hash okf/sources/<file>.md`
 4. Never overwrite an existing capture. Same source again → new dated
    file; the old one stays for drift comparison.
 5. **Load-bearing visuals get kept, not just described.** When the
    source is or contains an image whose pixels are the evidence —
    especially a dense architecture diagram that can't be fully
    extracted in one pass — copy it to
-   `kb/sources/assets/YYYY-MM-DD-<slug>.<ext>`, link it from the
+   `okf/sources/assets/YYYY-MM-DD-<slug>.<ext>`, link it from the
    capture, and state in the capture what the asset shows, what you
    extracted this pass, and what remains unread (later ingests and
    reviews will re-read it). Assets are immutable like captures; rules

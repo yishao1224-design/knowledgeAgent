@@ -5,7 +5,7 @@ description: The stdlib-only script (scripts/okf.py) that mechanizes the bundle 
 status: active
 confidence: high
 created: 2026-07-07
-updated: 2026-07-08
+updated: 2026-08-26
 review_after: 2027-01-07
 tags: []
 sources:
@@ -33,7 +33,7 @@ on failure).
 |---------|------|
 | `init` | Create dir skeleton + seed SCHEMA/log; sync canonical `skills/` → `.claude/skills/` and `.github/prompts/`; then index + lint |
 | `lint` | Conformance + lifecycle audit (exit 1 on errors). `--inbound PATH` lists linkers to a bundle path |
-| `index` | Regenerate `kb/index.md` from tree + frontmatter, with status badges |
+| `index` | Regenerate the bundle's `index.md` from tree + frontmatter, with status badges |
 | `links` | Expand `[[slug]]`/`[[slug\|text]]` authoring shorthand into canonical bundle-relative links, in place |
 | `log "MSG"` | Prepend an entry under today's `## YYYY-MM-DD` heading |
 | `stats` | Counts by type/status + the review queue |
@@ -70,7 +70,7 @@ lifecycle rules; `sources/*` only get the sha256/source_url warnings.
 
 `drift` hashes the source body **below** the frontmatter and compares it
 to the recorded `sha256`. This is the mechanism behind the "never modify
-`kb/sources/`" hard rule: editing a capture changes its body hash and
+`sources/`" hard rule: editing a capture changes its body hash and
 `drift` reports DRIFT. Adding a new capture is a two-step move —
 `drift --hash <file>` to get the hash, paste it into the frontmatter.
 Because the hash covers only the body, frontmatter fixes are invisible

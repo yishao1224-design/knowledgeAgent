@@ -5,7 +5,7 @@ description: Three-tier merge guardrails for a git-managed wiki/bundle — block
 status: active
 confidence: low
 created: 2026-07-06
-updated: 2026-07-06
+updated: 2026-08-26
 review_after: 2026-08-06
 tags: [unverified]
 ---
@@ -29,8 +29,8 @@ Maps directly onto the hard rules; no LLM required:
 | Check | Enforces | Mechanism |
 |-------|----------|-----------|
 | `python scripts/okf.py lint` | Frontmatter, OKF conformance, taxonomy | Exits 1 on errors |
-| Source immutability | Hard rule 1 | `git diff --name-status base...HEAD -- kb/sources/` — reject anything not `A` (added) |
-| Log discipline | Hard rule 2 | Diff touching `kb/` must also touch `kb/log.md` |
+| Source immutability | Hard rule 1 | `git diff --name-status base...HEAD -- okf/sources/` — reject anything not `A` (added) |
+| Log discipline | Hard rule 2 | Diff touching the bundle must also touch its `log.md` |
 | Index freshness | Regenerated catalog | Run `okf.py index` in CI; fail if the tree becomes dirty |
 
 Source immutability is the guardrail most worth automating: a silent
@@ -48,7 +48,7 @@ team to rubber-stamp overrides.
 
 ## Tier 3 — human gates, scoped by blast radius
 
-- **`kb/SCHEMA.md`, `skills/`, `scripts/okf.py`** define the rules
+- **the bundle's `SCHEMA.md`, `skills/`, `scripts/okf.py`** define the rules
   everyone plays by — require a designated owner's approval
   (CODEOWNERS).
 - **Ordinary concept pages** — one teammate's review suffices.

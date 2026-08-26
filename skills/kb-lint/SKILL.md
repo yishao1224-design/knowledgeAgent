@@ -1,6 +1,6 @@
 ---
 name: kb-lint
-description: Audit the kb/ knowledge bundle's mechanical health — OKF conformance, frontmatter completeness, broken links, orphans, overdue reviews, source drift — and fix what's safe to fix. Use when the user asks for a health check, lint, audit, or integrity check of the knowledge base.
+description: Audit the OKF knowledge bundle's mechanical health — OKF conformance, frontmatter completeness, broken links, orphans, overdue reviews, source drift — and fix what's safe to fix. Use when the user asks for a health check, lint, audit, or integrity check of the knowledge base.
 ---
 
 # kb-lint — Audit phase of the knowledge lifecycle
@@ -9,9 +9,13 @@ Mechanical health only. Lint tells you a page is overdue; deciding
 whether its claims still hold is kb-review's job — don't drift into
 content verification here.
 
-> **First run in this project?** If there's no `kb/` bundle or no
+> **First run in this project?** If there's no bundle directory or no
 > `scripts/okf.py`, run the **kb-setup** skill first to scaffold them,
 > then continue.
+>
+> Paths below assume the default bundle location, `okf/`. A project
+> may have chosen another name at setup — whichever top-level directory
+> holds `SCHEMA.md` is the bundle, and `okf.py` finds it on its own.
 
 ## Step 1 — Run the tooling
 

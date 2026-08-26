@@ -5,7 +5,7 @@ description: How to install the OKF bundle + lifecycle skills into a real projec
 status: active
 confidence: low
 created: 2026-07-06
-updated: 2026-07-09
+updated: 2026-08-26
 review_after: 2026-08-06
 tags: [unverified]
 ---
@@ -16,7 +16,8 @@ The knowledgeAgent repo is a *template*, not just a standalone knowledge
 base. Its toolchain is drop-in portable: `scripts/okf.py` resolves the
 bundle root relative to its own file location (`ROOT = script dir's
 parent`), so copying the script into any repo and running
-`python scripts/okf.py init` bootstraps a `kb/` bundle there. The bundle
+`python scripts/okf.py init` bootstraps a bundle there (`okf/` by
+default; `--bundle NAME` picks another). The bundle
 it creates follows [OKF](/concepts/open-knowledge-format.md) plus the
 [knowledge lifecycle](/concepts/knowledge-lifecycle.md) profile.
 
@@ -26,7 +27,7 @@ it creates follows [OKF](/concepts/open-knowledge-format.md) plus the
 
 | Knowledge is about… | Put the bundle… | Why |
 |---------------------|-----------------|-----|
-| One project (architecture decisions, domain concepts, gotchas, ingested vendor docs) | Inside that project repo (`kb/` at root) — **default choice** | Agent has KB in context during coding sessions; knowledge changes ride in the same PRs as the code; CI can run `okf.py lint` |
+| One project (architecture decisions, domain concepts, gotchas, ingested vendor docs) | Inside that project repo (`okf/` at root) — **default choice** | Agent has KB in context during coding sessions; knowledge changes ride in the same PRs as the code; CI can run `okf.py lint` |
 | One project spanning multiple repos (tightly-integrated modules, each with its own repo) | A standalone project-level KB repo, checked out as a **sibling** of the module repos | The highest-value knowledge is cross-module (contracts, shared invariants) and has no single owning codebase; bundle links cannot cross repos, so splitting per module would tear it apart |
 | Multiple unrelated projects, personal notes, team practices | A standalone KB repo (like knowledgeAgent itself) | No single codebase owns it |
 
@@ -50,7 +51,7 @@ recover both deliberately:
   [user story analysis workflow](/concepts/user-story-analysis-workflow.md)'s
   code cross-check assumes the agent can see the code. Fix by
   convention: check the repos out as siblings
-  (`project/module-a/`, `project/module-b/`, `project/kb/`) and add a
+  (`project/module-a/`, `project/module-b/`, `project/okf/`) and add a
   pointer to **each module repo's `CLAUDE.md`**: "project KB lives at
   `../kb` — read its index before cross-module work; follow its
   session protocol before writing to it." That pointer is the
@@ -83,12 +84,12 @@ this.
 1. Copy `scripts/okf.py` and the canonical `skills/` directory (the five
    `kb-*` skills) into the target repo.
 2. Run `python scripts/okf.py init` at the repo root. This creates the
-   `kb/` skeleton (SCHEMA.md, index.md, log.md, and the standard
+   bundle skeleton (SCHEMA.md, index.md, log.md, and the standard
    directories) and syncs `skills/` → `.claude/skills/` (Claude Code)
    and `.github/prompts/` (GitHub Copilot).
 3. Merge the governance rules into the project's existing `CLAUDE.md` as
    a "Knowledge base" section — minimally the session protocol
-   (SCHEMA.md → index.md → recent log before touching `kb/`) and the
+   (SCHEMA.md → index.md → recent log before touching the bundle) and the
    hard-rules list. Restate briefly in `AGENTS.md` /
    `.github/copilot-instructions.md` if non-Claude agents are used.
 4. Carry over the committed-vs-generated convention: gitignore
@@ -111,7 +112,7 @@ churn it. When requirements live in an external tracker, follow
 
 ## What to tune on adoption
 
-- **Tag taxonomy and Domain section in the generated `kb/SCHEMA.md`** —
+- **Tag taxonomy and Domain section in the generated `SCHEMA.md`** —
   written generically; set project-appropriate tags *before* the first
   real ingestion (hard rule: tags come from the taxonomy).
 - **Directory layout** — SCHEMA.md permits renaming bundle directories

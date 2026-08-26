@@ -1,6 +1,6 @@
 ---
 name: kb-curate
-description: Garden the kb/ knowledge bundle structure — merge duplicate pages, split bloated ones, deprecate and archive, fix taxonomy drift, refactor directories while keeping links whole. Use when the user asks to clean up, reorganize, dedupe, merge, archive, or restructure the knowledge base.
+description: Garden the OKF knowledge bundle structure — merge duplicate pages, split bloated ones, deprecate and archive, fix taxonomy drift, refactor directories while keeping links whole. Use when the user asks to clean up, reorganize, dedupe, merge, archive, or restructure the knowledge base.
 ---
 
 # kb-curate — Garden phase of the knowledge lifecycle
@@ -10,11 +10,15 @@ connects, not what it claims — claim verification belongs to kb-review.
 
 ## Step 0 — Orient
 
-> **First run in this project?** If there's no `kb/` bundle or no
+> **First run in this project?** If there's no bundle directory or no
 > `scripts/okf.py`, run the **kb-setup** skill first to scaffold them,
 > then continue.
+>
+> Paths below assume the default bundle location, `okf/`. A project
+> may have chosen another name at setup — whichever top-level directory
+> holds `SCHEMA.md` is the bundle, and `okf.py` finds it on its own.
 
-Read `kb/SCHEMA.md`, `kb/index.md`, recent `kb/log.md`. Run
+Read `okf/SCHEMA.md`, `okf/index.md`, recent `okf/log.md`. Run
 `python scripts/okf.py lint` and `okf.py stats` for a health picture:
 orphans, under-linked pages, taxonomy violations, status distribution.
 
@@ -61,13 +65,13 @@ sections citing disjoint `sources`; the page's one-sentence
 ### Archive
 Only `deprecated` pages with **zero inbound links** (verify with
 `okf.py lint --inbound`) and no historical value in place: move the
-file to `kb/archive/`, set `status: archived`. Deletion (rare) only
+file to `okf/archive/`, set `status: archived`. Deletion (rare) only
 with explicit user approval, and only for pages that never carried
 unique knowledge (e.g., accidental duplicates).
 
 ### Move / rename
 Bundle-relative links (`/dir/page.md`) break on moves — after any move,
-Grep `kb/` for the old path and update every referrer in the same
+Grep `okf/` for the old path and update every referrer in the same
 change. This is why moves are batched here rather than done ad hoc.
 
 ### Taxonomy & schema upkeep
@@ -77,7 +81,7 @@ directory or type → register in SCHEMA.md **in the same change**.
 
 ### Log rotation
 `log.md` past ~500 entries → move whole old years to
-`kb/archive/log-YYYY.md`, leave the current year in place.
+`okf/archive/log-YYYY.md`, leave the current year in place.
 
 ## Close out
 

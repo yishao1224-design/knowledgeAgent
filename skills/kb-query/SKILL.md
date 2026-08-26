@@ -1,6 +1,6 @@
 ---
 name: kb-query
-description: Answer a question from the kb/ knowledge bundle with citations, flagging stale or deprecated content, and optionally file the answer back as a Query page. Use when the user asks what the knowledge base knows about something, or asks a question the bundle should answer.
+description: Answer a question from the OKF knowledge bundle with citations, flagging stale or deprecated content, and optionally file the answer back as a Query page. Use when the user asks what the knowledge base knows about something, or asks a question the bundle should answer.
 ---
 
 # kb-query — Serve phase of the knowledge lifecycle
@@ -10,12 +10,16 @@ into it.
 
 ## Step 0 — Orient
 
-> **First run in this project?** If there's no `kb/` bundle or no
+> **First run in this project?** If there's no bundle directory or no
 > `scripts/okf.py`, run the **kb-setup** skill first to scaffold them,
 > then continue.
+>
+> Paths below assume the default bundle location, `okf/`. A project
+> may have chosen another name at setup — whichever top-level directory
+> holds `SCHEMA.md` is the bundle, and `okf.py` finds it on its own.
 
-Read `kb/SCHEMA.md` and `kb/index.md`. Locate candidate pages from the
-index descriptions; Grep `kb/` for terms the index doesn't surface.
+Read `okf/SCHEMA.md` and `okf/index.md`. Locate candidate pages from the
+index descriptions; Grep `okf/` for terms the index doesn't surface.
 
 ## Step 1 — Gather
 
@@ -41,7 +45,7 @@ assert relationships that change answers. Note each page's `status`,
 
 ## Step 3 — File it (when worth keeping)
 
-File the answer as `kb/queries/<slug>.md` (type `Query`) when it took
+File the answer as `okf/queries/<slug>.md` (type `Query`) when it took
 real synthesis across 2+ pages, or exposed a gap or contradiction.
 Don't file trivial single-page lookups.
 

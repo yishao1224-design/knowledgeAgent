@@ -5,7 +5,7 @@ description: A generator product vs a curation discipline — where openwiki's r
 status: active
 confidence: medium
 created: 2026-07-12
-updated: 2026-07-12
+updated: 2026-08-26
 review_after: 2026-10-12
 tags: []
 sources:
@@ -17,7 +17,7 @@ sources:
 Analysis filed 2026-07-12 from a comparison discussion. Verdict: same
 problem (an agent-maintained, agent-consumed knowledge base), opposite
 ends — [openwiki](/entities/openwiki.md) is a **product that generates
-docs**; the kb/ bundle is a **discipline the agent follows**. There is
+docs**; the OKF bundle is a **discipline the agent follows**. There is
 no engine here: the hosting agent plus
 [the lifecycle skill suite](/entities/lifecycle-skills.md) and
 [okf.py](/entities/okf-toolchain.md) *are* the engine, while openwiki
@@ -26,7 +26,7 @@ integrations [1].
 
 # Schema
 
-| | openwiki | kb/ bundle ([OKF](/concepts/open-knowledge-format.md) + lifecycle) |
+| | openwiki | the OKF bundle ([OKF](/concepts/open-knowledge-format.md) + lifecycle) |
 |---|---|---|
 | Core bet | Regenerate often enough that staleness doesn't matter | Track staleness explicitly and curate |
 | Knowledge model | Synthesized wiki pages, own format [1] | OKF v0.1 pages with typed frontmatter, readable by any plain OKF consumer |

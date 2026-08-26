@@ -96,7 +96,7 @@ it. A page goes stale the moment a story ships, not on a fixed cadence.
 The work item that drove the change **is** the freshness signal, so tie
 the KB refresh to it rather than to the clock:
 
-- **Definition-of-Done gate.** Add "affected `kb/` pages updated or
+- **Definition-of-Done gate.** Add "affected bundle pages updated or
   re-ingested" to a story's Definition of Done, the way
   [PR quality gates](/concepts/pr-quality-gates.md) make conformance a
   merge condition. The obligation then lives where the change lives —
