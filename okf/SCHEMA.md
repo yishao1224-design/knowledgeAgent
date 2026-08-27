@@ -114,6 +114,10 @@ makes either worth reading:
 - `generated` records what **produced** the content. kb-ingest stamps
   it on every page it writes or rewrites — it is a fact about
   authorship, costs nothing, and needs no verification to be true.
+  Whoever rewrites a body replaces the **whole** field with their own
+  `{ by, at }`: it is one provenance event, so bumping `at` while
+  leaving someone else's `by` behind attributes the new text to the
+  wrong producer.
 - `verified` records who **confirmed** it, and only kb-review writes
   it. An agent stamping `verified` on a page it just wrote would be
   attesting to its own output in the same motion; that is `generated`,

@@ -27,7 +27,7 @@ sources:
     id: kb-review
     title: kb-review SKILL.md
     last_modified: 2026-08-27
-    blob: 70cde6ee5365
+    blob: 6ce3390450f6
   - resource: ../../skills/kb-curate/SKILL.md
     id: kb-curate
     title: kb-curate SKILL.md

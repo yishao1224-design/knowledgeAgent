@@ -63,10 +63,18 @@ For each page in scope:
 | Verdict | Action |
 |---------|--------|
 | All claims hold | Bump `updated`, set new `stale_after` per the SCHEMA.md cadence table, `lifecycle: active`, restamp any pinned `blob:` you re-read. Append a `verified:` entry (`by: human:<id>` if a person confirmed it, else your own `<tool>/<version>`). Consider raising `confidence`. |
-| Some claims changed | Rewrite those claims, cite the new capture or file, bump `updated`, reset `stale_after`, restamp pinned `blob:`, advance `generated.at` (you produced the new text), keep `active`. |
+| Some claims changed | Rewrite those claims, cite the new capture or file, bump `updated`, reset `stale_after`, restamp pinned `blob:`, **replace `generated` entirely** with your own `{ by, at }`, keep `active`. |
 | Contested (sources disagree) | Write/refresh `## Contradictions` with both positions and citations; tag `contested`; keep `needs_review` until resolved. |
 | Substantially wrong or superseded | `lifecycle: deprecated` + `superseded_by` (write the successor page if needed, or a `## Deprecation` section explaining why with no successor). |
 | Can't verify, low stakes | Lower `confidence`, tag `unverified`, keep `needs_review`. Note it for the user. |
+
+`generated` is replaced wholesale, never half-updated. It is a single
+provenance event — *this producer made this text on this date* — so the
+producer and the timestamp move together. Advancing only `at` while
+leaving a previous agent's `by` in place attributes your rewrite to
+them, which is worse than no stamp at all: it reads as a confident,
+specific claim and is false. If you did not touch the body, leave the
+whole field alone.
 
 Never delete during review — deprecation is the strongest verdict here;
 deletion belongs to kb-curate.
