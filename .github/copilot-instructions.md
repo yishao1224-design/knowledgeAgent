@@ -1,8 +1,9 @@
 # Copilot instructions for knowledgeAgent
 
-This repo is an agent-maintained knowledge base: an OKF v0.1 bundle in
-`okf/` with a lifecycle profile (status, review dates, hash-verified
-immutable sources).
+This repo is an agent-maintained knowledge base: an OKF v0.2 bundle in
+`okf/` with a lifecycle profile (a five-state `lifecycle` key derived
+into the standard `status` field, `stale_after` review dates,
+`blob:`-pinned repo evidence, immutable sources).
 
 The authoritative operating contract is [CLAUDE.md](../CLAUDE.md) —
 agent-agnostic despite the name. Read it plus `okf/SCHEMA.md` before
@@ -18,8 +19,8 @@ beats create.
 
 ## Hard rules (short form)
 
-- `okf/sources/` is immutable; new capture = new dated file with a
-  `sha256` of its body (`python scripts/okf.py drift --hash FILE`).
+- `okf/sources/` is immutable; new capture = new dated file. Git
+  history (`git log -- okf/sources/`) is the tamper record.
 - Every `okf/` edit gets a `python scripts/okf.py log "..."` entry.
 - Frontmatter per `okf/SCHEMA.md` templates; `type` is mandatory (OKF).
 - Links are bundle-relative (`/concepts/x.md` = `okf/concepts/x.md`) in

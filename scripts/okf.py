@@ -9,20 +9,24 @@ Subcommands:
   index            regenerate the bundle's index.md from tree + frontmatter
   links            expand [[slug]] shorthand into canonical bundle links
   log "MESSAGE"    prepend a log entry under today's date
-  stats            counts by type/status, review queue
-  drift            verify sha256 of sources/ captures
-  drift --hash F   print sha256 of a file's body (for new captures)
+  stats            counts by type/lifecycle, review queue
+  drift            recheck pinned sources against their current git blob
+  drift --hash F   print the blob sha to pin for file F
 
 Every subcommand takes --bundle NAME to point at a differently-named
 bundle directory. Without it the bundle is auto-detected (any top-level
 directory holding a SCHEMA.md), falling back to the okf/ default.
 
+The bundle targets OKF v0.2: `status` carries a standard v0.2 value and
+this bundle's richer five-state lifecycle lives in the `lifecycle`
+extension key, derived from it by LIFECYCLE_STATUS below.
+
 Stdlib only. Uses PyYAML if installed, else a minimal frontmatter parser
-sufficient for the SCHEMA.md templates (scalars, inline lists, block lists).
+sufficient for the SCHEMA.md templates (scalars, inline lists and maps,
+block lists of scalars or mappings, one level of nested mapping).
 """
 
 import argparse
-import hashlib
 import re
 import sys
 from datetime import date, datetime
@@ -36,7 +40,16 @@ KB = ROOT / DEFAULT_BUNDLE
 NON_BUNDLE_DIRS = {".git", ".github", ".claude", ".agents", ".cursor",
                    "node_modules", "scripts", "skills", "dist", "__pycache__"}
 RESERVED = {"index.md", "log.md"}
-STATUSES = {"draft", "active", "needs_review", "deprecated", "archived"}
+OKF_VERSION = "0.2"
+# OKF v0.2 defines `status` with exactly these three values. This bundle's
+# five-state lifecycle is richer, so it lives in the `lifecycle` extension
+# key and `status` is derived from it: a plain v0.2 consumer reads a legal
+# standard field, a lifecycle-aware one reads the detail.
+OKF_STATUSES = {"draft", "stable", "deprecated"}
+LIFECYCLE = {"draft", "active", "needs_review", "deprecated", "archived"}
+LIFECYCLE_STATUS = {"draft": "draft", "active": "stable",
+                    "needs_review": "stable", "deprecated": "deprecated",
+                    "archived": "deprecated"}
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
 WIKILINK_RE = re.compile(r"\[\[([^\]|\n]+?)(?:\|([^\]\n]+?))?\]\]")
 TAG_DEF_RE = re.compile(r"^\s*[-*]\s+`([A-Za-z0-9_-]+)`", re.M)
@@ -61,27 +74,107 @@ def split_frontmatter(text):
     return m.group(1), text[m.end():]
 
 
-def parse_yaml_min(src):
-    """Minimal YAML subset: 'key: value', inline [a, b] lists, block lists."""
-    data, key = {}, None
-    for line in src.splitlines():
-        if not line.strip() or line.strip().startswith("#"):
+# `key:` must be followed by whitespace or end-of-line, so a bare list
+# item like `- https://example.com` is not mistaken for a `https:` key.
+KEY_RE = re.compile(r"^([A-Za-z0-9_.-]+):(?:[ 	]+(.*))?$")
+
+
+def _scalar(val):
+    val = (val or "").strip()
+    if val.startswith("[") and val.endswith("]"):
+        return [v.strip().strip("'\"") for v in val[1:-1].split(",") if v.strip()]
+    if val.startswith("{") and val.endswith("}"):
+        out = {}
+        for part in val[1:-1].split(","):
+            if ":" in part:
+                k, v = part.split(":", 1)
+                out[k.strip()] = v.strip().strip("'\"")
+        return out
+    return val.split(" #")[0].strip().strip("'\"")
+
+
+def _indent(line):
+    return len(line) - len(line.lstrip())
+
+
+def _skip_blank(lines, i):
+    while i < len(lines) and (not lines[i].strip()
+                              or lines[i].lstrip().startswith("#")):
+        i += 1
+    return i
+
+
+def _parse_list(lines, i, indent):
+    """Block list at `indent`; items are scalars or mappings."""
+    items = []
+    while i < len(lines):
+        i = _skip_blank(lines, i)
+        if i >= len(lines):
+            break
+        cur, stripped = _indent(lines[i]), lines[i].lstrip()
+        if cur < indent or not stripped.startswith("- "):
+            break
+        rest = stripped[2:].strip()
+        m = KEY_RE.match(rest)
+        if not m:
+            items.append(_scalar(rest))
+            i += 1
             continue
-        m = re.match(r"^([A-Za-z0-9_-]+):\s*(.*)$", line)
-        if m:
-            key, val = m.group(1), m.group(2).strip()
-            if val == "":
-                data[key] = []          # assume block list follows
-            elif val.startswith("[") and val.endswith("]"):
-                items = [v.strip().strip("'\"") for v in val[1:-1].split(",")]
-                data[key] = [v for v in items if v]
-            else:
-                data[key] = val.split(" #")[0].strip().strip("'\"")
-        elif re.match(r"^\s+-\s+", line) and key is not None:
-            item = re.sub(r"^\s+-\s+", "", line).strip().strip("'\"")
-            if isinstance(data.get(key), list):
-                data[key].append(item)
-    return data
+        item = {m.group(1): _scalar(m.group(2))}
+        i += 1
+        while i < len(lines):                       # continuation keys
+            i = _skip_blank(lines, i)
+            if i >= len(lines):
+                break
+            c2, s2 = _indent(lines[i]), lines[i].lstrip()
+            if c2 <= cur or s2.startswith("- "):
+                break
+            m2 = KEY_RE.match(s2.rstrip())
+            if m2:
+                item[m2.group(1)] = _scalar(m2.group(2))
+            i += 1
+        items.append(item)
+    return items, i
+
+
+def _parse_block(lines, i, indent):
+    """Mapping block at `indent`. Returns (dict, next_index)."""
+    data = {}
+    while i < len(lines):
+        i = _skip_blank(lines, i)
+        if i >= len(lines):
+            break
+        cur, stripped = _indent(lines[i]), lines[i].lstrip()
+        if cur < indent or stripped.startswith("- "):
+            break
+        m = KEY_RE.match(stripped.rstrip())
+        if not m:
+            i += 1
+            continue
+        key, val = m.group(1), m.group(2)
+        if val is not None and val.strip():
+            data[key] = _scalar(val)
+            i += 1
+            continue
+        j = _skip_blank(lines, i + 1)               # block list or sub-map?
+        if j < len(lines):
+            nind, nstr = _indent(lines[j]), lines[j].lstrip()
+            if nstr.startswith("- ") and nind >= cur:
+                data[key], i = _parse_list(lines, j, nind)
+                continue
+            if nind > cur:
+                data[key], i = _parse_block(lines, j, nind)
+                continue
+        data[key] = []
+        i += 1
+    return data, i
+
+
+def parse_yaml_min(src):
+    """Minimal YAML subset: scalars, inline [a, b] / {k: v}, block lists of
+    scalars or mappings, and one level of nested mapping — enough for the
+    OKF v0.2 frontmatter shapes in SCHEMA.md."""
+    return _parse_block(src.splitlines(), 0, 0)[0]
 
 
 def parse_frontmatter(src):
@@ -223,6 +316,94 @@ def parse_date(s):
         return None
 
 
+# ------------------------------------------------------------------ drift
+
+def git_blob(path):
+    """Current git blob sha of a working-tree file, or None when git is
+    unavailable. Hashing the working tree (not HEAD) means an uncommitted
+    edit to pinned evidence still registers as drift."""
+    import subprocess
+    try:
+        out = subprocess.run(["git", "hash-object", str(path)], cwd=str(ROOT),
+                             capture_output=True, text=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if out.returncode != 0:
+        return None
+    return out.stdout.strip() or None
+
+
+def resolve_resource(resource, page):
+    """Resolve a sources[].resource to a filesystem path, or None when it is
+    not a local file (absolute URL, or a scope descriptor). Relative paths
+    are document-relative per OKF v0.2 — that is what lets a page reach repo
+    files outside the bundle (`../../scripts/okf.py`)."""
+    t = str(resource or "").split("#")[0].strip()
+    if not t or "://" in t or t.startswith("mailto:"):
+        return None
+    if t.startswith("/"):
+        return (KB / t.lstrip("/")).resolve()
+    return (page.parent / t).resolve()
+
+
+def check_drift(files):
+    """Compare each pinned source entry's `blob:` against the file's current
+    blob sha. Returns (results, git_available); results are tuples of
+    (page, resource, state, pinned, current), state in ok|moved|gone."""
+    results = []
+    if git_blob(Path(__file__)) is None:
+        return results, False
+    for p in files:
+        meta, _, _ = load(p)
+        entries = (meta or {}).get("sources") or []
+        if isinstance(entries, str):
+            entries = [entries]
+        for entry in entries:
+            if not isinstance(entry, dict) or not entry.get("blob"):
+                continue
+            pinned = str(entry["blob"]).strip()
+            res = str(entry.get("resource", ""))
+            target = resolve_resource(res, p)
+            if target is None:
+                continue
+            if not target.exists():
+                results.append((rel(p), res, "gone", pinned, None))
+                continue
+            cur = git_blob(target)
+            if cur is None:
+                continue
+            state = "ok" if cur.startswith(pinned) else "moved"
+            results.append((rel(p), res, state, pinned, cur))
+    return results, True
+
+
+def cmd_drift(args):
+    if args.hash:
+        h = git_blob(Path(args.hash))
+        if h is None:
+            print(f"ERROR: cannot hash {args.hash}", file=sys.stderr)
+            return 2
+        print(h[:12])
+        return 0
+    files = concept_files()
+    results, git_ok = check_drift(files)
+    if not git_ok:
+        print("drift: git unavailable — no pinned source checked")
+        return 0
+    stale = [x for x in results if x[2] != "ok"]
+    for page, res, state, pinned, cur in results:
+        if state == "gone":
+            print(f"GONE:  {page} -> {res} (pinned {pinned}; file is missing)")
+        elif state == "moved":
+            print(f"MOVED: {page} -> {res} (pinned {pinned}, now {cur[:12]})")
+    print(f"\ndrift: {len(stale)} stale of {len(results)} pinned source(s)")
+    if stale:
+        print("re-verify each page against its file, then restamp with "
+              "'okf.py drift --hash <file>' — and set lifecycle: needs_review "
+              "if the claims themselves moved")
+    return 1 if stale else 0
+
+
 # ------------------------------------------------------------------- lint
 
 def cmd_lint(args):
@@ -278,35 +459,83 @@ def cmd_lint(args):
                 errors.append(f"{r}: type '{typ}' belongs in {expected} "
                               f"per SCHEMA.md type registry")
 
-        # lifecycle profile
+        # lifecycle profile — OKF v0.2 `status` plus this bundle's `lifecycle`
         status = str(meta.get("status", "")).strip()
-        if status and status not in STATUSES:
-            errors.append(f"{r}: unknown status '{status}'")
+        life = str(meta.get("lifecycle", "")).strip()
+        if status and status not in OKF_STATUSES:
+            errors.append(f"{r}: status '{status}' is not an OKF v0.2 value "
+                          f"({'|'.join(sorted(OKF_STATUSES))}) — the five-state "
+                          f"lifecycle belongs in 'lifecycle:'")
+        if life and life not in LIFECYCLE:
+            errors.append(f"{r}: unknown lifecycle '{life}'")
+        if life in LIFECYCLE and status and LIFECYCLE_STATUS[life] != status:
+            errors.append(f"{r}: lifecycle '{life}' implies status "
+                          f"'{LIFECYCLE_STATUS[life]}', found '{status}'")
         is_source = p.is_relative_to(KB / "sources")
         if p == KB / "SCHEMA.md":
             continue  # meta-file: OKF conformance applies, lifecycle rules don't
 
         if is_source:
-            if not meta.get("sha256"):
-                warns.append(f"{r}: source capture missing sha256 (drift check impossible)")
             if not meta.get("source_url"):
                 warns.append(f"{r}: source capture missing source_url")
             continue  # sources are exempt from the rest
 
-        for field in ("title", "description", "status", "updated"):
+        for field in ("title", "description", "status", "lifecycle", "updated"):
             if not meta.get(field):
                 warns.append(f"{r}: missing '{field}'")
-        if status == "active" and not meta.get("review_after"):
-            warns.append(f"{r}: active but no review_after")
-        if status == "deprecated" and not meta.get("superseded_by") \
+        if meta.get("review_after"):
+            warns.append(f"{r}: legacy 'review_after' — OKF v0.2 names this "
+                         f"field 'stale_after'")
+        if life == "active" and not meta.get("stale_after"):
+            warns.append(f"{r}: active but no stale_after")
+        if life == "deprecated" and not meta.get("superseded_by") \
                 and "## Deprecation" not in body:
             errors.append(f"{r}: deprecated without superseded_by or '## Deprecation' section")
-        if status == "archived" and not p.is_relative_to(KB / "archive"):
+        if life == "archived" and not p.is_relative_to(KB / "archive"):
             warns.append(f"{r}: archived but not under /archive/")
 
-        ra = parse_date(meta.get("review_after"))
-        if status == "active" and ra and ra < today:
-            warns.append(f"{r}: review overdue since {ra} — set status: needs_review or re-verify")
+        sa = parse_date(meta.get("stale_after"))
+        if life == "active" and sa and sa < today:
+            warns.append(f"{r}: review overdue since {sa} — set "
+                         f"lifecycle: needs_review or re-verify")
+
+        # sources shape — OKF v0.2 entries are mappings carrying a `resource`
+        srcs = meta.get("sources") or []
+        if isinstance(srcs, str):
+            srcs = [srcs]
+        seen_ids = set()
+        for entry in srcs:
+            if not isinstance(entry, dict):
+                warns.append(f"{r}: legacy source entry '{entry}' — v0.2 wants "
+                             f"a mapping with 'resource:'")
+                continue
+            if not str(entry.get("resource", "")).strip():
+                errors.append(f"{r}: source entry without 'resource'")
+            sid = str(entry.get("id", "")).strip()
+            if sid and sid in seen_ids:
+                errors.append(f"{r}: duplicate source id '{sid}'")
+            if sid:
+                seen_ids.add(sid)
+        # trust fields — validated only when present; a page without
+        # them is not flagged, since an absent stamp is an honest
+        # "nobody recorded this" and backfilling one would be worse.
+        gen = meta.get("generated")
+        if gen is not None:
+            if not isinstance(gen, dict) or not gen.get("by") or not gen.get("at"):
+                warns.append(f"{r}: 'generated' must be a mapping with "
+                             f"'by' and 'at' (OKF v0.2)")
+        ver = meta.get("verified")
+        if ver is not None:
+            events = ver if isinstance(ver, list) else [ver]
+            for ev in events:
+                if not isinstance(ev, dict) or not ev.get("by") or not ev.get("at"):
+                    warns.append(f"{r}: 'verified' entries must be mappings "
+                                 f"with 'by' and 'at' (OKF v0.2)")
+                    break
+
+        if re.search(r"^#+\s*Citations\s*$", body, re.M):
+            warns.append(f"{r}: '# Citations' section — v0.2 replaced it with "
+                         f"the 'sources' frontmatter; cite as [<source id>]")
 
         # tags
         if tags_known is not None:
@@ -327,7 +556,7 @@ def cmd_lint(args):
             if tgt.suffix == ".md" and tgt not in all_paths \
                     and tgt.name not in RESERVED and not tgt.exists():
                 infos.append(f"{r}: link to not-yet-written page ({t})")
-        if status in ("active", "needs_review") and n_out < 2:
+        if life in ("active", "needs_review") and n_out < 2:
             warns.append(f"{r}: only {n_out} outbound bundle link(s); minimum is 2")
 
         # wiki-links — authoring sugar that must be expanded before commit
@@ -348,6 +577,14 @@ def cmd_lint(args):
         if p.resolve() not in inbound and p.name != "SCHEMA.md":
             warns.append(f"{r}: orphan — no inbound links and not in index.md "
                          f"(run 'okf.py index')")
+
+    # pinned-source drift (skipped silently when git is unavailable)
+    for page, res, state, pinned, cur in check_drift(files)[0]:
+        if state == "moved":
+            warns.append(f"{page}: pinned source {res} changed since "
+                         f"{pinned} — run 'okf.py drift' and re-verify")
+        elif state == "gone":
+            warns.append(f"{page}: pinned source {res} no longer exists")
 
     # reserved-file rules
     for idx in KB.rglob("index.md"):
@@ -378,13 +615,14 @@ def cmd_index(args):
         section = top if (KB / top).is_dir() else "_root"
         title = meta.get("title") or p.stem
         desc = str(meta.get("description") or "").strip()
-        status = str(meta.get("status") or "").strip()
-        badge = f" *({status})*" if status in ("needs_review", "deprecated", "archived") else ""
+        life = str(meta.get("lifecycle") or "").strip()
+        badge = f" *({life})*" if life in ("needs_review", "deprecated", "archived") else ""
         entries.setdefault(section, []).append(
             f"* [{title}]({p.relative_to(KB).as_posix()}) - {desc}{badge}")
 
     total = sum(len(v) for v in entries.values())
-    lines = ['---', 'okf_version: "0.1"', '---', '', '# Bundle Index', '']
+    lines = ['---', f'okf_version: "{OKF_VERSION}"', '---', '',
+             '# Bundle Index', '']
     for e in sorted(entries.pop("_root", [])):
         lines.append(e)
     order = SECTION_ORDER + sorted(set(entries) - set(SECTION_ORDER))
@@ -473,58 +711,32 @@ def cmd_log(args):
 # ------------------------------------------------------------------ stats
 
 def cmd_stats(args):
-    by_type, by_status, queue = {}, {}, []
+    by_type, by_life, queue = {}, {}, []
     today = date.today()
     files = concept_files()
     for p in files:
         meta, _, _ = load(p)
         meta = meta or {}
         by_type[str(meta.get("type", "?"))] = by_type.get(str(meta.get("type", "?")), 0) + 1
-        st = str(meta.get("status", "?"))
-        by_status[st] = by_status.get(st, 0) + 1
-        ra = parse_date(meta.get("review_after"))
-        if st == "needs_review" or (st == "active" and ra and ra < today):
-            queue.append((ra or date.min, rel(p)))
+        life = str(meta.get("lifecycle", "?"))
+        by_life[life] = by_life.get(life, 0) + 1
+        sa = parse_date(meta.get("stale_after"))
+        if life == "needs_review" or (life == "active" and sa and sa < today):
+            queue.append((sa or date.min, rel(p)))
     print(f"{len(files)} concept file(s)\n\nby type:")
     for k, v in sorted(by_type.items(), key=lambda kv: -kv[1]):
         print(f"  {k}: {v}")
-    print("\nby status:")
-    for k, v in sorted(by_status.items(), key=lambda kv: -kv[1]):
+    print("\nby lifecycle:")
+    for k, v in sorted(by_life.items(), key=lambda kv: -kv[1]):
         print(f"  {k}: {v}")
     print(f"\nreview queue ({len(queue)}):")
-    for ra, r in sorted(queue):
-        print(f"  {r}" + (f" (due {ra})" if ra != date.min else ""))
+    for sa, r in sorted(queue):
+        print(f"  {r}" + (f" (due {sa})" if sa != date.min else ""))
+    results, git_ok = check_drift(files)
+    if git_ok:
+        stale = [x for x in results if x[2] != "ok"]
+        print(f"\npinned sources: {len(results)} ({len(stale)} stale)")
     return 0
-
-
-# ------------------------------------------------------------------ drift
-
-def body_hash(path):
-    _, body, _ = load(path)
-    return hashlib.sha256(body.encode("utf-8")).hexdigest()
-
-
-def cmd_drift(args):
-    if args.hash:
-        print(body_hash(Path(args.hash)))
-        return 0
-    src_dir = KB / "sources"
-    bad = 0
-    files = sorted(src_dir.rglob("*.md")) if src_dir.exists() else []
-    for p in files:
-        if p.name in RESERVED:
-            continue
-        meta, _, _ = load(p)
-        recorded = (meta or {}).get("sha256", "")
-        actual = body_hash(p)
-        if not recorded:
-            print(f"WARN: {rel(p)}: no sha256 recorded (actual: {actual})")
-        elif recorded != actual:
-            print(f"DRIFT: {rel(p)}: body changed since ingestion "
-                  f"(recorded {recorded[:12]}…, actual {actual[:12]}…)")
-            bad += 1
-    print(f"drift: {bad} drifted of {len(files)} source(s)")
-    return 1 if bad else 0
 
 
 # ------------------------------------------------------------------- init
@@ -536,7 +748,8 @@ SCHEMA_SEED = """---
 type: Schema
 title: Bundle Schema & Conventions
 description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, lifecycle rules.
-status: active
+status: stable
+lifecycle: active
 updated: {today}
 ---
 
@@ -576,15 +789,44 @@ this example shows it.
 type: Concept            # match to directory — see type registry above
 title: Human Readable Title
 description: One sentence for index/previews.
-status: draft            # draft | active | needs_review | deprecated | archived
+status: draft            # OKF v0.2: draft | stable | deprecated
+lifecycle: draft         # draft | active | needs_review | deprecated | archived
 confidence: medium       # low | medium | high
 created: {today}
 updated: {today}
-review_after: {today}    # required once active; set per cadence
+stale_after: {today}     # required once lifecycle: active
 tags: []
-sources: []
+sources:
+  - resource: /sources/{today}-example.md   # capture, bundle-relative
+    id: example                             # cite in the body as [example]
+    title: Example capture
+  - resource: ../../src/thing.py            # live repo file, doc-relative
+    id: thing-impl
+    title: thing.py implementation
+    last_modified: {today}
+    blob: 0000000000aa                      # pin: okf.py drift --hash <file>
+generated:               # who produced this content, stamped at write time
+  by: agent/version      # actor: human:<id> | <tool>/<version> | process:<id>
+  at: {today}
+verified:                # append one entry per real re-verification
+  - by: human:you        # only for a real check — never on freshly written text
+    at: {today}
 ---
 ```
+
+`status` is the OKF v0.2 standard field; `lifecycle` is this bundle's
+five-state extension and `status` is derived from it (`active` and
+`needs_review` are both `stable`; `archived` is `deprecated`). Lint
+errors if the two disagree.
+
+`generated` says what produced the page; `verified` says who confirmed
+it. Stamp `generated` whenever you write, and `verified` only after a
+real re-check — an agent verifying its own fresh output records nothing.
+
+Cite sources by `id` in the body — `…as the README states [example]` —
+not with a `# Citations` section, which v0.2 replaced with `sources`.
+Pin `blob:` only on re-readable local files; `okf.py drift` rechecks
+those and lint reports the ones that moved.
 
 Only `type: Concept` pages describing **domain** knowledge (business
 rules, processes, system behavior) use the domain-concept body template
@@ -647,6 +889,25 @@ def cmd_init(args):
     #     .claude/skills/ (Claude Code) and .github/prompts/ (Copilot)
     src = ROOT / "skills"
     dst = ROOT / ".claude" / "skills"
+
+    # 2a — refresh toolchain copies bundled inside skills FIRST, so the
+    #      `npx skills add` install ships current scripts. The files in
+    #      scripts/ stay the single source of truth.
+    scripts_dir = Path(__file__).resolve().parent
+    bundles = [
+        ("okf.py", src / "kb-setup" / "okf.py"),
+    ]
+    for fname, bundled in bundles:
+        source_file = scripts_dir / fname
+        if not source_file.exists() or not bundled.parent.exists():
+            continue
+        if bundled.resolve() == source_file.resolve():
+            continue
+        if not bundled.exists() or bundled.read_bytes() != source_file.read_bytes():
+            shutil.copyfile(source_file, bundled)
+            made.append(f"skills/{bundled.parent.name}/{fname} "
+                        f"(refreshed toolchain bundle)")
+
     prompts = ROOT / ".github" / "prompts"
     synced = []
     if src.exists():
@@ -664,24 +925,6 @@ def cmd_init(args):
                 PROMPT_TMPL.format(name=name, desc=desc), encoding="utf-8",
                 newline="\n")
             synced.append(name)
-
-    # 2b — refresh toolchain copies bundled inside skills so a
-    #      `npx skills add` install ships current scripts. The files in
-    #      scripts/ stay the single source of truth.
-    scripts_dir = Path(__file__).resolve().parent
-    bundles = [
-        ("okf.py", src / "kb-setup" / "okf.py"),
-    ]
-    for fname, bundled in bundles:
-        source_file = scripts_dir / fname
-        if not source_file.exists() or not bundled.parent.exists():
-            continue
-        if bundled.resolve() == source_file.resolve():
-            continue
-        if not bundled.exists() or bundled.read_bytes() != source_file.read_bytes():
-            shutil.copyfile(source_file, bundled)
-            made.append(f"skills/{bundled.parent.name}/{fname} "
-                        f"(refreshed toolchain bundle)")
 
     # 3 — regenerate index and report health
     cmd_index(args)
@@ -744,7 +987,8 @@ def main():
     p = sub.add_parser("log", parents=[common]);   p.add_argument("message")
     sub.add_parser("stats", parents=[common])
     p = sub.add_parser("drift", parents=[common])
-    p.add_argument("--hash", metavar="FILE")
+    p.add_argument("--hash", metavar="FILE",
+                   help="print the blob sha to pin for FILE and exit")
     args = ap.parse_args()
     resolve_bundle(args)
     if args.cmd == "init":

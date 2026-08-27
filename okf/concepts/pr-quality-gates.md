@@ -2,11 +2,12 @@
 type: Concept
 title: PR Quality Gates for a Team-Shared Bundle
 description: Three-tier merge guardrails for a git-managed wiki/bundle — blocking mechanical CI, advisory LLM review, human gates scoped by blast radius; conformance at merge, truth via lifecycle.
-status: active
+status: stable
+lifecycle: active
 confidence: low
 created: 2026-07-06
-updated: 2026-08-26
-review_after: 2026-08-06
+updated: 2026-08-27
+stale_after: 2026-08-06
 tags: [unverified]
 ---
 
@@ -34,8 +35,10 @@ Maps directly onto the hard rules; no LLM required:
 | Index freshness | Regenerated catalog | Run `okf.py index` in CI; fail if the tree becomes dirty |
 
 Source immutability is the guardrail most worth automating: a silent
-edit to a capture corrupts the audit trail invisibly, and `okf.py
-drift` only catches it after the fact.
+edit to a capture corrupts the audit trail, and nothing in the
+toolchain blocks one — a CI job diffing the PR against `okf/sources/`
+and failing on any modification to an existing file is the gate that
+would.
 
 ## Tier 2 — advisory review (judgment, non-blocking)
 
@@ -59,7 +62,7 @@ Do not try to guarantee correctness at merge time. The
 [knowledge lifecycle](/concepts/knowledge-lifecycle.md) exists so that
 "captured but not yet verified" is a legitimate, visible state
 (`draft`, `needs_review`, `confidence`) rather than something a PR gate
-must prevent: merged pages carry `review_after` and get caught by
+must prevent: merged pages carry `stale_after` and get caught by
 kb-review later. The PR bar is *structure and immutability*; truth is
 enforced over time. Teams adopting the bundle (see
 [adopting the bundle pattern](/concepts/adopting-the-bundle-pattern.md))

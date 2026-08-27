@@ -25,14 +25,14 @@ index descriptions; Grep `okf/` for terms the index doesn't surface.
 
 Read the relevant pages AND the pages they link to (one hop) — links
 assert relationships that change answers. Note each page's `status`,
-`confidence`, and `review_after`.
+`confidence`, and `stale_after`.
 
 ## Step 2 — Answer
 
 - Synthesize across pages; cite every load-bearing claim with its
   bundle path, e.g. `(see /concepts/foo.md)`.
 - **Label trust explicitly in the answer**:
-  - `needs_review` or overdue `review_after` → "may be stale (last
+  - `needs_review` or overdue `stale_after` → "may be stale (last
     verified <updated>)".
   - `deprecated` → answer from `superseded_by` instead; mention the
     deprecation only if relevant.

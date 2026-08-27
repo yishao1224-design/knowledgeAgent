@@ -2,11 +2,12 @@
 type: Concept
 title: User Story Analysis Workflow (Ingest After Verify)
 description: The bundle-integrated pipeline for working a user story — query first, flag contradictions at analysis time, implement and verify, ingest what shipped last.
-status: active
+status: stable
+lifecycle: active
 confidence: low
 created: 2026-07-08
-updated: 2026-07-08
-review_after: 2026-08-08
+updated: 2026-08-27
+stale_after: 2026-08-08
 tags: [unverified]
 ---
 
@@ -62,14 +63,14 @@ query → analyze → implement → test/verify → ingest → story closes
 1. **Contradiction flagging cannot wait for the end.** If the query
    step reveals the story conflicts with a documented invariant, flag
    the affected page **at analysis time**: `## Contradictions` section,
-   `contested` tag, `status: needs_review`. It might mean the *story*
+   `contested` tag, `lifecycle: needs_review`. It might mean the *story*
    is wrong and implementation should pause; and until resolved,
    anyone else querying that page must see it is contested. Flagging
    changes no claims — it defers the writing of knowledge, not the
    raising of alarms.
 2. **The in-flight window is a known cost.** While implementation runs,
    the bundle is knowingly behind. The flags from carve-out 1 cover
-   pages *known* to be affected; the `review_after` backstop (scoped
+   pages *known* to be affected; the `stale_after` backstop (scoped
    per [SCHEMA.md](/SCHEMA.md)) covers the rest.
 
 ## Analysis-time code cross-check
@@ -77,8 +78,8 @@ query → analyze → implement → test/verify → ingest → story closes
 During steps 1–2 the agent has both the affected code and the affected
 KB pages in context — so it **cross-checks the pages' claims against
 the live code and updates trust labels**. This is the change-triggered
-detector the rest of the machinery lacks: `drift` only guards captures,
-`review_after` only watches the clock, and the DoD gate only fires when
+detector the rest of the machinery lacks: `stale_after` only watches
+the clock, and the DoD gate only fires when
 the process is followed. The cross-check works from the current state
 of the code, so it also catches hotfixes with no story and gate-skipped
 changes — and it makes freshness *attention-driven*: pages about hot
@@ -97,7 +98,7 @@ Guardrails:
    | Finding | Analyst-agent may… |
    |---------|--------------------|
    | Code contradicts a page claim | Flag immediately: `needs_review` + `## Contradictions` note with file refs (status-only, same as carve-out 1) |
-   | Code confirms the claims checked | Bump `review_after` — only for a genuine verification, with a `**Review**` log entry (kb-review work done opportunistically) |
+   | Code confirms the claims checked | Bump `stale_after` — only for a genuine verification, with a `**Review**` log entry (kb-review work done opportunistically) |
    | Page wrong, fix obvious | Still no mid-analysis rewrite — content correction belongs to the ingest step or kb-review |
 
 3. **A mismatch is a three-way question.** Page stale, code buggy
@@ -129,10 +130,10 @@ ingest-step disciplines follow:
 
 - **Don't re-warrant untouched claims.** Ingesting story #N's outcome
   updates one section and bumps `updated:` — but resetting
-  `review_after` from `updated` would silently vouch for claims from
+  `stale_after` from `updated` would silently vouch for claims from
   earlier stories nobody looked at. Either genuinely re-check the old
   claims while they're in context (the analysis-time cross-check
-  usually already has), or set `review_after` for the
+  usually already has), or set `stale_after` for the
   least-recently-verified claim on the page.
 - **Story-vs-story disagreement is usually evolution, not
   contradiction.** If story #N changes the rule an earlier story

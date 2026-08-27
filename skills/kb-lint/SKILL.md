@@ -1,6 +1,6 @@
 ---
 name: kb-lint
-description: Audit the OKF knowledge bundle's mechanical health — OKF conformance, frontmatter completeness, broken links, orphans, overdue reviews, source drift — and fix what's safe to fix. Use when the user asks for a health check, lint, audit, or integrity check of the knowledge base.
+description: Audit the OKF knowledge bundle's mechanical health — OKF conformance, frontmatter completeness, broken links, orphans, overdue reviews — and fix what's safe to fix. Use when the user asks for a health check, lint, audit, or integrity check of the knowledge base.
 ---
 
 # kb-lint — Audit phase of the knowledge lifecycle
@@ -21,7 +21,6 @@ content verification here.
 
 ```
 python scripts/okf.py lint
-python scripts/okf.py drift
 python scripts/okf.py stats
 ```
 
@@ -36,8 +35,12 @@ python scripts/okf.py stats
 - Frontmatter on a non-root `index.md` → remove it.
 
 **WARNs — fix the mechanical ones, queue the semantic ones:**
-- Missing `title`/`description`/`updated`/`review_after` → fill from
-  content and the SCHEMA.md cadence table.
+- Missing `title`/`description`/`updated`/`stale_after`/`lifecycle` →
+  fill from content and the SCHEMA.md cadence table.
+- Legacy v0.1 shapes — a `review_after` field, a bare-string `sources`
+  entry, a surviving `# Citations` section → migrate to the v0.2 shapes
+  in SCHEMA.md (`stale_after`, `sources` mappings, inline `[source-id]`
+  citations). Mechanical; do it here.
 - Orphans → add the page to a linking context (or run `okf.py index`
   if it's just missing from the index); if nothing should link to it,
   that's a curation question — flag for kb-curate.
@@ -46,12 +49,20 @@ python scripts/okf.py stats
   only. **Never add filler links to satisfy the count** — if no second
   real relationship exists, note the page for kb-curate (it may not
   meet the page threshold).
-- Overdue reviews → set `status: needs_review`; do NOT re-verify
+- Overdue reviews → set `lifecycle: needs_review`; do NOT re-verify
   content here. Tell the user the review queue grew.
 
-**DRIFT findings:** a source body changed post-ingestion — that's a
-tamper/corruption signal since sources are immutable. Restore from git
-history if available; otherwise report to the user before touching it.
+**Pinned-source drift** (`pinned source ... changed` / `no longer
+exists`, also reported by `okf.py drift`): the file a page cites has
+moved on. This is a *semantic* finding — queue it for kb-review, do
+**not** restamp `blob:` here. Restamping is a claim that someone
+re-read the file, and lint never reads content. Set
+`lifecycle: needs_review` and tell the user.
+
+**A source capture edited after ingestion** is a tamper/corruption
+signal, since captures are immutable. `git log -- okf/sources/`
+surfaces it. Restore from git history if available; otherwise report to
+the user before touching it.
 
 **INFOs (links to not-yet-written pages):** fine by design (OKF §5).
 Only report a summary count, plus any that have accumulated 3+

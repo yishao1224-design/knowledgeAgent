@@ -9,13 +9,17 @@ agent-agnostic. **Read it in full before touching anything under
 Non-negotiables, restated:
 
 1. Files under `okf/sources/` are immutable — re-ingest under a new
-   dated filename, never edit.
+   dated filename, never edit. Git history is the tamper record.
 2. Every edit to `okf/` gets a log entry:
    `python scripts/okf.py log "**Verb**: message"`.
-3. Deprecate, don't delete. `status: deprecated` requires
+3. Deprecate, don't delete. `lifecycle: deprecated` requires
    `superseded_by` or a `## Deprecation` section.
 4. Run `python scripts/okf.py lint` before finishing any session that
    modified `okf/`; errors must be zero.
+5. `status` is OKF v0.2's standard field (`draft | stable |
+   deprecated`); this bundle's five-state machine lives in `lifecycle`
+   and the two must agree. Cite sources inline by `sources[].id`, never
+   with a `# Citations` section.
 
 Lifecycle workflows (capture / serve / verify / garden / audit) are
 defined in `skills/kb-*/SKILL.md`. Match the user's request to a

@@ -3,12 +3,15 @@ type: Entity
 title: ado-workitem-sync — ADO Retrieval Toolchain
 description: Removed 2026-08-26 — the scripts/ado.py + ado-workitem-sync skill pair that synced Azure DevOps work items into local analysis folders; kept for the rev-stamp provenance and code-vs-judgment design record.
 status: deprecated
+lifecycle: deprecated
 confidence: medium
 created: 2026-07-09
 updated: 2026-08-26
 tags: []
 sources:
-  - /sources/2026-07-09-ado-workitem-sync.md
+  - resource: /sources/2026-07-09-ado-workitem-sync.md
+    id: ado-capture
+    title: ado.py + skill capture
 ---
 
 # ado-workitem-sync — ADO Retrieval Toolchain
@@ -34,7 +37,7 @@ should start from those pages, not from this one.
 The code/skill pair that implements the *retrieve* leg of the
 [user story analysis workflow](/concepts/user-story-analysis-workflow.md):
 `scripts/ado.py` owns every mechanical rule, and the thin
-`ado-workitem-sync` skill supplies only routing and judgment [1]. It is
+`ado-workitem-sync` skill supplies only routing and judgment [ado-capture]. It is
 the concrete instance of the script-for-pipelines rule in
 [ingesting requirements from ticket systems](/concepts/ingesting-requirements-from-ticket-systems.md) —
 the same code-vs-judgment split that pairs
@@ -104,7 +107,3 @@ prompt a review of this page.
   — the access-path and rev-stamp rules this tool implements.
 - [okf.py — the Mechanical Toolchain](/entities/okf-toolchain.md) — the
   sibling tool for the bundle side; same design philosophy.
-
-# Citations
-
-[1] [ado.py + skill capture](/sources/2026-07-09-ado-workitem-sync.md)

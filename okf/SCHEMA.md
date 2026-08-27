@@ -2,16 +2,25 @@
 type: Schema
 title: Bundle Schema & Conventions
 description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, lifecycle rules.
-status: active
-updated: 2026-08-26
+status: stable
+lifecycle: active
+updated: 2026-08-27
 ---
 
 # Bundle Schema & Conventions
 
-This bundle follows **OKF v0.1** plus the lifecycle profile described
+This bundle follows **OKF v0.2** plus the lifecycle profile described
 here. When this file and habit disagree, this file wins. When this file
 and `CLAUDE.md` disagree, this file wins for content conventions;
 `CLAUDE.md` wins for process.
+
+The spec now lives at
+[GoogleCloudPlatform/open-knowledge-format](https://github.com/GoogleCloudPlatform/open-knowledge-format);
+the copy under `knowledge-catalog/okf/` this bundle was seeded from is a
+frozen v0.2 snapshot, no longer maintained. See
+[Open Knowledge Format (OKF)](/concepts/open-knowledge-format.md) for
+what v0.2 changed and why this bundle splits `status` from
+`lifecycle`.
 
 # Domain
 
@@ -31,7 +40,7 @@ okf/            # default name; a project may choose another
 ├── entities/         # concrete things: people, orgs, systems, datasets
 ├── comparisons/      # X-vs-Y analyses
 ├── queries/          # filed answers from kb-query worth keeping
-├── archive/          # archived concepts (status: archived)
+├── archive/          # archived concepts (lifecycle: archived)
 └── sources/          # IMMUTABLE raw captures
     ├── YYYY-MM-DD-<slug>.md
     └── assets/       # load-bearing binary evidence (see Source assets)
@@ -51,23 +60,79 @@ because this template's example shows it.
 type: Concept            # required (OKF). Match to directory — see type registry below.
 title: Human Readable Title
 description: One sentence, used in index.md and previews.
-status: draft            # draft | active | needs_review | deprecated | archived
+status: draft            # OKF v0.2 standard: draft | stable | deprecated
+lifecycle: draft         # draft | active | needs_review | deprecated | archived
 confidence: medium       # low | medium | high — how well-sourced the claims are
 created: 2026-07-05
 updated: 2026-07-05
-review_after: 2026-10-05 # required once status: active
+stale_after: 2026-10-05  # required once lifecycle: active
 tags: [tag-from-taxonomy]
-sources:                 # bundle-relative paths into /sources/
-  - /sources/2026-07-05-example.md
+sources:                 # see "Source entries" below
+  - resource: /sources/2026-07-05-example.md
+    id: example
+    title: Example capture
+generated:               # who produced this content, stamped at write time
+  by: claude-code/opus-5   # <tool>/<version> — whatever agent is running
+  at: 2026-07-05
+verified:                # optional; one entry per real re-verification
+  - by: human:maintainer
+    at: 2026-07-05
 supersedes: /concepts/old-page.md      # optional
-superseded_by: /concepts/new-page.md   # required when status: deprecated
+superseded_by: /concepts/new-page.md   # required when lifecycle: deprecated
 ---
 ```
+
+## `status` vs `lifecycle`
+
+OKF v0.2 promoted `status` to a standard field with exactly three
+values — `draft | stable | deprecated`. This bundle's five-state
+lifecycle is richer than that, so it lives in the `lifecycle`
+**extension** key and `status` is derived from it:
+
+| `lifecycle` | `status` |
+|-------------|----------|
+| `draft` | `draft` |
+| `active` | `stable` |
+| `needs_review` | `stable` — still served, flagged in answers |
+| `deprecated` | `deprecated` |
+| `archived` | `deprecated` |
+
+Write both; lint errors if they disagree. A plain v0.2 consumer that
+ignores extension keys still reads a legal `status`; a lifecycle-aware
+one reads the detail. Per the conformance rule, the body prose must
+still say when a page is deprecated or contested — the extension key
+alone is not allowed to carry that meaning.
+
+`generated` and `verified` both use the v0.2 actor convention:
+`human:<id>` for a person, `<tool>/<version>` for an agent or tool,
+`process:<id>` for automation. Consumers classify trust off the
+`human:` prefix, so use it for anything a person actually confirmed.
+
+The two are **not** interchangeable, and keeping them apart is what
+makes either worth reading:
+
+- `generated` records what **produced** the content. kb-ingest stamps
+  it on every page it writes or rewrites — it is a fact about
+  authorship, costs nothing, and needs no verification to be true.
+  Whoever rewrites a body replaces the **whole** field with their own
+  `{ by, at }`: it is one provenance event, so bumping `at` while
+  leaving someone else's `by` behind attributes the new text to the
+  wrong producer.
+- `verified` records who **confirmed** it, and only kb-review writes
+  it. An agent stamping `verified` on a page it just wrote would be
+  attesting to its own output in the same motion; that is `generated`,
+  not confirmation.
+
+So the ordinary state of a fresh page is *generated by an agent, never
+verified* — legible, honest, and exactly what it says. Do not backfill
+either field for pages whose authorship or verification you cannot
+actually establish.
 
 # Source-capture frontmatter template
 
 Files under `sources/` are verbatim or near-verbatim captures. Immutable
-after creation.
+after creation — git history is the tamper record; `git log -- sources/`
+surfaces any post-ingestion edit, with the original recoverable.
 
 ```yaml
 ---
@@ -76,9 +141,49 @@ title: Original Article Title
 description: One sentence on what this source covers.
 source_url: https://example.com/article
 ingested: 2026-07-05
-sha256: <hash of the body below the frontmatter — okf.py drift checks it>
 ---
 ```
+
+# Source entries (frontmatter `sources`)
+
+Every entry is a mapping with a required `resource`, per OKF v0.2. Two
+kinds live in the same list, told apart by what `resource` points at:
+
+```yaml
+sources:
+  - resource: /sources/2026-07-12-example.md   # frozen capture
+    id: example-readme
+    title: Example README capture
+  - resource: ../../scripts/okf.py             # live repo file
+    id: okf-py
+    title: scripts/okf.py implementation
+    last_modified: 2026-08-27
+    blob: 9a37baf0dd06
+```
+
+- **Frozen captures** are bundle-relative (`/sources/...`) and immutable.
+  Use them for anything that cannot be re-read later — a web page, a
+  conversation, a verification already performed.
+- **Live files** are document-relative, so a page in `entities/` reaches
+  repo files as `../../path` — that form resolves both on disk and as a
+  rendered link. Pin them with `blob:` (12 chars of the git blob sha,
+  from `okf.py drift --hash <file>`) and record `last_modified:` as the
+  date you checked.
+
+Pinning is what turns review from calendar-driven into signal-driven:
+`okf.py drift` recomputes each pinned file's blob and reports `moved`
+or `gone`, and lint surfaces the same as warnings. A moved pin is a
+prompt to re-verify, **not** an automatic status change — deciding
+whether a changed file invalidates the page is judgment, and belongs to
+`kb-review`.
+
+Pin only what a claim actually rests on. If a page's whole content is
+re-derivable from the file it points at, the page should not exist:
+delete it and let the agent read the file. Do not pin a capture under
+`/sources/` — captures never change, so drift on them is meaningless.
+
+`id` is the citation key: cite it in the body as `[okf-py]`. Ids must be
+unique within a page (lint errors on duplicates).
 
 # Source assets (binary evidence)
 
@@ -96,10 +201,9 @@ ingests and reviews.
   pass — note what remains unread).
 - Assets are **immutable like captures**: an updated diagram is a new
   dated file, never an overwrite.
-- Trust caveat: `drift` hashes only `.md` bodies, so assets sit outside
-  the tamper check. The capture's written description of the asset is
-  the fallback tamper-evidence; a mismatch between description and
-  image is a review flag.
+- The capture's written description of the asset is what a reviewer
+  checks it against; a mismatch between description and image is a
+  review flag.
 - Size discipline: small images only. Decks/PDFs/videos stay at their
   authoritative home; when in doubt, extract harder rather than commit
   bigger.
@@ -132,14 +236,15 @@ their original type).
 # Body conventions
 
 - Prefer structure (headings, tables, lists, code blocks) over prose.
-- Conventional headings with defined meaning: `# Schema`, `# Examples`,
-  `# Citations` (per OKF), plus bundle-local `## Contradictions` and
-  `## Deprecation`.
+- Conventional headings with defined meaning: `# Schema`, `# Examples`
+  (per OKF), plus bundle-local `## Contradictions` and `## Deprecation`.
 - Every non-draft concept: **≥ 2 outbound bundle-relative links** in the
   body. Links assert relationships; say the relationship in prose around
   the link.
-- Claims from outside the bundle get a `# Citations` section with
-  numbered references; frontmatter `sources` points at the captured copy.
+- Claims from outside the bundle are cited inline by source id —
+  `…ships its own provider layer [openwiki]` — resolving against the
+  `sources` frontmatter. v0.2 replaced the numbered `# Citations`
+  section with `sources`; lint warns if one reappears.
 
 # Domain-concept body template
 
@@ -153,8 +258,8 @@ pick headings that fit the subject (e.g. `# Schema`, `# Related pages`)
 rather than forcing `## Definition`/`## Key Behaviors`. See
 [okf-toolchain.md](/entities/okf-toolchain.md) for a worked
 `Entity` example. General body conventions above still apply to every
-type regardless of body structure, including `# Citations` for
-externally-derived claims and the ≥2-outbound-link rule.
+type regardless of body structure, including inline `[source-id]`
+citation of externally-derived claims and the ≥2-outbound-link rule.
 
 Required sections: `## Definition`, at least one of `## Key Behaviors`
 or `## Invariants`, and `## Related Concepts`. Every other section is
@@ -212,7 +317,7 @@ Template rules:
   per artifact — an artifact gets an `Entity` page only when it meets
   the page-creation threshold below.
 - If `## Open Questions` accumulates items that contradict the page's
-  own claims, set `status: needs_review` (and tag `contested` where
+  own claims, set `lifecycle: needs_review` (and tag `contested` where
   sources disagree) instead of only annotating.
 
 # Page-creation threshold
@@ -223,7 +328,7 @@ to it. Otherwise fold the material into the closest existing page.
 
 # Review cadence defaults
 
-`review_after` is a **backstop, not the primary freshness mechanism** —
+`stale_after` is a **backstop, not the primary freshness mechanism** —
 a dead-man's-switch that guarantees an `active` page is eventually
 re-affirmed even when nothing else prompts it. It fires on the clock,
 not on change, so it cannot tell "nothing changed" from "everything
@@ -231,10 +336,22 @@ changed." Scope the cadence to whether the page already has a *real
 change signal*; running one blunt offset uniformly is what turns the
 review queue into ignorable noise.
 
-The `review_after` **date is an internal maintainer field.** Readers
-never interpret it — the user-facing signal is the `status:
+The `stale_after` **date is an internal maintainer field.** Readers
+never interpret it — the user-facing signal is the `lifecycle:
 needs_review` flag surfaced in answers, which the overdue date merely
 triggers.
+
+Prefer a real change signal over the clock wherever one exists. In
+order of precedence:
+
+1. **A pinned `blob:` that moved** (`okf.py drift`) — exact, mechanical,
+   fires on the change itself. Available for any claim resting on a file
+   in this repo; pin it and lengthen the timer.
+2. **A tracked change process** — the story / Definition-of-Done trigger
+   in [ingesting requirements](/concepts/ingesting-requirements-from-ticket-systems.md).
+   Human discipline, so it needs (1) or (3) behind it.
+3. **`stale_after` expiry** — the only mechanism left for external or
+   ephemeral facts, and the one that fires blind.
 
 Baseline offset from `updated`, by confidence:
 
@@ -248,14 +365,16 @@ Then adjust by change signal:
 
 | The page's truth is governed by… | Cadence |
 |----------------------------------|---------|
+| A file in this repo, pinned with `blob:` | **Backstop only — lengthen well past the baseline.** Drift detection fires on the change itself; the timer only catches claims the pin does not cover. |
 | A change process the bundle already tracks — e.g. domain code driven by user stories (see [ingesting requirements](/concepts/ingesting-requirements-from-ticket-systems.md)) | **Backstop only — lengthen well past the baseline.** The story / Definition-of-Done trigger is the real freshness signal; a short timer here is pure noise. |
-| Nothing the bundle can track — external/volatile facts (pricing, versions, org charts, live URLs) | **Short — 1 month regardless of confidence.** This is where `review_after` earns its keep; no other mechanism catches these. |
+| Nothing the bundle can track — external/volatile facts (pricing, versions, org charts, live URLs) | **Short — 1 month regardless of confidence.** This is where `stale_after` earns its keep; no other mechanism catches these. |
 | `unverified` conversation takeaways with no source | Short (≤ 1 month) — force a second look before the claim is trusted. |
 
 A chronically-ignored review queue means the offsets are wrong for
 those pages (too short for backstop-only pages), not that the field is
 worthless — retune toward the table above rather than muting the
-warning.
+warning. If a queue entry keeps coming back with nothing to change, ask
+whether the page could carry a pin instead of a shorter timer.
 
 # Log conventions
 
