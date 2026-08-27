@@ -17,7 +17,7 @@ sources:
     id: kb-ingest
     title: kb-ingest SKILL.md
     last_modified: 2026-08-27
-    blob: 08051c191f30
+    blob: 53fdfb22b31c
   - resource: ../../skills/kb-query/SKILL.md
     id: kb-query
     title: kb-query SKILL.md
@@ -27,7 +27,7 @@ sources:
     id: kb-review
     title: kb-review SKILL.md
     last_modified: 2026-08-27
-    blob: 8d095b8847a5
+    blob: 70cde6ee5365
   - resource: ../../skills/kb-curate/SKILL.md
     id: kb-curate
     title: kb-curate SKILL.md

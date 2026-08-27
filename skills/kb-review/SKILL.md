@@ -63,7 +63,7 @@ For each page in scope:
 | Verdict | Action |
 |---------|--------|
 | All claims hold | Bump `updated`, set new `stale_after` per the SCHEMA.md cadence table, `lifecycle: active`, restamp any pinned `blob:` you re-read. Append a `verified:` entry (`by: human:<id>` if a person confirmed it, else your own `<tool>/<version>`). Consider raising `confidence`. |
-| Some claims changed | Rewrite those claims, cite the new capture or file, bump `updated`, reset `stale_after`, restamp pinned `blob:`, keep `active`. |
+| Some claims changed | Rewrite those claims, cite the new capture or file, bump `updated`, reset `stale_after`, restamp pinned `blob:`, advance `generated.at` (you produced the new text), keep `active`. |
 | Contested (sources disagree) | Write/refresh `## Contradictions` with both positions and citations; tag `contested`; keep `needs_review` until resolved. |
 | Substantially wrong or superseded | `lifecycle: deprecated` + `superseded_by` (write the successor page if needed, or a `## Deprecation` section explaining why with no successor). |
 | Can't verify, low stakes | Lower `confidence`, tag `unverified`, keep `needs_review`. Note it for the user. |

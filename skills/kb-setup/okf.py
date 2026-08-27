@@ -516,6 +516,23 @@ def cmd_lint(args):
                 errors.append(f"{r}: duplicate source id '{sid}'")
             if sid:
                 seen_ids.add(sid)
+        # trust fields — validated only when present; a page without
+        # them is not flagged, since an absent stamp is an honest
+        # "nobody recorded this" and backfilling one would be worse.
+        gen = meta.get("generated")
+        if gen is not None:
+            if not isinstance(gen, dict) or not gen.get("by") or not gen.get("at"):
+                warns.append(f"{r}: 'generated' must be a mapping with "
+                             f"'by' and 'at' (OKF v0.2)")
+        ver = meta.get("verified")
+        if ver is not None:
+            events = ver if isinstance(ver, list) else [ver]
+            for ev in events:
+                if not isinstance(ev, dict) or not ev.get("by") or not ev.get("at"):
+                    warns.append(f"{r}: 'verified' entries must be mappings "
+                                 f"with 'by' and 'at' (OKF v0.2)")
+                    break
+
         if re.search(r"^#+\s*Citations\s*$", body, re.M):
             warns.append(f"{r}: '# Citations' section — v0.2 replaced it with "
                          f"the 'sources' frontmatter; cite as [<source id>]")
@@ -788,8 +805,11 @@ sources:
     title: thing.py implementation
     last_modified: {today}
     blob: 0000000000aa                      # pin: okf.py drift --hash <file>
+generated:               # who produced this content, stamped at write time
+  by: agent/version      # actor: human:<id> | <tool>/<version> | process:<id>
+  at: {today}
 verified:                # append one entry per real re-verification
-  - by: human:you        # actor: human:<id> | <tool>/<version> | process:<id>
+  - by: human:you        # only for a real check — never on freshly written text
     at: {today}
 ---
 ```
@@ -798,6 +818,10 @@ verified:                # append one entry per real re-verification
 five-state extension and `status` is derived from it (`active` and
 `needs_review` are both `stable`; `archived` is `deprecated`). Lint
 errors if the two disagree.
+
+`generated` says what produced the page; `verified` says who confirmed
+it. Stamp `generated` whenever you write, and `verified` only after a
+real re-check — an agent verifying its own fresh output records nothing.
 
 Cite sources by `id` in the body — `…as the README states [example]` —
 not with a `# Citations` section, which v0.2 replaced with `sources`.

@@ -17,7 +17,7 @@ sources:
     id: okf-py
     title: scripts/okf.py implementation
     last_modified: 2026-08-27
-    blob: 9a37baf0dd06
+    blob: 5d4a4ae830ed
 ---
 
 # okf.py — the Mechanical Toolchain
@@ -69,9 +69,17 @@ honest mechanically rather than by memory.
 moved or vanished; `archived` outside
 `/archive/`; tag not in the SCHEMA taxonomy; `active`/`needs_review`
 page with < 2 outbound bundle links; orphan pages (no inbound links);
-source captures missing `source_url`; legacy v0.1 shapes — a
-`review_after` field, a bare-string `sources` entry, or a surviving
-`# Citations` section.
+source captures missing `source_url`; a malformed `generated`/
+`verified` entry (present but not a `{ by, at }` mapping); legacy v0.1
+shapes — a `review_after` field, a bare-string `sources` entry, or a
+surviving `# Citations` section.
+
+Note what lint deliberately does *not* warn about: a page with **no**
+`generated` or `verified` at all. An absent stamp is an honest "nobody
+recorded this"; warning would push whoever clears the queue into
+inventing authorship or verification records, which is the one failure
+those fields cannot survive. Shape is mechanical and gets checked;
+presence is a claim and does not.
 
 **Info:** links to not-yet-written pages — allowed by design, never an
 error.

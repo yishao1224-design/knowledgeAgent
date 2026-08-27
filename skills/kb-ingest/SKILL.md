@@ -70,6 +70,10 @@ For each page:
 - Full frontmatter per SCHEMA.md's page frontmatter template, `type`
   set per the above. New pages start `lifecycle: draft` (`status:
   draft`); set `stale_after` from the confidence table.
+- Stamp `generated: { by, at }` on every page you write or materially
+  rewrite — `by` is your own agent identity as `<tool>/<version>`, `at`
+  is today. Never stamp `verified:` here: writing a page is not
+  confirming it, and that field belongs to kb-review.
 - `sources:` lists the capture(s) from Step 1 as OKF v0.2 mappings —
   `resource:` (bundle-relative for a capture), `id:`, `title:`.
 - **Pin re-readable repo files.** When a claim rests on a file in this

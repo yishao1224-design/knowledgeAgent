@@ -100,8 +100,8 @@ The bundle must stay consumable by any plain OKF v0.2 reader:
   non-empty `type`.
 - `index.md` has no frontmatter (except the bundle root, which may carry
   `okf_version`); `log.md` uses `## YYYY-MM-DD` headings, newest first.
-- `status`, `sources`, `stale_after` and `verified` are *standard*
-  v0.2 fields — keep them to the spec's shapes. `status` in particular
+- `status`, `sources`, `stale_after`, `generated` and `verified` are
+  *standard* v0.2 fields — keep them to the spec's shapes. `status` in particular
   accepts only `draft | stable | deprecated`; the five-state
   `lifecycle` is the extension key, and lint errors if the two
   disagree.
