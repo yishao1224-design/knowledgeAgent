@@ -28,11 +28,11 @@ Read `okf/SCHEMA.md`, `okf/index.md`, and the last ~20 lines of
 2. Write `okf/sources/YYYY-MM-DD-<slug>.md` with the Source frontmatter
    template from SCHEMA.md. The body is the captured content (verbatim
    or a faithful condensation — say which in the description).
-3. Compute the hash and put it in the frontmatter:
-   `python scripts/okf.py drift --hash okf/sources/<file>.md`
-4. Never overwrite an existing capture. Same source again → new dated
-   file; the old one stays for drift comparison.
-5. **Load-bearing visuals get kept, not just described.** When the
+3. Never overwrite an existing capture. Same source again → new dated
+   file; the old one stays for diffing against the new one. Git is the
+   tamper record — `git log -- okf/sources/` shows any edit to a
+   capture after ingestion, with the original recoverable.
+4. **Load-bearing visuals get kept, not just described.** When the
    source is or contains an image whose pixels are the evidence —
    especially a dense architecture diagram that can't be fully
    extracted in one pass — copy it to
@@ -56,7 +56,7 @@ takeaways, which existing pages you'll update, which new pages meet the
 creation threshold, and any contradictions with existing content. If
 the material contradicts an existing `active` page, do NOT silently
 overwrite: add a `## Contradictions` section to that page, tag it
-`contested`, set `status: needs_review`.
+`contested`, set `lifecycle: needs_review`.
 
 ## Step 3 — Write/update concepts
 
@@ -68,10 +68,21 @@ For each page:
   an idea/definition/explanation. **Never default to `type: Concept`**
   just because the frontmatter template example shows it.
 - Full frontmatter per SCHEMA.md's page frontmatter template, `type`
-  set per the above. New pages start `status: draft`; set
-  `review_after` from the confidence table.
-- `sources:` lists the capture(s) from Step 1.
-- Externally-derived claims get a `# Citations` section.
+  set per the above. New pages start `lifecycle: draft` (`status:
+  draft`); set `stale_after` from the confidence table.
+- `sources:` lists the capture(s) from Step 1 as OKF v0.2 mappings —
+  `resource:` (bundle-relative for a capture), `id:`, `title:`.
+- **Pin re-readable repo files.** When a claim rests on a file in this
+  repo rather than on a capture, add a second kind of `sources` entry:
+  a document-relative `resource:` (`../../scripts/okf.py`), plus
+  `last_modified:` (today) and `blob:` from
+  `python scripts/okf.py drift --hash <file>`. That is what lets
+  `okf.py drift` re-trigger review when the file changes, instead of
+  waiting on the clock. Never pin a `/sources/` capture — captures are
+  immutable, so drift on them is meaningless.
+- Externally-derived claims are cited inline by source id —
+  `…ships its own provider layer [openwiki]`. Do **not** write a
+  `# Citations` section; OKF v0.2 replaced it with `sources`.
 - Domain concepts (`type: Concept` describing business rules,
   processes, system behavior) follow the **domain-concept body
   template** in SCHEMA.md: required sections `## Definition`,

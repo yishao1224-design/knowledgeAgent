@@ -2,14 +2,17 @@
 type: Comparison
 title: codebase-memory-mcp vs the kb wiki
 description: Why a derived code-knowledge graph and a curated OKF bundle are complementary layers, where they overlap (ADRs), and a phased integration plan.
-status: active
+status: stable
+lifecycle: active
 confidence: medium
 created: 2026-07-06
-updated: 2026-08-26
-review_after: 2026-10-06
+updated: 2026-08-27
+stale_after: 2026-10-06
 tags: []
 sources:
-  - /sources/2026-07-06-codebase-memory-mcp.md
+  - resource: /sources/2026-07-06-codebase-memory-mcp.md
+    id: codebase-memory-mcp
+    title: codebase-memory-mcp README capture
 ---
 
 # codebase-memory-mcp vs the kb wiki
@@ -23,11 +26,11 @@ agent-memory problem, and each covers the other's weakness.
 | | [codebase-memory-mcp](/entities/codebase-memory-mcp.md) | the OKF bundle ([OKF](/concepts/open-knowledge-format.md) + lifecycle) |
 |---|---|---|
 | Nature | **Index** (cache) | **Corpus** (asset) |
-| Content | What the code *is*: definitions, call graphs, imports [1] | What we *decided and learned*: rationale, external facts, contradictions |
+| Content | What the code *is*: definitions, call graphs, imports [codebase-memory-mcp] | What we *decided and learned*: rationale, external facts, contradictions |
 | Ground truth | The code itself | Verification work already done |
 | Regenerable? | Fully — delete DB, re-index | No — hence immutable sources, deprecate-don't-delete |
-| Staleness model | Mechanical: git watcher, seconds [1] | Semantic: `review_after` + [kb-review], months |
-| Storage | SQLite graph in a cache dir [1] | Portable markdown, git-versioned, human-readable |
+| Staleness model | Mechanical: git watcher, seconds [codebase-memory-mcp] | Mechanical for pinned repo files (`okf.py drift`), semantic otherwise: `stale_after` + [kb-review], months |
+| Storage | SQLite graph in a cache dir [codebase-memory-mcp] | Portable markdown, git-versioned, human-readable |
 
 The division-of-labor rule that follows: **code-structure questions go
 to the graph; decisions, rationale, and external knowledge go to the
@@ -39,40 +42,43 @@ months.
 ## Friction points
 
 1. **ADRs have two candidate homes.** The tool's `manage_adr` stores
-   decision records in its own storage [1]; the bundle is built for
+   decision records in its own storage [codebase-memory-mcp]; the bundle is built for
    exactly that content with a better deal (portable, versioned,
    lifecycle-managed, readable by any OKF consumer). Resolution: the
    wins; don't use `manage_adr`.
 2. **Divergent staleness clocks** are a feature only if content is
    routed to the right side (see rule above).
 3. **Trust boundary**: single-binary `curl | bash` installer that
-   auto-rewrites 11 coding agents' configs [1] — vet and pin before
+   auto-rewrites 11 coding agents' configs [codebase-memory-mcp] — vet and pin before
    adoption.
 
 ## Integration opportunity: code-aware review triggers
 
-The bundle's `review_after` is purely time-based. Concepts that are
-*about* code could carry an extension field, e.g.
-`code_refs: [src/auth/login.py::AuthFlow]`, and a review step could
-query the graph's `detect_changes` [1] to demote affected concepts to
-`needs_review` immediately when referenced symbols change — the same
-pattern as the bundle's source-hash drift detection, extended from
-documents to code. OKF-legal (extension key) and degrades gracefully
-without the MCP server.
+**Partly built as of 2026-08-27, without the MCP server.** This section
+originally proposed a `code_refs:` extension key plus a call to the
+graph's `detect_changes` [codebase-memory-mcp] to demote affected
+concepts the moment referenced symbols change. What shipped instead
+achieves the same trigger with no dependency: a `sources` entry pins a
+file with `blob:`, and `okf.py drift` compares it against git — see
+[okf.py](/entities/okf-toolchain.md). Same idea, cheaper, and OKF-legal
+by riding the standard `sources` field rather than a private key.
+
+What the graph would still add is **granularity**: `drift` fires on any
+change to a whole file, where `detect_changes` fires on the specific
+symbol a page actually cites. For pages about one function in a large,
+busy file that difference is the gap between a useful trigger and
+noise — which is the case that would justify Phase 1 below.
 
 ## Adoption plan (not yet started as of 2026-07-06)
 
 - **Phase 0 — coexist**: install the MCP server (after vetting) in
   repos with real code; add the routing rule to agent instructions.
-- **Phase 1 — code-aware reviews**: add `code_refs` to the schema and
-  a `detect_changes` check to the review workflow.
+- **Phase 1 — symbol-level review triggers**: only if file-level
+  `blob:` pins prove too noisy — swap the file pin for a
+  `detect_changes` check on the cited symbol.
 - **Phase 2 — one home for decisions**: skip `manage_adr`; ingest any
   existing ADRs as a `Decision` concept type.
 
 Caveat: for the knowledgeAgent repo itself the pairing is moot (no
 code to index); it pays off where the bundle pattern is deployed inside
 an actual codebase.
-
-# Citations
-
-[1] [codebase-memory-mcp README capture](/sources/2026-07-06-codebase-memory-mcp.md)

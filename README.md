@@ -1,14 +1,15 @@
 # knowledgeAgent
 
 An agent-maintained knowledge base built on the
-[Open Knowledge Format (OKF) v0.1](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md),
+[Open Knowledge Format (OKF) v0.2](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md),
 extended with a knowledge-lifecycle profile inspired by the
 [Hermes llm-wiki pattern](https://github.com/NousResearch/hermes-agent/blob/main/skills/research/llm-wiki/SKILL.md).
 
-Knowledge here is treated as perishable: every page carries a lifecycle
-`status`, active pages carry a `review_after` date, raw sources are
-immutable and hash-verified, and a lint toolchain keeps the whole thing
-honest.
+Knowledge here is treated as perishable: every page carries a
+`lifecycle`, active pages carry a `stale_after` date, claims that rest
+on repo files pin those files by git blob so a change re-opens the
+page, raw sources are immutable, and a lint toolchain keeps the whole
+thing honest.
 
 ## Layout
 
@@ -20,7 +21,7 @@ knowledgeAgent/
 │   ├── index.md         #   generated catalog (okf.py index)
 │   ├── log.md           #   append-only change history
 │   ├── concepts/ entities/ comparisons/ queries/ archive/
-│   └── sources/         #   IMMUTABLE raw captures, sha256-verified
+│   └── sources/         #   IMMUTABLE raw captures (git is the tamper record)
 ├── skills/              # canonical lifecycle skills (edit these)
 │   ├── kb-setup/        #   bootstrap: scaffold okf/ + okf.py into a fresh project
 │   │   └── okf.py       #     toolchain bundled for `npx skills add` (auto-synced)
@@ -118,8 +119,6 @@ python scripts/okf.py lint --inbound /p.md # who links here? (safe-delete check)
 python scripts/okf.py index                # regenerate okf/index.md
 python scripts/okf.py log "**Verb**: msg"  # prepend a dated log entry
 python scripts/okf.py stats                # counts + review queue
-python scripts/okf.py drift                # verify source hashes
-python scripts/okf.py drift --hash FILE    # hash a new capture's body
 ```
 
 No dependencies beyond Python 3 stdlib (PyYAML used if present).
@@ -147,22 +146,27 @@ in file explorers, and in GitHub's root listing.
 
 ## Relationship to OKF
 
-The bundle is strictly OKF v0.1 conformant — any plain OKF consumer can
-read it. The lifecycle fields (`status`, `confidence`, `review_after`,
-`sources`, `supersedes`, `superseded_by`) are extension frontmatter keys
-under OKF §4, and the body prose always restates deprecation/contest
-status so nothing is lost when those keys are ignored.
+The bundle is strictly OKF v0.2 conformant — any plain OKF consumer can
+read it. `status`, `sources`, `stale_after` and `verified` are standard
+v0.2 fields used to the spec's shapes; the extras (`lifecycle`,
+`confidence`, `supersedes`, `superseded_by`, and `blob:` inside a
+source entry) are extension frontmatter keys under OKF §4. The body
+prose always restates deprecation/contest status so nothing is lost
+when those keys are ignored.
 
 Improvements layered on top of the base spec:
 
 1. **Lifecycle states** with enforced exit criteria (OKF has no trust model).
-2. **Expiring truth** — `active` requires `review_after`; lint feeds an
+2. **Expiring truth** — `active` requires `stale_after`; lint feeds an
    automatic review queue.
-3. **Tamper-evident sources** — immutable captures, body hashes checked
-   by `okf.py drift`.
-4. **Graph-aware deprecation** — `superseded_by` plus inbound-link
+3. **Evidence pinning** — a source entry may pin a repo file by git
+   blob sha; `okf.py drift` re-opens the page when that file changes,
+   so the clock is a backstop rather than the primary signal.
+4. **Immutable sources** — captures are append-only; a re-ingest is a
+   new dated file, and git history records any edit to an old one.
+5. **Graph-aware deprecation** — `superseded_by` plus inbound-link
    queries mean links are never silently broken.
-5. **Governed vocabulary** — types and tags registered in `okf/SCHEMA.md`
+6. **Governed vocabulary** — types and tags registered in `okf/SCHEMA.md`
    before first use.
 
 Skills live canonically in `skills/`; edit them there and re-run

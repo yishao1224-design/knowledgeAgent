@@ -1,7 +1,7 @@
 # knowledgeAgent
 
 An agent-maintained knowledge base. The knowledge lives in `okf/` as an
-**OKF bundle** (Open Knowledge Format v0.1) extended with a lifecycle
+**OKF bundle** (Open Knowledge Format v0.2) extended with a lifecycle
 profile — see `okf/SCHEMA.md` for the authoritative conventions.
 
 ## What this repo is
@@ -32,7 +32,9 @@ covering the same thing. Update beats create.
 
 ## The knowledge lifecycle
 
-Every concept moves through these states (frontmatter `status` field):
+Every concept moves through these states (frontmatter `lifecycle`
+field; the standard OKF `status` field is derived from it — see
+`okf/SCHEMA.md`):
 
 ```
 draft ──> active ──> needs_review ──> active     (verified)
@@ -41,9 +43,10 @@ draft ──> active ──> needs_review ──> active     (verified)
 ```
 
 - **draft** — captured but not yet verified/cross-linked. Lint tolerates missing links.
-- **active** — verified, linked, trustworthy. Must carry `review_after`.
-- **needs_review** — `review_after` has passed, a source drifted, or a
-  contradiction was found. Still served, but flagged in answers.
+- **active** — verified, linked, trustworthy. Must carry `stale_after`.
+- **needs_review** — a pinned source's `blob:` moved, `stale_after` has
+  passed, a source changed upstream, or a contradiction was found.
+  Still served, but flagged in answers.
 - **deprecated** — superseded or wrong. Must carry `superseded_by` (a
   bundle-relative link) or a `## Deprecation` section explaining why.
   Never deleted while anything links to it.
@@ -62,19 +65,26 @@ Which skill drives which transition:
 ## Hard rules
 
 1. **Never modify anything under `okf/sources/`.** Re-ingest under a new
-   dated filename instead; `okf.py drift` compares hashes.
+   dated filename instead. Git is the tamper record —
+   `git log -- okf/sources/` surfaces any post-ingestion edit.
 2. **Every edit to `okf/` gets a `log.md` entry** — use
    `python scripts/okf.py log "<Verb>: message with [links](/path.md)"`.
 3. **Frontmatter is mandatory** on every concept: at minimum `type`,
-   `title`, `description`, `status`, `updated`. `active` concepts also
-   need `review_after` and (if claims come from outside) `sources`.
+   `title`, `description`, `status`, `lifecycle`, `updated`. `active`
+   concepts also need `stale_after` and (if claims come from outside)
+   `sources`. `sources` entries are OKF v0.2 mappings with a required
+   `resource`; a claim resting on a repo file pins it with `blob:` so
+   `okf.py drift` can catch the change.
 4. **Links are bundle-relative** (`/concepts/foo.md`, leading slash =
    bundle root `okf/`) in committed files. Broken links to not-yet-written
    pages are allowed; lint reports them as info, not errors. You may
    *author* with `[[slug]]`/`[[slug|text]]` shorthand, but run
    `python scripts/okf.py links` to expand it to canonical form before
    `index`/`lint` — lint flags any wiki-link left unexpanded.
-5. **Update `updated:` whenever you touch a concept's content.**
+5. **Update `updated:` whenever you touch a concept's content.** Only
+   re-stamp a pinned `blob:` or append a `verified:` entry when you
+   actually re-read the evidence — those fields assert that a check
+   happened.
 6. **Deprecate, don't delete.** Deletion only happens in `kb-curate`
    after confirming zero inbound links (lint tells you).
 7. **Tags come from the taxonomy in `okf/SCHEMA.md`.** Want a new tag?
@@ -84,14 +94,21 @@ Which skill drives which transition:
 
 ## OKF conformance
 
-The bundle must stay consumable by any plain OKF v0.1 reader:
+The bundle must stay consumable by any plain OKF v0.2 reader:
 
 - Every non-reserved `.md` under `okf/` has parseable frontmatter with a
   non-empty `type`.
 - `index.md` has no frontmatter (except the bundle root, which may carry
   `okf_version`); `log.md` uses `## YYYY-MM-DD` headings, newest first.
-- All lifecycle fields (`status`, `confidence`, `review_after`,
-  `sources`, `supersedes`, `superseded_by`) are *extension* keys — legal
-  under OKF §4, ignored harmlessly by plain consumers. Do not invent
-  semantics that break when those keys are stripped: the body prose must
-  still say when something is deprecated or contested.
+- `status`, `sources`, `stale_after` and `verified` are *standard*
+  v0.2 fields — keep them to the spec's shapes. `status` in particular
+  accepts only `draft | stable | deprecated`; the five-state
+  `lifecycle` is the extension key, and lint errors if the two
+  disagree.
+- The remaining fields (`lifecycle`, `confidence`, `supersedes`,
+  `superseded_by`, and `blob:` inside a source entry) are *extension*
+  keys — legal under OKF §4, ignored harmlessly by plain consumers. Do
+  not invent semantics that break when those keys are stripped: the
+  body prose must still say when something is deprecated or contested.
+- Cite sources inline by their `sources[].id` (`[okf-spec-v2]`). v0.2
+  replaced the `# Citations` body list with the `sources` field.

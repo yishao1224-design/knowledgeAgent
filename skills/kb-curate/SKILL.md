@@ -32,7 +32,7 @@ just do them.
 1. Pick the survivor (better title/location/inbound links).
 2. Fold unique content and `sources` in; union the tags; keep the
    earliest `created`; bump `updated`.
-3. The loser becomes `status: deprecated`, body replaced by a one-line
+3. The loser becomes `lifecycle: deprecated`, body replaced by a one-line
    pointer, `superseded_by: /path/to/survivor.md`.
 4. Repoint inbound links to the survivor:
    `okf.py lint --inbound /path/to/loser.md` lists the linkers.
@@ -50,9 +50,9 @@ sections citing disjoint `sources`; the page's one-sentence
    fixed in the same operation.
 2. New pages' frontmatter: `status` carries over from the parent (the
    content was already verified; only its address changed);
-   `confidence` and `review_after` set **per part** — this is the
+   `confidence` and `stale_after` set **per part** — this is the
    payoff: the volatile part gets the short cadence, the stable part
-   the long one; `sources` and `# Citations` distributed to the parts
+   the long one; `sources` entries distributed to the parts
    they back; tags per part; keep the parent's `created`, set
    `updated` to today.
 3. The original stays alive as a summary + links to the parts — **not
@@ -65,7 +65,7 @@ sections citing disjoint `sources`; the page's one-sentence
 ### Archive
 Only `deprecated` pages with **zero inbound links** (verify with
 `okf.py lint --inbound`) and no historical value in place: move the
-file to `okf/archive/`, set `status: archived`. Deletion (rare) only
+file to `okf/archive/`, set `lifecycle: archived`. Deletion (rare) only
 with explicit user approval, and only for pages that never carried
 unique knowledge (e.g., accidental duplicates).
 

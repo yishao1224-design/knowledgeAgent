@@ -2,11 +2,12 @@
 type: Concept
 title: Adopting the Bundle Pattern in a Project Repo
 description: How to install the OKF bundle + lifecycle skills into a real project repository — same-repo vs separate-repo decision, adoption steps, and what to tune.
-status: active
+status: stable
+lifecycle: active
 confidence: low
 created: 2026-07-06
 updated: 2026-08-26
-review_after: 2026-08-06
+stale_after: 2026-08-06
 tags: [unverified]
 ---
 

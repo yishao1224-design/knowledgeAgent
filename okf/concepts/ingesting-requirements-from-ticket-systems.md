@@ -2,11 +2,12 @@
 type: Concept
 title: Ingesting Requirements from Ticket Systems
 description: How to feed user stories from a work-item tracker (e.g. Azure DevOps) into the bundle — access paths, immutable captures, and the don't-mirror-the-backlog rule.
-status: active
+status: stable
+lifecycle: active
 confidence: low
 created: 2026-07-06
-updated: 2026-08-26
-review_after: 2026-08-08
+updated: 2026-08-27
+stale_after: 2026-08-08
 tags: [unverified]
 ---
 
@@ -76,17 +77,18 @@ raw payload rather than adding a dated capture), preserve provenance
 mechanically: record the tracker's revision number (ADO `System.Rev`)
 plus a retrieval timestamp in the normalized payload, and stamp any
 derived analysis with the revision it was based on. "Is this analysis
-stale?" then becomes a mechanical rev comparison — the tracker-flavored
-equivalent of the sha256 drift check.
+stale?" then becomes a mechanical rev comparison — and unlike a hash
+over a local capture, it detects change at the *source*, which is the
+detection the bundle otherwise lacks.
 
 ## Capture mechanics and re-ingestion
 
 Fetched story text is snapshotted to
-`/sources/YYYY-MM-DD-ado-<epic-or-story-slug>.md` with its hash, per
-the immutability rule in [SCHEMA.md](/SCHEMA.md). When a story changes
+`/sources/YYYY-MM-DD-ado-<epic-or-story-slug>.md`, per the
+immutability rule in [SCHEMA.md](/SCHEMA.md). When a story changes
 in the tracker, re-ingest under a **new dated file** — the sequence of
 captures becomes an audit trail of how the requirement evolved, and
-`okf.py drift` guards the old ones.
+git history guards the old ones.
 
 ## Keeping code knowledge fresh
 
@@ -106,8 +108,8 @@ the KB refresh to it rather than to the clock:
   dated capture. A closed story can then flag exactly those pages for
   [kb-review](/concepts/knowledge-lifecycle.md) — change-triggered, not
   memory-triggered.
-- **`review_after` is only the backstop.** Per the scoped cadence in
-  [SCHEMA.md](/SCHEMA.md), story-driven pages lengthen `review_after`
+- **`stale_after` is only the backstop.** Per the scoped cadence in
+  [SCHEMA.md](/SCHEMA.md), story-driven pages lengthen `stale_after`
   well past the baseline and rely on the DoD trigger as primary; the
   timer just catches what slips the process — e.g. an external fact
   that changed with no story behind it.
@@ -124,7 +126,7 @@ backstop covers the rest.
 ## Review cadence
 
 Distilled requirement pages are **story-driven**, so treat
-`review_after` as the backstop and the story's Definition of Done as
+`stale_after` as the backstop and the story's Definition of Done as
 the primary freshness trigger (see *Keeping code knowledge fresh* above
 and the scoped cadence in [SCHEMA.md](/SCHEMA.md)). `kb-review` still
 works the queue — for whatever the process misses, and for pages that
