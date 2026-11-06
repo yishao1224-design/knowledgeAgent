@@ -15,7 +15,10 @@ non-negotiable rules.
 Orient before acting: read `okf/SCHEMA.md`, then `okf/index.md`, then the
 last ~20 lines of `okf/log.md`. Never create a concept page without
 checking the index for an existing page on the same subject — update
-beats create.
+beats create. Inside a project (a subdirectory with its own
+`SCHEMA.md`), read the root `SCHEMA.md` plus the project's `SCHEMA.md`,
+`index.md` and `log.md` instead, and log with
+`python scripts/okf.py log --project NAME "..."`.
 
 ## Hard rules (short form)
 

@@ -5,6 +5,9 @@
 # video intro assets
 video-intro/
 
+# okf.py drift: blob-less clones of code repos named in SCHEMA.md
+.okf-cache/
+
 __pycache__/
 *.pyc
 .examples/*.

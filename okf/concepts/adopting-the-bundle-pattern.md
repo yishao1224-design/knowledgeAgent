@@ -1,12 +1,12 @@
 ---
 type: Concept
 title: Adopting the Bundle Pattern in a Project Repo
-description: How to install the OKF bundle + lifecycle skills into a real project repository — same-repo vs separate-repo decision, adoption steps, and what to tune.
+description: How to install the OKF bundle + lifecycle skills into a real project repository — same-repo vs separate-repo decision, a team wiki holding many projects, adoption steps, and what to tune.
 status: stable
 lifecycle: active
 confidence: low
 created: 2026-07-06
-updated: 2026-08-26
+updated: 2026-11-06
 stale_after: 2026-08-06
 tags: [unverified]
 ---
@@ -30,7 +30,7 @@ it creates follows [OKF](/concepts/open-knowledge-format.md) plus the
 |---------------------|-----------------|-----|
 | One project (architecture decisions, domain concepts, gotchas, ingested vendor docs) | Inside that project repo (`okf/` at root) — **default choice** | Agent has KB in context during coding sessions; knowledge changes ride in the same PRs as the code; CI can run `okf.py lint` |
 | One project spanning multiple repos (tightly-integrated modules, each with its own repo) | A standalone project-level KB repo, checked out as a **sibling** of the module repos | The highest-value knowledge is cross-module (contracts, shared invariants) and has no single owning codebase; bundle links cannot cross repos, so splitting per module would tear it apart |
-| Multiple unrelated projects, personal notes, team practices | A standalone KB repo (like knowledgeAgent itself) | No single codebase owns it |
+| Multiple unrelated projects, personal notes, team practices | A standalone KB repo (like knowledgeAgent itself) — for several projects, one bundle with a **project scope** each (below) | No single codebase owns it |
 
 Git submodules are technically possible but add sync friction; avoid
 unless one bundle genuinely must be shared across repos.
@@ -79,6 +79,46 @@ module, so brief skew between a module release and its KB update is
 possible. Don't fight it with submodule machinery — the lifecycle's
 `needs_review` flags and in-flight-window logic exist to label exactly
 this.
+
+## Many projects in one team wiki
+
+A team wiki kept apart from the code, holding several projects, is one
+bundle with one **project scope** per project — not one bundle per
+project. Bundle links do not cross bundles, and the team-level payoff
+(shared practices, the same pitfall met in two projects, comparisons
+across them) is exactly the cross-project links. The mechanics are in
+[SCHEMA.md](/SCHEMA.md) under *Project scopes* and in
+[okf.py](/entities/okf-toolchain.md):
+
+- **Project first, then whatever layout the project wants.**
+  `okf.py init --project payments` creates `payments/` with its own
+  `SCHEMA.md`, `index.md`, `log.md` and `sources/`. The project's
+  SCHEMA.md owns its type names and directories outright — OKF itself
+  registers no types centrally and fixes no layout — plus its tags and
+  review cadence. Cross-project questions map types by the `meaning`
+  column of each registry, which agents can do and scripts cannot; so
+  type-keyed rules live per project, not at team level.
+- **The root SCHEMA.md keeps only what no project may loosen**: the
+  frontmatter minimum, the [lifecycle](/concepts/knowledge-lifecycle.md),
+  source immutability, link form, logging. Lint enforces these
+  everywhere regardless of scope.
+- **One index and one log per project.** Orientation reads the
+  project's `index.md` and recent `log.md`; a shared log would bury a
+  project's last 20 entries under other projects'. The root `log.md`
+  only records team-level changes and is read only for team-level work.
+- **Code stays in its own repos, pinned by name.** Each project's
+  SCHEMA.md lists its repositories in a `# Code repositories` table;
+  pages pin files there with `repo:` + `path:` + `blob:`, and a
+  scheduled `okf.py drift` in the wiki's CI fetches them (blob-less,
+  depth-1) and flags pages whose evidence moved. This replaces the
+  "knowledge changes ride in the same PR as the code" advantage of the
+  in-repo layout with a signal, and a sibling-PR DoD gate (above) can
+  still close the gap at story level.
+- **Each code repo points back.** Its `CLAUDE.md`/`AGENTS.md` names the
+  wiki and the project directory to read before cross-cutting work —
+  the same glue as in the hybrid row above.
+- **Split into separate repos only for access control** (git cannot
+  restrict reads per directory) or when projects share nothing at all.
 
 ## Adoption steps (in-repo)
 

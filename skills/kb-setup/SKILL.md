@@ -90,6 +90,22 @@ holds more than one bundle — okf.py errors out rather than guessing.
 > `skills/` folder, so that step simply reports "(none found)" — that's
 > expected, not an error.
 
+### Team wiki with several projects
+
+When one bundle will hold knowledge for several projects, initialise
+the bundle as above, then add each project as its own scope:
+
+```
+python scripts/okf.py init --project payments   # → okf/payments/
+```
+
+That writes `okf/payments/SCHEMA.md` (the project's own type registry,
+tags and `# Code repositories` table), `log.md` and `sources/`, and
+lists the project in the root `index.md`. The root `SCHEMA.md` then
+holds only team-wide rules; each project fills in its own SCHEMA.md
+in Step 3. Add `.okf-cache/` to `.gitignore` if projects will pin code
+from other repositories (`okf.py drift` keeps blob-less clones there).
+
 ## Step 3 — Make the schema real
 
 The seed `SCHEMA.md` is a starter. Before the first real ingestion,

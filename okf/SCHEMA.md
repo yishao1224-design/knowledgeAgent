@@ -4,7 +4,7 @@ title: Bundle Schema & Conventions
 description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, lifecycle rules.
 status: stable
 lifecycle: active
-updated: 2026-08-27
+updated: 2026-11-06
 ---
 
 # Bundle Schema & Conventions
@@ -46,6 +46,49 @@ okf/            # default name; a project may choose another
     └── assets/       # load-bearing binary evidence (see Source assets)
         └── YYYY-MM-DD-<slug>.<ext>
 ```
+
+# Project scopes (multi-project bundles)
+
+One bundle can hold several projects. A **project** is any directory
+inside the bundle that carries its own `SCHEMA.md`; every page belongs
+to the nearest such directory above it (else to the bundle root). This
+bundle has none — it is a single root scope — but the toolchain and
+skills support them for a team wiki:
+
+```
+team-wiki/okf/
+├── SCHEMA.md          # team rules — the hard rules below hold everywhere
+├── index.md           # root catalog; lists projects under "# Projects"
+├── log.md             # team-level changes only
+├── <shared pages>     # cross-project knowledge, governed by this file
+└── payments/
+    ├── SCHEMA.md      # the project's own types, dirs, tags, code repos
+    ├── index.md       # generated per project (OKF §8: any directory)
+    ├── log.md         # the project's history (OKF §9: "that scope")
+    ├── sources/       # its immutable captures
+    └── <its own dirs> # e.g. decisions/ runbooks/ — whatever it registers
+```
+
+What each level owns:
+
+| Root `SCHEMA.md` (no project may loosen) | Project `SCHEMA.md` (owned outright) |
+|---|---|
+| Frontmatter minimum, `status`/`lifecycle` mapping, lifecycle states | **Type registry** — its own type names and directories; nothing inherited, since OKF registers no types centrally |
+| Source immutability, source-entry shape, bundle-relative links | **Tag taxonomy** — added to the root's, which stays usable |
+| Every edit logged, deprecate-don't-delete | **Code repositories** table (overrides a same-named root row) |
+| | Review cadence, body templates, the project description |
+
+Types differ across projects by design. Each registry row states the
+type's **meaning**, and that column is what lets an agent map one
+project's `Decision` to another's `ADR` when a question spans projects.
+
+Tooling: `okf.py init --project NAME` scaffolds a project; `index`
+writes one `index.md` per scope; `log`, `stats` and `drift` take
+`--project NAME`; lint checks each page against its own scope's
+registry and taxonomy, and warns when a project lacks `index.md` or
+`log.md`. A `[[slug]]` matching pages in several projects resolves to
+the linking page's own project. Links stay bundle-relative
+(`/payments/decisions/x.md`), so pages link across projects freely.
 
 # Page frontmatter template (all types)
 
@@ -146,8 +189,8 @@ ingested: 2026-07-05
 
 # Source entries (frontmatter `sources`)
 
-Every entry is a mapping with a required `resource`, per OKF v0.2. Two
-kinds live in the same list, told apart by what `resource` points at:
+Every entry is a mapping with a required `resource`, per OKF v0.2.
+Three kinds live in the same list:
 
 ```yaml
 sources:
@@ -159,6 +202,13 @@ sources:
     title: scripts/okf.py implementation
     last_modified: 2026-08-27
     blob: 9a37baf0dd06
+  - resource: https://github.com/acme/payments-svc/blob/main/src/refund.py
+    id: refund-py                              # code in another repo
+    title: refund.py in payments-svc
+    repo: payments-svc                         # a row in # Code repositories
+    path: src/refund.py
+    last_modified: 2026-11-06
+    blob: 3f9a1c0d2e44
 ```
 
 - **Frozen captures** are bundle-relative (`/sources/...`) and immutable.
@@ -169,6 +219,19 @@ sources:
   rendered link. Pin them with `blob:` (12 chars of the git blob sha,
   from `okf.py drift --hash <file>`) and record `last_modified:` as the
   date you checked.
+- **Code in another repository** — the normal case for a wiki kept
+  apart from the code it describes. `repo:` names a row of a
+  `# Code repositories` table (`| repo | url | branch |`) in the page's
+  project `SCHEMA.md` or the root one; `path:` is the file within it;
+  `resource:` is a browse URL for humans and plain OKF readers. Get
+  `blob:` from `okf.py drift --hash <repo>:<path> --project <name>`.
+  `drift` keeps a blob-less, depth-1 clone of each repo under
+  `.okf-cache/` (gitignored) and re-resolves `<branch>:<path>` — git's
+  own blob id, so GitHub, Azure DevOps, GitLab and local paths behave
+  the same; credentials are whatever git on that machine already has.
+  Lint never fetches: it reads the cache and reports an unfetched repo
+  as info. Never freeze such code into a capture instead — that blinds
+  drift to it.
 
 Pinning is what turns review from calendar-driven into signal-driven:
 `okf.py drift` recomputes each pinned file's blob and reports `moved`
@@ -383,3 +446,10 @@ whether the page could carry a pin instead of a shorter timer.
 **Update**, **Review**, **Merge**, **Split**, **Deprecation**,
 **Archive**, **Ingestion**, **Lint-fix**. Rotate at ~500 entries
 (`okf.py log` warns; move old entries to `archive/log-YYYY.md`).
+
+In a multi-project bundle each project keeps its own `log.md`
+(`okf.py log --project NAME "..."`), and orientation reads the
+project's log, not the root's. The root `log.md` records only
+team-level changes — the root SCHEMA, root-level shared pages, adding,
+renaming or moving projects — so it stays short and is read only when
+doing team-level work.

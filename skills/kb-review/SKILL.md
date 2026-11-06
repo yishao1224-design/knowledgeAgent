@@ -17,6 +17,19 @@ recently enough to trust.
 > Paths below assume the default bundle location, `okf/`. A project
 > may have chosen another name at setup — whichever top-level directory
 > holds `SCHEMA.md` is the bundle, and `okf.py` finds it on its own.
+>
+> **Projects.** If the bundle holds project directories (a subdirectory
+> with its own `SCHEMA.md`, listed under *Projects* in the root
+> `index.md`), work inside one: settle which project the request
+> belongs to, read the root `SCHEMA.md` (team rules, never loosened)
+> **plus** that project's `SCHEMA.md`, `index.md` and recent `log.md`.
+> Those project files stand in for the `okf/…` ones in the steps
+> below; captures go in `<project>/sources/`; `okf.py log`, `stats` and
+> `drift` take `--project <name>`. Types and directories are the
+> project's own — take them from its type registry, never assume
+> `concepts/`/`entities/`. The root `log.md` is only for team-level
+> changes (root SCHEMA, root-level shared pages, adding or moving
+> projects).
 
 1. Read `okf/SCHEMA.md`; skim recent `okf/log.md`.
 2. `python scripts/okf.py stats` — the review queue lists every
@@ -53,6 +66,7 @@ For each page in scope:
    diff it against what the page claims. A moved `blob:` means the
    evidence changed, not necessarily that the page is wrong — decide
    per claim, then restamp `blob:` with `okf.py drift --hash <file>`
+   (code in another repo: `--hash <repo>:<path> --project <name>`)
    and set `last_modified:` to today. **Restamping without re-reading
    the file is falsifying the record**; it is the one thing this
    mechanism cannot survive.

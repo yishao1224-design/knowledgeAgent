@@ -17,6 +17,19 @@ concept pages.
 > Paths below assume the default bundle location, `okf/`. A project
 > may have chosen another name at setup — whichever top-level directory
 > holds `SCHEMA.md` is the bundle, and `okf.py` finds it on its own.
+>
+> **Projects.** If the bundle holds project directories (a subdirectory
+> with its own `SCHEMA.md`, listed under *Projects* in the root
+> `index.md`), work inside one: settle which project the request
+> belongs to, read the root `SCHEMA.md` (team rules, never loosened)
+> **plus** that project's `SCHEMA.md`, `index.md` and recent `log.md`.
+> Those project files stand in for the `okf/…` ones in the steps
+> below; captures go in `<project>/sources/`; `okf.py log`, `stats` and
+> `drift` take `--project <name>`. Types and directories are the
+> project's own — take them from its type registry, never assume
+> `concepts/`/`entities/`. The root `log.md` is only for team-level
+> changes (root SCHEMA, root-level shared pages, adding or moving
+> projects).
 
 Read `okf/SCHEMA.md`, `okf/index.md`, and the last ~20 lines of
 `okf/log.md`. Identify existing pages that overlap the new material.
@@ -61,7 +74,8 @@ overwrite: add a `## Contradictions` section to that page, tag it
 ## Step 3 — Write/update concepts
 
 For each page:
-- Pick `type` from SCHEMA.md's type registry and put the page in the
+- Pick `type` from the governing SCHEMA.md's type registry (the
+  project's own, inside a project) and put the page in the
   matching directory — `Entity` in `entities/` for a concrete nameable
   thing (person, org, system, dataset, tool), `Comparison` in
   `comparisons/`, `Query` in `queries/`, `Concept` in `concepts/` for
@@ -84,6 +98,13 @@ For each page:
   `okf.py drift` re-trigger review when the file changes, instead of
   waiting on the clock. Never pin a `/sources/` capture — captures are
   immutable, so drift on them is meaningless.
+- **Pin code that lives in another repository** the same way, by name:
+  the repo must be a row in the project's (or root's) `# Code
+  repositories` table in SCHEMA.md; the entry carries `repo:` + `path:`
+  instead of a local path, `resource:` is the file's browse URL, and
+  `blob:` comes from
+  `python scripts/okf.py drift --hash <repo>:<path> --project <name>`.
+  Never freeze such code into a capture — that would blind drift to it.
 - Externally-derived claims are cited inline by source id —
   `…ships its own provider layer [openwiki]`. Do **not** write a
   `# Citations` section; OKF v0.2 replaced it with `sources`.

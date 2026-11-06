@@ -17,9 +17,27 @@ into it.
 > Paths below assume the default bundle location, `okf/`. A project
 > may have chosen another name at setup — whichever top-level directory
 > holds `SCHEMA.md` is the bundle, and `okf.py` finds it on its own.
+>
+> **Projects.** If the bundle holds project directories (a subdirectory
+> with its own `SCHEMA.md`, listed under *Projects* in the root
+> `index.md`), work inside one: settle which project the request
+> belongs to, read the root `SCHEMA.md` (team rules, never loosened)
+> **plus** that project's `SCHEMA.md`, `index.md` and recent `log.md`.
+> Those project files stand in for the `okf/…` ones in the steps
+> below; captures go in `<project>/sources/`; `okf.py log`, `stats` and
+> `drift` take `--project <name>`. Types and directories are the
+> project's own — take them from its type registry, never assume
+> `concepts/`/`entities/`. The root `log.md` is only for team-level
+> changes (root SCHEMA, root-level shared pages, adding or moving
+> projects).
 
 Read `okf/SCHEMA.md` and `okf/index.md`. Locate candidate pages from the
 index descriptions; Grep `okf/` for terms the index doesn't surface.
+
+A question spanning projects: read each relevant project's `SCHEMA.md`
+type registry first and map types **by their stated meaning** — one
+project's `Decision` may be another's `ADR`. Say in the answer which
+project each cited page belongs to.
 
 ## Step 1 — Gather
 

@@ -1,13 +1,13 @@
 ---
 type: Entity
 title: okf.py — the Mechanical Toolchain
-description: The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
+description: The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — the exact conformance/lifecycle rules its lint enforces, project scopes, and drift on code in other repositories.
 status: stable
 lifecycle: active
 confidence: high
 created: 2026-07-07
-updated: 2026-08-27
-stale_after: 2027-01-07
+updated: 2026-11-06
+stale_after: 2027-05-06
 tags: []
 sources:
   - resource: /sources/2026-07-07-okf-toolchain.md
@@ -16,8 +16,8 @@ sources:
   - resource: ../../scripts/okf.py
     id: okf-py
     title: scripts/okf.py implementation
-    last_modified: 2026-08-27
-    blob: 5d4a4ae830ed
+    last_modified: 2026-11-06
+    blob: 23c3149dac26
 ---
 
 # okf.py — the Mechanical Toolchain
@@ -38,13 +38,13 @@ Seven subcommands; `lint` and `drift` gate (exit 1 on failure).
 
 | Command | Role |
 |---------|------|
-| `init` | Create dir skeleton + seed SCHEMA/log; sync canonical `skills/` → `.claude/skills/` and `.github/prompts/`; then index + lint |
+| `init` | Create dir skeleton + seed SCHEMA/log; sync canonical `skills/` → `.claude/skills/` and `.github/prompts/`; then index + lint. `--project NAME` instead scaffolds a project scope (own SCHEMA.md, log.md, sources/) |
 | `lint` | Conformance + lifecycle audit (exit 1 on errors). `--inbound PATH` lists linkers to a bundle path |
-| `index` | Regenerate the bundle's `index.md` from tree + frontmatter, with lifecycle badges |
+| `index` | Regenerate `index.md` from tree + frontmatter, with lifecycle badges — one per scope: the root lists its own pages plus a `# Projects` section, each project gets its own |
 | `links` | Expand `[[slug]]`/`[[slug\|text]]` authoring shorthand into canonical bundle-relative links, in place |
-| `log "MSG"` | Prepend an entry under today's `## YYYY-MM-DD` heading |
-| `stats` | Counts by type/lifecycle, the review queue, and pinned-source drift |
-| `drift` | Recheck every pinned `sources[].blob` against the file's current git blob (exit 1 if any moved). `--hash FILE` prints the sha to pin |
+| `log "MSG"` | Prepend an entry under today's `## YYYY-MM-DD` heading; `--project NAME` writes the project's `log.md` |
+| `stats` | Counts by type/lifecycle/project, the review queue, and pinned-source drift; `--project` narrows it |
+| `drift` | Recheck every pinned `sources[].blob` against the file's current git blob (exit 1 if any moved), fetching code repos named in SCHEMA.md (`--offline`: cache only). `--hash FILE` or `--hash REPO:PATH` prints the sha to pin; `--project` narrows it |
 
 ## What lint actually enforces
 
@@ -58,7 +58,11 @@ honest mechanically rather than by memory.
 - a `status` outside OKF v0.2's `draft | stable | deprecated`, an
   unknown `lifecycle`, or the two disagreeing with the mapping in
   [SCHEMA.md](/SCHEMA.md);
+- a known `type` outside the directory its scope's type registry gives
+  it (`archive/` exempt);
 - a `sources` entry with no `resource`, or two entries sharing an `id`;
+- a `repo:` source entry without `path:`, or naming a repo absent from
+  every `# Code repositories` table in its scope chain;
 - `deprecated` without `superseded_by` *and* without a `## Deprecation`
   section — i.e. deprecation must always leave a prose trail;
 - a non-root `index.md` carrying frontmatter.
@@ -67,12 +71,14 @@ honest mechanically rather than by memory.
 `status`/`lifecycle`/`updated`; `active` without `stale_after`; `active` past its
 `stale_after` (overdue → should go `needs_review`); a pinned source that
 moved or vanished; `archived` outside
-`/archive/`; tag not in the SCHEMA taxonomy; `active`/`needs_review`
+`/archive/`; a `type` its scope's registry doesn't list; tag not in
+the scope's taxonomy (root tags count everywhere); `active`/`needs_review`
 page with < 2 outbound bundle links; orphan pages (no inbound links);
 source captures missing `source_url`; a malformed `generated`/
 `verified` entry (present but not a `{ by, at }` mapping); legacy v0.1
 shapes — a `review_after` field, a bare-string `sources` entry, or a
-surviving `# Citations` section.
+surviving `# Citations` section; a project scope lacking its own
+`index.md` or `log.md`.
 
 Note what lint deliberately does *not* warn about: a page with **no**
 `generated` or `verified` at all. An absent stamp is an honest "nobody
@@ -82,10 +88,28 @@ those fields cannot survive. Shape is mechanical and gets checked;
 presence is a claim and does not.
 
 **Info:** links to not-yet-written pages — allowed by design, never an
-error.
+error; a `repo:` pin not checked because its repository is not in the
+local cache yet (lint never fetches).
 
-**Exemptions:** `SCHEMA.md` is checked for OKF conformance but skips
-lifecycle rules; `sources/*` only get the `source_url` warning.
+**Exemptions:** each scope's `SCHEMA.md` is checked for OKF conformance
+but skips lifecycle and type-registry rules; a scope's `sources/*` only
+get the `source_url` warning.
+
+## Project scopes (2026-11-06)
+
+Any directory inside the bundle holding its own `SCHEMA.md` is a
+project scope; a page belongs to the nearest one above it, else to the
+root. Per page, lint reads that scope's type registry (no inheritance
+from the root — OKF registers no types centrally, so each project names
+its own, and a `lives in` may be nested, e.g. `docs/adr/`) and the
+union of the root and scope tag taxonomies. Everything not
+scope-specific — lifecycle, `status` mapping, source shape, links —
+is enforced identically everywhere, which is how the root SCHEMA's
+rules stay un-loosenable. `[[slug]]` matching pages in several projects
+resolves to the linking page's own project before being called
+ambiguous. A bundle with no project `SCHEMA.md` is one root scope and
+behaves exactly as before; the conventions are in
+[SCHEMA.md](/SCHEMA.md) under *Project scopes*.
 
 ## Immutability enforcement
 
@@ -120,16 +144,24 @@ not. Its scope is equally specific:
 
 - **Covers** files inside this repo, hashed from the working tree, so
   an uncommitted edit registers too.
-- **Does not cover** anything upstream — a web page behind a
+- **Covers code in other git repositories** (since 2026-11-06): an
+  entry with `repo:` + `path:` names a row of a SCHEMA.md
+  `# Code repositories` table; `drift` keeps a bare, depth-1,
+  `--filter=blob:none` clone of it under `.okf-cache/` (trees only, so
+  cheap even for large repos) and compares `rev-parse <branch>:<path>`.
+  The blob id is git's own, so any host behaves the same. `lint` reads
+  only that cache and never fetches; an unreachable or not-yet-fetched
+  repo is reported as `unchecked`, never as stale.
+- **Does not cover** non-git upstreams — a web page behind a
   `source_url` still changes silently. Re-fetching remains a judgment
-  call inside [kb-review](/entities/lifecycle-skills.md), and is still
-  the bundle's only upstream-change detection.
+  call inside [kb-review](/entities/lifecycle-skills.md).
 - **Does not cover** captures under `/sources/`: they are immutable, so
   drift on them is meaningless by construction.
 - **Never edits frontmatter.** A moved pin is a prompt to re-verify;
   whether the change invalidates the page is judgment, and belongs to
   [kb-review](/entities/lifecycle-skills.md), which restamps `blob:`
-  with `okf.py drift --hash <file>` once the claims are re-checked.
+  with `okf.py drift --hash <file>` (or `<repo>:<path>`) once the
+  claims are re-checked.
 
 This is what lets the cadence rules in [SCHEMA.md](/SCHEMA.md) treat
 the clock as a backstop rather than the primary signal for anything the

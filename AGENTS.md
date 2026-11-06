@@ -5,6 +5,9 @@ lives in [CLAUDE.md](CLAUDE.md) — despite the filename it is
 agent-agnostic. **Read it in full before touching anything under
 `okf/`**, then read `okf/SCHEMA.md` (content conventions), `okf/index.md`
 (what exists), and the recent entries of `okf/log.md` (what changed).
+In a multi-project bundle (a subdirectory with its own `SCHEMA.md` is a
+project), read the root `SCHEMA.md` plus the project's `SCHEMA.md`,
+`index.md` and `log.md`, and log with `okf.py log --project NAME`.
 
 Non-negotiables, restated:
 

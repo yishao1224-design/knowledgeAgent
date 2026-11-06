@@ -8,7 +8,7 @@ okf_version: "0.2"
 
 # Concepts
 
-* [Adopting the Bundle Pattern in a Project Repo](concepts/adopting-the-bundle-pattern.md) - How to install the OKF bundle + lifecycle skills into a real project repository — same-repo vs separate-repo decision, adoption steps, and what to tune.
+* [Adopting the Bundle Pattern in a Project Repo](concepts/adopting-the-bundle-pattern.md) - How to install the OKF bundle + lifecycle skills into a real project repository — same-repo vs separate-repo decision, a team wiki holding many projects, adoption steps, and what to tune.
 * [Automating the Lifecycle (LangGraph and Alternatives)](concepts/automating-the-lifecycle.md) - Whether to put an orchestration framework like LangGraph in charge of the knowledge lifecycle — verdict, rules if you do, and the simpler scheduled-skills alternative.
 * [Ingesting Requirements from Ticket Systems](concepts/ingesting-requirements-from-ticket-systems.md) - How to feed user stories from a work-item tracker (e.g. Azure DevOps) into the bundle — access paths, immutable captures, and the don't-mirror-the-backlog rule.
 * [Open Knowledge Format (OKF)](concepts/open-knowledge-format.md) - The storage format this bundle conforms to — markdown + YAML frontmatter bundles with reserved index/log files and permissive consumption.
@@ -22,7 +22,7 @@ okf_version: "0.2"
 * [The Lifecycle Skill Suite](entities/lifecycle-skills.md) - The five canonical skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) that drive the knowledge lifecycle — one per phase, with strict division of responsibility.
 * [ado-workitem-sync — ADO Retrieval Toolchain](entities/ado-workitem-sync.md) - Removed 2026-08-26 — the scripts/ado.py + ado-workitem-sync skill pair that synced Azure DevOps work items into local analysis folders; kept for the rev-stamp provenance and code-vs-judgment design record. *(deprecated)*
 * [codebase-memory-mcp](entities/codebase-memory-mcp.md) - MCP server by DeusData that indexes codebases into a queryable SQLite knowledge graph (tree-sitter + hybrid LSP) with automatic freshness via git watching.
-* [okf.py — the Mechanical Toolchain](entities/okf-toolchain.md) - The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
+* [okf.py — the Mechanical Toolchain](entities/okf-toolchain.md) - The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — the exact conformance/lifecycle rules its lint enforces, project scopes, and drift on code in other repositories.
 * [openwiki](entities/openwiki.md) - LangChain's TypeScript CLI that auto-generates and schedule-refreshes agent-optimized wikis (repo docs or a personal brain) from pluggable connectors — the regenerate-often counterpart to this bundle's curated lifecycle. *(needs_review)*
 
 # Comparisons

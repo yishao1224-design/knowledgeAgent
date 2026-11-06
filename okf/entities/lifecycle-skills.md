@@ -6,7 +6,7 @@ status: stable
 lifecycle: active
 confidence: high
 created: 2026-07-06
-updated: 2026-08-27
+updated: 2026-11-06
 stale_after: 2026-10-06
 tags: []
 sources:
@@ -16,28 +16,28 @@ sources:
   - resource: ../../skills/kb-ingest/SKILL.md
     id: kb-ingest
     title: kb-ingest SKILL.md
-    last_modified: 2026-08-27
-    blob: 53fdfb22b31c
+    last_modified: 2026-11-06
+    blob: e71e0050d703
   - resource: ../../skills/kb-query/SKILL.md
     id: kb-query
     title: kb-query SKILL.md
-    last_modified: 2026-08-27
-    blob: ffff4aa8f998
+    last_modified: 2026-11-06
+    blob: 3d9970846fd0
   - resource: ../../skills/kb-review/SKILL.md
     id: kb-review
     title: kb-review SKILL.md
-    last_modified: 2026-08-27
-    blob: 6ce3390450f6
+    last_modified: 2026-11-06
+    blob: f11b57800f1e
   - resource: ../../skills/kb-curate/SKILL.md
     id: kb-curate
     title: kb-curate SKILL.md
-    last_modified: 2026-08-27
-    blob: b20099f5cf73
+    last_modified: 2026-11-06
+    blob: adee4accf1c1
   - resource: ../../skills/kb-lint/SKILL.md
     id: kb-lint
     title: kb-lint SKILL.md
-    last_modified: 2026-08-27
-    blob: 2b4c59b3df75
+    last_modified: 2026-11-06
+    blob: 41e3cba48529
 ---
 
 # The Lifecycle Skill Suite
@@ -95,6 +95,17 @@ The skills partition authority so no phase silently does another's job:
   `index` → `log` → `lint`, which is what makes the
   [PR quality gates](/concepts/pr-quality-gates.md) Tier-1 checks a
   formality for skill-driven changes rather than a hurdle.
+
+## Project scopes
+
+Since 2026-11-06 every skill's Step 0 is project-aware: in a bundle
+holding project scopes (a subdirectory with its own `SCHEMA.md`, see
+[SCHEMA.md](/SCHEMA.md)), a session first settles which project it is
+in, then reads the root SCHEMA (team rules) plus the project's own
+SCHEMA, `index.md` and `log.md`, and passes `--project` to `okf.py
+log`/`stats`/`drift`. Types and directories come from the project's
+registry; kb-query maps types across projects by their stated meaning;
+kb-ingest pins code in other repositories by `repo:` + `path:` [kb-ingest].
 
 ## Editing the skills
 
