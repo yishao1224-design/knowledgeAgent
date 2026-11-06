@@ -17,7 +17,7 @@ sources:
     id: okf-py
     title: scripts/okf.py implementation
     last_modified: 2026-11-06
-    blob: 23c3149dac26
+    blob: 2726904b732f
 ---
 
 # okf.py — the Mechanical Toolchain
@@ -149,6 +149,10 @@ not. Its scope is equally specific:
   `# Code repositories` table; `drift` keeps a bare, depth-1,
   `--filter=blob:none` clone of it under `.okf-cache/` (trees only, so
   cheap even for large repos) and compares `rev-parse <branch>:<path>`.
+  A blank `branch` follows the remote's current default branch, asked
+  afresh (`ls-remote --symref`) on every fetch, so switching the
+  primary branch upstream surfaces as moved pins rather than going
+  unnoticed.
   The blob id is git's own, so any host behaves the same. `lint` reads
   only that cache and never fetches; an unreachable or not-yet-fetched
   repo is reported as `unchecked`, never as stale.

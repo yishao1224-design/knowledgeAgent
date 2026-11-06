@@ -506,12 +506,29 @@ class RemoteRepos:
                 if rc != 0:
                     err = f"clone failed: {msg.splitlines()[-1] if msg else rc}"
             else:
-                rc, head = _git("symbolic-ref", "HEAD", cwd=d)
-                branch = spec["branch"] or (head.rsplit("/", 1)[-1] if rc == 0 else "HEAD")
-                rc, msg = _git("fetch", "--quiet", "--depth=1", "--filter=blob:none",
-                               "origin", f"+refs/heads/{branch}:refs/heads/{branch}", cwd=d)
-                if rc != 0:
-                    err = f"fetch failed: {msg.splitlines()[-1] if msg else rc}"
+                branch = spec["branch"]
+                if not branch:
+                    # Blank branch = follow the remote's *current* default
+                    # branch, which may have been switched since the clone.
+                    rc, out = _git("ls-remote", "--symref", "origin", "HEAD", cwd=d)
+                    m = (re.search(r"^ref:\s+refs/heads/(\S+)\s+HEAD", out, re.M)
+                         if rc == 0 else None)
+                    if m:
+                        branch = m.group(1)
+                    else:
+                        rc, head = _git("symbolic-ref", "HEAD", cwd=d)
+                        branch = (head[len("refs/heads/"):]
+                                  if rc == 0 and head.startswith("refs/heads/") else "")
+                if not branch:
+                    err = "fetch failed: cannot tell the remote's default branch"
+                else:
+                    rc, msg = _git("fetch", "--quiet", "--depth=1", "--filter=blob:none",
+                                   "origin", f"+refs/heads/{branch}:refs/heads/{branch}",
+                                   cwd=d)
+                    if rc != 0:
+                        err = f"fetch failed: {msg.splitlines()[-1] if msg else rc}"
+                    elif not spec["branch"]:
+                        _git("symbolic-ref", "HEAD", f"refs/heads/{branch}", cwd=d)
         if err is None:
             if not d.exists():
                 err = "not fetched yet — run 'okf.py drift'"
@@ -1197,7 +1214,10 @@ Code this project's pages pin as evidence. A `sources` entry names a
 row with `repo:` plus `path:` and `blob:` (from
 `okf.py drift --hash <repo>:<path> --project {name}`); `okf.py drift`
 re-checks it against the branch below. `url` is any git URL or path
-the machine running drift can clone; blank `branch` = default branch.
+the machine running drift can clone; blank `branch` = the remote's
+current default branch (re-read on every fetch). When the primary
+branch changes, edit `branch` here, run `okf.py drift`, and re-verify
+what it reports.
 
 | repo | url | branch |
 |------|-----|--------|

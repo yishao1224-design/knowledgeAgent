@@ -229,6 +229,10 @@ sources:
   `.okf-cache/` (gitignored) and re-resolves `<branch>:<path>` — git's
   own blob id, so GitHub, Azure DevOps, GitLab and local paths behave
   the same; credentials are whatever git on that machine already has.
+  A blank `branch` follows the remote's *current* default branch,
+  re-read on every fetch. The wiki describes one branch per repo row:
+  when the primary branch changes, edit the row (or the remote's
+  default), run `drift`, and re-verify what it flags as moved.
   Lint never fetches: it reads the cache and reports an unfetched repo
   as info. Never freeze such code into a capture instead — that blinds
   drift to it.

@@ -1,6 +1,7 @@
 # Bundle Update Log
 
 ## 2026-11-06
+* **Update**: `okf.py drift` now re-reads a remote's current default branch on every fetch when a [Code repositories](/SCHEMA.md) row leaves `branch` blank, so switching the primary branch upstream shows up as moved pins instead of drift silently tracking the old one; branch names containing `/` also resolve correctly. Documented in [SCHEMA.md](/SCHEMA.md) and [okf-toolchain](/entities/okf-toolchain.md) (pin restamped).
 * **Update**: multi-project bundles. A directory inside the bundle holding its own SCHEMA.md is now a *project scope* with its own type registry (names not inherited — OKF registers no types centrally), directory layout, tags, review cadence, `index.md` and `log.md`; the root SCHEMA keeps only the rules no project may loosen and the root log only team-level changes. Code in other repositories is pinned by `repo:` + `path:` + `blob:` against a `# Code repositories` table in SCHEMA.md, and `okf.py drift` checks it through blob-less depth-1 clones under .okf-cache/ (lint reads the cache only). Conventions in [SCHEMA.md](/SCHEMA.md); toolchain in [okf-toolchain](/entities/okf-toolchain.md) (pin restamped); project-aware Step 0 in [lifecycle-skills](/entities/lifecycle-skills.md) (pins restamped); team-wiki guidance in [adopting-the-bundle-pattern](/concepts/adopting-the-bundle-pattern.md). A bundle without project SCHEMA.md files behaves exactly as before.
 
 ## 2026-08-27
