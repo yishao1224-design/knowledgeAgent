@@ -190,7 +190,7 @@ ingested: 2026-07-05
 # Source entries (frontmatter `sources`)
 
 Every entry is a mapping with a required `resource`, per OKF v0.2.
-Three kinds live in the same list:
+Four kinds live in the same list:
 
 ```yaml
 sources:
@@ -209,6 +209,12 @@ sources:
     path: src/refund.py
     last_modified: 2026-11-06
     blob: 3f9a1c0d2e44
+  - resource: https://acme.sharepoint.com/sites/arch/_layouts/15/Doc.aspx?sourcedoc={4F2A…}
+    id: payments-hld                           # document in an external system
+    title: Payments High-Level Design v3
+    author: human:li.wei
+    last_modified: 2026-10-28                  # the version you read
+    capture: /payments/sources/2026-11-06-payments-hld.md   # optional
 ```
 
 - **Frozen captures** are bundle-relative (`/sources/...`) and immutable.
@@ -236,6 +242,27 @@ sources:
   Lint never fetches: it reads the cache and reports an unfetched repo
   as info. Never freeze such code into a capture instead — that blinds
   drift to it.
+- **Documents in external systems** — SharePoint, LeanIX, Confluence,
+  a ticket tracker: material with an authoritative, access-controlled
+  home. `resource:` is the document's URL itself (OKF allows an absolute
+  URL), so humans and plain OKF readers land on the original. Record
+  `last_modified:` as the document's own modified date *as you read it*
+  — that is how a later reviewer tells which version the page reflects
+  — plus `author:` when known. Use a **stable** URL: an ID-based link
+  (SharePoint `Doc.aspx?sourcedoc={GUID}`, a LeanIX fact-sheet URL with
+  its UUID) rather than a sharing link or a path link, which can expire,
+  be per-user, or break on rename (lint flags SharePoint `/:w:/…` and
+  `?e=` links as info), and name the document in `title:` so it can be
+  found again if the URL dies. A capture is **optional**: add one, and
+  point at it with the `capture:` extension key, only when the exact
+  wording you relied on matters or the reader may not have access;
+  otherwise the URL alone is the citation — agents re-read it later in
+  a browser running with the user's signed-in session. Nothing watches
+  these systems — when such a document changes, trigger review by hand:
+  `okf.py lint --inbound <url>` lists every page citing it, with the
+  `last_modified` each was written against. Never copy content beyond
+  the source's own confidentiality: the wiki repo must not be readable
+  more widely than the document.
 
 Pinning is what turns review from calendar-driven into signal-driven:
 `okf.py drift` recomputes each pinned file's blob and reports `moved`
@@ -254,9 +281,9 @@ unique within a page (lint errors on duplicates).
 
 # Source assets (binary evidence)
 
-Most binaries are **not** kept: extract their knowledge into the `.md`
-capture and point `source_url` at the authoritative copy (SharePoint,
-the tracker, a URL). Keep a binary in `sources/assets/` only when
+Most binaries are **not** kept: cite the authoritative copy (SharePoint,
+the tracker, a URL) as a *document in an external system* above, and
+extract into a `.md` capture only what needs freezing. Keep a binary in `sources/assets/` only when
 **the pixels are the evidence** and there is no authoritative home —
 above all, dense architecture diagrams and annotated screenshots that
 cannot be fully extracted in one pass and will be re-read on later

@@ -5,7 +5,8 @@ Subcommands:
   init             bootstrap the bundle skeleton + sync skills/ to per-tool
                    copies (.claude/skills/, .github/prompts/ for Copilot)
   lint             conformance + lifecycle audit (exit 1 on errors)
-  lint --inbound P list files linking to bundle path P (safe-delete check)
+  lint --inbound P list files linking to bundle path P (safe-delete check),
+                   or pages citing external URL P (manual review trigger)
   index            regenerate the bundle's index.md from tree + frontmatter
   links            expand [[slug]] shorthand into canonical bundle links
   init --project P add project scope P (its own SCHEMA.md, index.md, log.md)
@@ -667,6 +668,27 @@ def cmd_lint(args):
             if tgt is not None:
                 inbound.setdefault(tgt, set()).add(p)
 
+    if args.inbound and "://" in args.inbound:
+        # an external document (SharePoint, LeanIX, a web page): list the
+        # pages citing it — the manual "this doc changed, review its
+        # dependants" trigger, since no tool watches such systems
+        want = args.inbound.split("#")[0].rstrip("/")
+        hits = []
+        for p in files:
+            meta, _, _ = load(p)
+            for e in (meta or {}).get("sources") or []:
+                res = str(e.get("resource", "")).split("#")[0].rstrip("/") \
+                    if isinstance(e, dict) else ""
+                if res and (res == want or res.startswith(want + "/")
+                            or res.startswith(want + "?")):
+                    hits.append((rel(p), str(e.get("id", "") or "-"),
+                                 str(e.get("last_modified", "") or "?"),
+                                 str((meta or {}).get("lifecycle", "?"))))
+        print(f"pages citing {args.inbound}: {len(hits)}")
+        for page, sid, lm, life in sorted(hits):
+            print(f"  {page}  [{sid}]  read as of {lm}  ({life})")
+        return 0
+
     if args.inbound:
         target = (KB / args.inbound.lstrip("/")).resolve()
         linkers = sorted(inbound.get(target, ()))
@@ -767,6 +789,29 @@ def cmd_lint(args):
                 errors.append(f"{r}: duplicate source id '{sid}'")
             if sid:
                 seen_ids.add(sid)
+            res = str(entry.get("resource", "")).strip()
+            cap = str(entry.get("capture", "") or "").strip()
+            if cap:
+                # optional frozen snapshot beside an external resource
+                cpath = KB / cap.lstrip("/")
+                if not cap.startswith("/"):
+                    errors.append(f"{r}: capture '{cap}' must be bundle-relative "
+                                  f"(/…/sources/<file>.md)")
+                elif not cpath.is_file():
+                    errors.append(f"{r}: capture '{cap}' does not exist")
+                elif "sources" not in cpath.relative_to(KB).parts[:-1]:
+                    warns.append(f"{r}: capture '{cap}' is not under a "
+                                 f"sources/ directory")
+                if "://" not in res:
+                    warns.append(f"{r}: 'capture' belongs next to an external "
+                                 f"URL resource — '{res}' is already local")
+            if "sharepoint.com" in res.lower() and (
+                    re.search(r"sharepoint\.com/:[a-z]:/", res, re.I)
+                    or re.search(r"[?&]e=", res)):
+                infos.append(f"{r}: source '{entry.get('id') or res}' looks like "
+                             f"a SharePoint sharing/path link — these can expire, "
+                             f"be per-user, or break on rename; prefer the "
+                             f"Doc.aspx?sourcedoc={{GUID}} form")
             if entry.get("repo"):
                 name = str(entry["repo"]).strip()
                 if not str(entry.get("path", "")).strip():
@@ -1408,7 +1453,9 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("init", parents=[common, proj])
     p = sub.add_parser("lint", parents=[common])
-    p.add_argument("--inbound", metavar="PATH")
+    p.add_argument("--inbound", metavar="PATH|URL",
+                   help="list files linking to bundle PATH, or pages whose "
+                        "sources cite URL (e.g. a SharePoint/LeanIX document)")
     sub.add_parser("index", parents=[common])
     sub.add_parser("links", parents=[common])
     p = sub.add_parser("log", parents=[common, proj]); p.add_argument("message")

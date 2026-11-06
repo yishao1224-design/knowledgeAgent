@@ -17,7 +17,7 @@ sources:
     id: kb-ingest
     title: kb-ingest SKILL.md
     last_modified: 2026-11-06
-    blob: e71e0050d703
+    blob: 0445766af262
   - resource: ../../skills/kb-query/SKILL.md
     id: kb-query
     title: kb-query SKILL.md
@@ -27,7 +27,7 @@ sources:
     id: kb-review
     title: kb-review SKILL.md
     last_modified: 2026-11-06
-    blob: f11b57800f1e
+    blob: 980b5e62eb75
   - resource: ../../skills/kb-curate/SKILL.md
     id: kb-curate
     title: kb-curate SKILL.md
@@ -105,7 +105,11 @@ in, then reads the root SCHEMA (team rules) plus the project's own
 SCHEMA, `index.md` and `log.md`, and passes `--project` to `okf.py
 log`/`stats`/`drift`. Types and directories come from the project's
 registry; kb-query maps types across projects by their stated meaning;
-kb-ingest pins code in other repositories by `repo:` + `path:` [kb-ingest].
+kb-ingest pins code in other repositories by `repo:` + `path:` and cites
+documents in SharePoint/LeanIX-style systems by stable URL, which
+kb-review re-opens in a signed-in browser when a manual trigger
+(`okf.py lint --inbound <url>`) puts their dependants in the queue
+[kb-ingest] [kb-review].
 
 ## Editing the skills
 

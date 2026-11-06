@@ -17,7 +17,7 @@ sources:
     id: okf-py
     title: scripts/okf.py implementation
     last_modified: 2026-11-06
-    blob: 2726904b732f
+    blob: 24824342325f
 ---
 
 # okf.py — the Mechanical Toolchain
@@ -39,7 +39,7 @@ Seven subcommands; `lint` and `drift` gate (exit 1 on failure).
 | Command | Role |
 |---------|------|
 | `init` | Create dir skeleton + seed SCHEMA/log; sync canonical `skills/` → `.claude/skills/` and `.github/prompts/`; then index + lint. `--project NAME` instead scaffolds a project scope (own SCHEMA.md, log.md, sources/) |
-| `lint` | Conformance + lifecycle audit (exit 1 on errors). `--inbound PATH` lists linkers to a bundle path |
+| `lint` | Conformance + lifecycle audit (exit 1 on errors). `--inbound PATH` lists linkers to a bundle path; `--inbound URL` lists pages whose `sources` cite that external document, with the `last_modified` each was written against — the manual review trigger for SharePoint/LeanIX-style sources |
 | `index` | Regenerate `index.md` from tree + frontmatter, with lifecycle badges — one per scope: the root lists its own pages plus a `# Projects` section, each project gets its own |
 | `links` | Expand `[[slug]]`/`[[slug\|text]]` authoring shorthand into canonical bundle-relative links, in place |
 | `log "MSG"` | Prepend an entry under today's `## YYYY-MM-DD` heading; `--project NAME` writes the project's `log.md` |
@@ -63,6 +63,8 @@ honest mechanically rather than by memory.
 - a `sources` entry with no `resource`, or two entries sharing an `id`;
 - a `repo:` source entry without `path:`, or naming a repo absent from
   every `# Code repositories` table in its scope chain;
+- a `capture:` key that is not bundle-relative or points at a missing
+  file;
 - `deprecated` without `superseded_by` *and* without a `## Deprecation`
   section — i.e. deprecation must always leave a prose trail;
 - a non-root `index.md` carrying frontmatter.
@@ -78,7 +80,8 @@ source captures missing `source_url`; a malformed `generated`/
 `verified` entry (present but not a `{ by, at }` mapping); legacy v0.1
 shapes — a `review_after` field, a bare-string `sources` entry, or a
 surviving `# Citations` section; a project scope lacking its own
-`index.md` or `log.md`.
+`index.md` or `log.md`; a `capture:` outside any `sources/` directory,
+or beside a `resource` that is already local.
 
 Note what lint deliberately does *not* warn about: a page with **no**
 `generated` or `verified` at all. An absent stamp is an honest "nobody
@@ -89,7 +92,10 @@ presence is a claim and does not.
 
 **Info:** links to not-yet-written pages — allowed by design, never an
 error; a `repo:` pin not checked because its repository is not in the
-local cache yet (lint never fetches).
+local cache yet (lint never fetches); a SharePoint sharing or path
+link (`/:w:/…`, `?e=`) cited as a source, since those expire, are
+per-user or break on rename — the ID-based `Doc.aspx?sourcedoc=` form
+is preferred.
 
 **Exemptions:** each scope's `SCHEMA.md` is checked for OKF conformance
 but skips lifecycle and type-registry rules; a scope's `sources/*` only
@@ -157,8 +163,11 @@ not. Its scope is equally specific:
   only that cache and never fetches; an unreachable or not-yet-fetched
   repo is reported as `unchecked`, never as stale.
 - **Does not cover** non-git upstreams — a web page behind a
-  `source_url` still changes silently. Re-fetching remains a judgment
-  call inside [kb-review](/entities/lifecycle-skills.md).
+  `source_url`, or a SharePoint/LeanIX document cited by URL, still
+  changes silently. That is deliberate: review of those is triggered by
+  hand (`lint --inbound <url>`) and done by an agent re-opening the URL
+  in a signed-in browser inside
+  [kb-review](/entities/lifecycle-skills.md), not by API polling.
 - **Does not cover** captures under `/sources/`: they are immutable, so
   drift on them is meaningless by construction.
 - **Never edits frontmatter.** A moved pin is a prompt to re-verify;

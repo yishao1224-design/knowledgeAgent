@@ -94,9 +94,9 @@ Which skill drives which transition:
    `python scripts/okf.py links` to expand it to canonical form before
    `index`/`lint` — lint flags any wiki-link left unexpanded.
 5. **Update `updated:` whenever you touch a concept's content.** Only
-   re-stamp a pinned `blob:` or append a `verified:` entry when you
-   actually re-read the evidence — those fields assert that a check
-   happened.
+   re-stamp a pinned `blob:` (or an external document's
+   `last_modified`) or append a `verified:` entry when you actually
+   re-read the evidence — those fields assert that a check happened.
 6. **Deprecate, don't delete.** Deletion only happens in `kb-curate`
    after confirming zero inbound links (lint tells you).
 7. **Tags come from the taxonomy in `okf/SCHEMA.md`.** Want a new tag?
