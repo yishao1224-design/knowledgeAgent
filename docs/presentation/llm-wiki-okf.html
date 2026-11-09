@@ -709,6 +709,41 @@ kept the clock running; the conflict is flagged.</div>
   <div class="foot"><span class="brand"><i></i>LLM Wiki × OKF</span><span class="small">Example answer is illustrative</span><span class="pn"></span></div>
 </section>
 
+<!-- ================= CODE KNOWLEDGE ================= -->
+<section class="slide" data-title="Code knowledge">
+  <div class="kicker">LLM Wiki · code knowledge</div>
+  <h2>Code is the truth — but it doesn’t explain itself</h2>
+  <div class="body">
+    <div class="grid" style="grid-template-columns:1fr 1.35fr;gap:34px">
+      <div class="card r" data-f="1">
+        <h3>Just let the LLM read the code?</h3>
+        <p style="font-size:16px">Works for one answer. Three problems:</p>
+        <div class="prob"><span class="n">1</span><p>Answers are one-off</p></div>
+        <div class="prob"><span class="n">2</span><p>Context is rebuilt every time</p></div>
+        <div class="prob"><span class="n">3</span><p>Hard-won understanding never settles anywhere</p></div>
+      </div>
+      <div data-f="2">
+        <h3>A code wiki captures the <span class="red">explanation layer</span></h3>
+        <p style="font-size:16px;margin-bottom:12px">The evidence is in the source — but nobody wrote it down:</p>
+        <div class="xl">
+          <div>Project overview</div><div>Module boundaries</div><div>Call chains</div><div>Auth flow</div>
+          <div>API contracts</div><div>Deployment structure</div><div class="r">Tech debt</div><div class="r">Architecture decisions</div>
+        </div>
+        <p class="small" style="margin-top:12px">Rule of thumb: if a page could be re-derived from one file, don’t write it — let the agent read the file.</p>
+      </div>
+    </div>
+    <div class="strip" data-f="3" style="margin-top:22px">
+      <div class="bx" style="background:var(--ink);color:#fff">Source code<small>the truth · the evidence</small></div>
+      <div class="ar">⟵ cites it<br>as evidence</div>
+      <div class="bx" style="border:2px solid var(--red);background:var(--red-l);color:var(--ink)">Wiki page<small>the explanation</small></div>
+      <div class="ar">code moves ⟶<br>page re-checked</div>
+      <div class="bx" style="border:2px solid var(--ink);background:#fff;color:var(--ink)">Re-verify<small>against the current code</small></div>
+    </div>
+    <div class="callout" data-f="4" style="margin-top:18px">Don’t treat the wiki as the truth. <span class="red">The code is the truth; the wiki explains it and cites it.</span></div>
+  </div>
+  <div class="foot"><span class="brand"><i></i>LLM Wiki × OKF</span><span class="small">Idea adapted from a community write-up on turning Obsidian into an LLM Wiki</span><span class="pn"></span></div>
+</section>
+
 <!-- ================= RAG SECTION ================= -->
 <section class="slide section" data-title="03 LLM Wiki and RAG">
   <div class="num">03</div>
@@ -984,41 +1019,6 @@ kept the clock running; the conflict is flagged.</div>
     </div>
   </div>
   <div class="foot"><span class="brand"><i></i>LLM Wiki × OKF</span><span class="pn"></span></div>
-</section>
-
-<!-- ================= CODE KNOWLEDGE ================= -->
-<section class="slide" data-title="Code knowledge">
-  <div class="kicker">knowledgeAgent · code knowledge</div>
-  <h2>Code is the truth — but it doesn’t explain itself</h2>
-  <div class="body">
-    <div class="grid" style="grid-template-columns:1fr 1.35fr;gap:34px">
-      <div class="card r" data-f="1">
-        <h3>Just let the LLM read the code?</h3>
-        <p style="font-size:16px">Works for one answer. Three problems:</p>
-        <div class="prob"><span class="n">1</span><p>Answers are one-off</p></div>
-        <div class="prob"><span class="n">2</span><p>Context is rebuilt every time</p></div>
-        <div class="prob"><span class="n">3</span><p>Hard-won understanding never settles anywhere</p></div>
-      </div>
-      <div data-f="2">
-        <h3>A code wiki captures the <span class="red">explanation layer</span></h3>
-        <p style="font-size:16px;margin-bottom:12px">The evidence is in the source — but nobody wrote it down:</p>
-        <div class="xl">
-          <div>Project overview</div><div>Module boundaries</div><div>Call chains</div><div>Auth flow</div>
-          <div>API contracts</div><div>Deployment structure</div><div class="r">Tech debt</div><div class="r">Architecture decisions</div>
-        </div>
-        <p class="small" style="margin-top:12px">Rule of thumb: if a page could be re-derived from one file, don’t write it — let the agent read the file.</p>
-      </div>
-    </div>
-    <div class="strip" data-f="3" style="margin-top:22px">
-      <div class="bx" style="background:var(--ink);color:#fff">Source code<small>the truth · the evidence</small></div>
-      <div class="ar">⟵ cites &amp; pins<br>by git blob</div>
-      <div class="bx" style="border:2px solid var(--red);background:var(--red-l);color:var(--ink)">Wiki page<small>the explanation</small></div>
-      <div class="ar">code moves ⟶<br>needs_review</div>
-      <div class="bx" style="border:2px solid var(--ink);background:#fff;color:var(--ink)">kb-review<small>re-verifies against the code</small></div>
-    </div>
-    <div class="callout" data-f="4" style="margin-top:18px">Don’t treat the wiki as the truth. <span class="red">The code is the truth; the wiki explains it and cites it.</span></div>
-  </div>
-  <div class="foot"><span class="brand"><i></i>LLM Wiki × OKF</span><span class="small">Idea adapted from a community write-up on turning Obsidian into an LLM Wiki</span><span class="pn"></span></div>
 </section>
 
 <!-- ================= 26. DRIFT ================= -->
