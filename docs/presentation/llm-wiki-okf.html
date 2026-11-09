@@ -321,6 +321,17 @@ body.ui #nav{opacity:1}
 .in .bar2 div{width:var(--w)}
 
 /* takeaways */
+/* ---------- code knowledge ---------- */
+.xl{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.xl div{background:#fff;border:1.5px solid var(--ink);padding:9px 12px;font-size:16px;font-weight:600;color:var(--ink)}
+.xl div.r{border-color:var(--red);color:var(--red)}
+.prob{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:center;margin-top:12px}
+.prob .n{width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.prob p{font-size:18px;color:var(--ink)}
+.strip{display:flex;align-items:center;gap:12px}
+.strip .bx{flex:1;padding:10px 16px;font-size:16px;font-weight:700;line-height:1.25}
+.strip .bx small{display:block;font-size:13px;font-weight:400;opacity:.85}
+.strip .ar{font-size:14px;font-weight:700;color:var(--red);text-align:center;line-height:1.25;flex:0 0 auto}
 .tk{display:grid;grid-template-columns:70px 1fr;gap:6px 18px;align-items:baseline;margin-bottom:16px}
 .tk .n{font-size:44px;font-weight:800;color:var(--red);line-height:1}
 .tk h3{font-size:25px}
@@ -973,6 +984,41 @@ kept the clock running; the conflict is flagged.</div>
     </div>
   </div>
   <div class="foot"><span class="brand"><i></i>LLM Wiki × OKF</span><span class="pn"></span></div>
+</section>
+
+<!-- ================= CODE KNOWLEDGE ================= -->
+<section class="slide" data-title="Code knowledge">
+  <div class="kicker">knowledgeAgent · code knowledge</div>
+  <h2>Code is the truth — but it doesn’t explain itself</h2>
+  <div class="body">
+    <div class="grid" style="grid-template-columns:1fr 1.35fr;gap:34px">
+      <div class="card r" data-f="1">
+        <h3>Just let the LLM read the code?</h3>
+        <p style="font-size:16px">Works for one answer. Three problems:</p>
+        <div class="prob"><span class="n">1</span><p>Answers are one-off</p></div>
+        <div class="prob"><span class="n">2</span><p>Context is rebuilt every time</p></div>
+        <div class="prob"><span class="n">3</span><p>Hard-won understanding never settles anywhere</p></div>
+      </div>
+      <div data-f="2">
+        <h3>A code wiki captures the <span class="red">explanation layer</span></h3>
+        <p style="font-size:16px;margin-bottom:12px">The evidence is in the source — but nobody wrote it down:</p>
+        <div class="xl">
+          <div>Project overview</div><div>Module boundaries</div><div>Call chains</div><div>Auth flow</div>
+          <div>API contracts</div><div>Deployment structure</div><div class="r">Tech debt</div><div class="r">Architecture decisions</div>
+        </div>
+        <p class="small" style="margin-top:12px">Rule of thumb: if a page could be re-derived from one file, don’t write it — let the agent read the file.</p>
+      </div>
+    </div>
+    <div class="strip" data-f="3" style="margin-top:22px">
+      <div class="bx" style="background:var(--ink);color:#fff">Source code<small>the truth · the evidence</small></div>
+      <div class="ar">⟵ cites &amp; pins<br>by git blob</div>
+      <div class="bx" style="border:2px solid var(--red);background:var(--red-l);color:var(--ink)">Wiki page<small>the explanation</small></div>
+      <div class="ar">code moves ⟶<br>needs_review</div>
+      <div class="bx" style="border:2px solid var(--ink);background:#fff;color:var(--ink)">kb-review<small>re-verifies against the code</small></div>
+    </div>
+    <div class="callout" data-f="4" style="margin-top:18px">Don’t treat the wiki as the truth. <span class="red">The code is the truth; the wiki explains it and cites it.</span></div>
+  </div>
+  <div class="foot"><span class="brand"><i></i>LLM Wiki × OKF</span><span class="small">Idea adapted from a community write-up on turning Obsidian into an LLM Wiki</span><span class="pn"></span></div>
 </section>
 
 <!-- ================= 26. DRIFT ================= -->
