@@ -139,8 +139,7 @@ body.ui #nav{opacity:1}
 .tl .st h3{margin-top:4px}
 .tl .st p{font-size:17px}
 .meter{height:12px;background:var(--soft2);margin-top:14px;position:relative;overflow:hidden}
-.meter i{position:absolute;left:0;top:0;bottom:0;background:var(--ink);width:0;transition:width 1.1s ease .2s}
-.in .meter i{width:var(--w)}
+.meter i{position:absolute;left:0;top:0;bottom:0;background:var(--ink);width:var(--w)}
 .meter.bad i{background:var(--red)}
 .meterlbl{font-size:13px;color:var(--grey);margin-top:4px;letter-spacing:.04em}
 
@@ -426,12 +425,12 @@ body.ui #nav{opacity:1}
   <h2>Six ways technical documentation lets us down</h2>
   <div class="body">
     <div class="grid g3">
-      <div class="card r" data-f="1"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><h3>Scattered</h3><p>Wikis, SharePoint, PDFs, tickets, code comments, chat threads. No single place to look — so people don’t.</p></div>
-      <div class="card r" data-f="2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><h3>Stale</h3><p>The code moved on; the doc didn’t. Nothing tells you <i>when</i> it stopped being true.</p></div>
-      <div class="card r" data-f="3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M12 9v4M12 16h.01"/></svg><h3>Untrusted</h3><p>No signal separating “verified last week” from “written years ago by someone who has left”.</p></div>
-      <div class="card r" data-f="4"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h16M4 17h7"/><path d="M17 4l4 4M21 4l-4 4"/></svg><h3>Contradictory</h3><p>Three pages, three answers. Which one wins? Usually: whoever you asked last.</p></div>
-      <div class="card r" data-f="5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M16 11h6M19 8l3 3-3 3"/></svg><h3>Tribal</h3><p>The real knowledge lives in a few heads — and walks out of the door with them.</p></div>
-      <div class="card r" data-f="6"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h4"/><path d="M3 21L21 3" stroke-width="2.4"/></svg><h3>Write-only</h3><p>Written for the release milestone, then never read, linked, or updated again.</p></div>
+      <div class="card r"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><h3>Scattered</h3><p>Wikis, SharePoint, PDFs, tickets, code comments, chat threads. No single place to look — so people don’t.</p></div>
+      <div class="card r"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><h3>Stale</h3><p>The code moved on; the doc didn’t. Nothing tells you <i>when</i> it stopped being true.</p></div>
+      <div class="card r"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M12 9v4M12 16h.01"/></svg><h3>Untrusted</h3><p>No signal separating “verified last week” from “written years ago by someone who has left”.</p></div>
+      <div class="card r"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h16M4 17h7"/><path d="M17 4l4 4M21 4l-4 4"/></svg><h3>Contradictory</h3><p>Three pages, three answers. Which one wins? Usually: whoever you asked last.</p></div>
+      <div class="card r"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M16 11h6M19 8l3 3-3 3"/></svg><h3>Tribal</h3><p>The real knowledge lives in a few heads — and walks out of the door with them.</p></div>
+      <div class="card r"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h4"/><path d="M3 21L21 3" stroke-width="2.4"/></svg><h3>Write-only</h3><p>Written for the release milestone, then never read, linked, or updated again.</p></div>
     </div>
   </div>
   <div class="foot"><span class="brand"><i></i>LLM Wiki × OKF</span><span class="pn"></span></div>
@@ -443,16 +442,16 @@ body.ui #nav{opacity:1}
   <h2>How a technical document dies — a story every team knows</h2>
   <div class="body">
     <div class="tl">
-      <div class="st" data-f="1"><span class="dot"></span><div class="when">Day 1</div><h3>Written &amp; reviewed</h3><p>The interface spec is accurate, complete, approved.</p>
+      <div class="st"><span class="dot"></span><div class="when">Day 1</div><h3>Written &amp; reviewed</h3><p>The interface spec is accurate, complete, approved.</p>
         <div class="meter"><i style="--w:96%"></i></div><div class="meterlbl">Matches reality</div></div>
-      <div class="st bad" data-f="2"><span class="dot"></span><div class="when">Month 2</div><h3>Code changes</h3><p>A sprint refactors the interface. Updating the spec isn’t in the Definition of Done.</p>
+      <div class="st bad"><span class="dot"></span><div class="when">Month 2</div><h3>Code changes</h3><p>A sprint refactors the interface. Updating the spec isn’t in the Definition of Done.</p>
         <div class="meter bad"><i style="--w:70%"></i></div><div class="meterlbl">Silently drifting</div></div>
-      <div class="st bad" data-f="3"><span class="dot"></span><div class="when">Month 6</div><h3>Someone trusts it</h3><p>A new engineer follows the spec and builds against behaviour that no longer exists.</p>
+      <div class="st bad"><span class="dot"></span><div class="when">Month 6</div><h3>Someone trusts it</h3><p>A new engineer follows the spec and builds against behaviour that no longer exists.</p>
         <div class="meter bad"><i style="--w:42%"></i></div><div class="meterlbl">Actively misleading</div></div>
-      <div class="st bad" data-f="4"><span class="dot"></span><div class="when">Month 12</div><h3>Nobody trusts it</h3><p>The team stops reading the wiki and asks people instead. Knowledge becomes tribal again.</p>
+      <div class="st bad"><span class="dot"></span><div class="when">Month 12</div><h3>Nobody trusts it</h3><p>The team stops reading the wiki and asks people instead. Knowledge becomes tribal again.</p>
         <div class="meter bad"><i style="--w:15%"></i></div><div class="meterlbl">Abandoned</div></div>
     </div>
-    <div class="callout" data-f="5" style="margin-top:36px">Docs don’t fail at <span class="red">writing</span> time. They fail at <span class="red">maintenance</span> time — and nothing tells us when it happens.</div>
+    <div class="callout" style="margin-top:36px">Docs don’t fail at <span class="red">writing</span> time. They fail at <span class="red">maintenance</span> time — and nothing tells us when it happens.</div>
   </div>
   <div class="foot"><span class="brand"><i></i>LLM Wiki × OKF</span><span class="small">Illustrative story, not measured data</span><span class="pn"></span></div>
 </section>
@@ -463,7 +462,7 @@ body.ui #nav{opacity:1}
   <h2>The bottleneck is the bookkeeping, not the thinking</h2>
   <div class="body mid">
     <div class="grid g2" style="gap:30px">
-      <div class="card" data-f="1">
+      <div class="card">
         <h3>What people are good at</h3>
         <ul class="clean" style="margin-top:12px">
           <li>Deciding which sources matter</li>
@@ -472,7 +471,7 @@ body.ui #nav{opacity:1}
           <li>Seeing what it all means for the product</li>
         </ul>
       </div>
-      <div class="card r" data-f="2">
+      <div class="card r">
         <h3>What people quietly stop doing</h3>
         <ul class="clean" style="margin-top:12px">
           <li>Updating every page a change touches</li>
@@ -483,7 +482,7 @@ body.ui #nav{opacity:1}
         </ul>
       </div>
     </div>
-    <div class="callout" data-f="3" style="margin-top:28px">The tedious right-hand column is exactly the work an LLM <span class="red">doesn’t get tired of</span>.</div>
+    <div class="callout" style="margin-top:28px">The tedious right-hand column is exactly the work an LLM <span class="red">doesn’t get tired of</span>.</div>
   </div>
   <div class="foot"><span class="brand"><i></i>LLM Wiki × OKF</span><span class="pn"></span></div>
 </section>
