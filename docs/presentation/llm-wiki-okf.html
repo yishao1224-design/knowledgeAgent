@@ -520,7 +520,7 @@ body.ui #nav{opacity:1}
       <!-- query row -->
       <g class="grp" data-f="2">
         <text x="0" y="214" style="font-size:13px;font-weight:700;letter-spacing:.12em;fill:#6E6E6E">QUERY TIME · EVERY SINGLE QUESTION</text>
-        <rect class="box r" x="0" y="236" width="180" height="90"/><text class="lbl" x="90" y="276" text-anchor="middle">Question</text><text class="sub" x="90" y="298" text-anchor="middle">“What does E42 mean?”</text>
+        <rect class="box r" x="0" y="236" width="180" height="90"/><text class="lbl" x="90" y="276" text-anchor="middle">Question</text><text class="sub" x="90" y="298" text-anchor="middle">“What does ON_HOLD do?”</text>
         <path class="arr draw" pathLength="1" d="M182 281H262"/>
         <rect class="box" x="266" y="236" width="180" height="90"/><text class="lbl" x="356" y="276" text-anchor="middle">Embed</text><text class="sub" x="356" y="298" text-anchor="middle">question → vector</text>
         <path class="arr draw" pathLength="1" d="M448 281H528"/>
@@ -628,7 +628,7 @@ body.ui #nav{opacity:1}
         <div class="layer" data-f="1" data-a="left">
           <div class="lh"><span class="t">Raw sources</span><span class="o">immutable</span></div>
           <div class="lb"><p>The evidence: specs, articles, tickets, transcripts. The LLM reads them — never edits them.</p>
-            <div class="files"><span>sources/2026-11-08-spec.md</span><span>sources/assets/</span></div></div>
+            <div class="files"><span>sources/2026-11-08-wo-api-v3.md</span><span>sources/assets/</span></div></div>
         </div>
       </div>
       <div class="ops">
@@ -672,7 +672,7 @@ body.ui #nav{opacity:1}
         <text x="14" y="304" class="t-md">okf/sources/</text>
         <g class="i-lock" transform="translate(180,288)"><rect x="0" y="9" width="20" height="15" fill="#1F1F1F"/><path d="M4 9V6a6 6 0 0 1 12 0v3" fill="none" stroke="#1F1F1F" stroke-width="3"/></g>
         <text x="14" y="455" class="t-sm">immutable · git is the tamper record</text>
-        <text class="i-capname t-mono" x="14" y="415">2026-11-08-motor-spec.md</text>
+        <text class="i-capname t-mono" x="14" y="415">2026-11-08-wo-api-v3.md</text>
 
         <!-- flow lines -->
         <path class="i-flowline i-f1" pathLength="1" d="M60 165 V280"/>
@@ -684,7 +684,7 @@ body.ui #nav{opacity:1}
           <path class="doc" d="M0 0H64L84 20V110H0Z"/><path d="M64 0V20H84" fill="none" stroke="#1F1F1F" stroke-width="2"/>
           <line class="docl" x1="12" y1="36" x2="70" y2="36"/><line class="docl" x1="12" y1="50" x2="70" y2="50"/><line class="docl" x1="12" y1="64" x2="56" y2="64"/><line class="docl" x1="12" y1="78" x2="66" y2="78"/>
           <rect x="0" y="92" width="38" height="18" fill="#E2000F"/><text x="19" y="105" text-anchor="middle" style="font-size:11px;font-weight:700;fill:#fff">PDF</text>
-          <text x="96" y="20" class="t-md">Motor controller</text><text x="96" y="38" class="t-md">spec v3</text><text x="96" y="56" class="t-sm">new source</text>
+          <text x="96" y="20" class="t-md">Work order API</text><text x="96" y="38" class="t-md">spec v3</text><text x="96" y="56" class="t-sm">new source</text>
         </g>
         <g class="i-copy">
           <path class="doc" d="M0 0H64L84 20V110H0Z" style="stroke:#E2000F"/><path d="M64 0V20H84" fill="none" stroke="#E2000F" stroke-width="2"/>
@@ -718,21 +718,21 @@ body.ui #nav{opacity:1}
         <line class="i-newedge e2" pathLength="1" x1="695" y1="440" x2="705" y2="210"/>
         <line class="i-newedge e3" pathLength="1" x1="695" y1="440" x2="525" y2="390"/>
         <line class="i-newedge e4" pathLength="1" x1="695" y1="440" x2="600" y2="310"/>
-        <g class="i-node up"><rect x="545" y="113" width="130" height="34"/><text x="610" y="135" text-anchor="middle">Motor Controller</text></g>
-        <g class="i-node up"><rect x="650" y="193" width="112" height="34"/><text x="706" y="215" text-anchor="middle">Fault Codes</text></g>
-        <g class="i-node"><rect x="462" y="208" width="116" height="34"/><text x="520" y="230" text-anchor="middle">CAN Protocol</text></g>
-        <g class="i-node up"><rect x="538" y="293" width="124" height="34"/><text x="600" y="315" text-anchor="middle">Commissioning</text></g>
-        <g class="i-node"><rect x="466" y="373" width="118" height="34"/><text x="525" y="395" text-anchor="middle">Firmware 2.x</text></g>
+        <g class="i-node up"><rect x="545" y="113" width="130" height="34"/><text x="610" y="135" text-anchor="middle">Work Order</text></g>
+        <g class="i-node up"><rect x="650" y="193" width="112" height="34"/><text x="706" y="215" text-anchor="middle">Status Codes</text></g>
+        <g class="i-node"><rect x="462" y="208" width="116" height="34"/><text x="520" y="230" text-anchor="middle">Dispatch</text></g>
+        <g class="i-node up"><rect x="538" y="293" width="124" height="34"/><text x="600" y="315" text-anchor="middle">Offline Sync</text></g>
+        <g class="i-node"><rect x="466" y="373" width="118" height="34"/><text x="525" y="395" text-anchor="middle">REST API v2</text></g>
         <!-- badges -->
         <g class="i-badge upd"><rect x="630" y="100" width="58" height="18" fill="#E2000F"/><text x="659" y="113" text-anchor="middle" style="font-size:10.5px;font-weight:700;fill:#fff">UPDATED</text></g>
         <g class="i-badge upd"><rect x="590" y="280" width="58" height="18" fill="#E2000F"/><text x="619" y="293" text-anchor="middle" style="font-size:10.5px;font-weight:700;fill:#fff">UPDATED</text></g>
         <g class="i-badge"><rect x="660" y="172" width="112" height="20" fill="#FFF3DF" stroke="#C77700"/><text x="716" y="186" text-anchor="middle" style="font-size:10.5px;font-weight:700;fill:#C77700">⚠ CONTESTED · REVIEW</text></g>
-        <g class="i-new"><rect x="636" y="423" width="118" height="34"/><text class="nm" x="695" y="445" text-anchor="middle">Firmware 3.0</text>
+        <g class="i-new"><rect x="636" y="423" width="118" height="34"/><text class="nm" x="695" y="445" text-anchor="middle">REST API v3</text>
           <text class="stat d" x="695" y="474" text-anchor="middle">NEW · DRAFT</text><text class="stat a" x="695" y="474" text-anchor="middle">ACTIVE</text></g>
 
         <!-- log line -->
         <g class="i-log"><rect x="0" y="466" width="440" height="30" fill="#1F1F1F"/>
-          <text x="10" y="486" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;fill:#EDEDED"><tspan fill="#FF8A92">## 2026-11-08</tspan>  Ingestion: spec v3 → 3 updated, 1 new</text></g>
+          <text x="10" y="486" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;fill:#EDEDED"><tspan fill="#FF8A92">## 2026-11-08</tspan>  Ingestion: WO API v3 → 3 updated, 1 new</text></g>
         <!-- lint -->
         <g class="i-lint"><rect x="262" y="104" width="146" height="40" fill="#2E7D4F"/><text x="335" y="129" text-anchor="middle" style="font-size:15px;font-weight:700;fill:#fff">✓ lint · 0 errors</text></g>
       </svg>
@@ -756,9 +756,9 @@ body.ui #nav{opacity:1}
           <div class="s" data-f="4"><span class="n" style="background:var(--red)">4</span>Flag anything under review or deprecated</div>
           <div class="s" data-f="5"><span class="n" style="background:var(--red)">5</span>File a substantial answer back as a page</div>
         </div>
-        <div class="code" data-f="4" style="margin-top:18px;font-size:13.5px;white-space:pre-wrap">E42 means <b style="color:#fff">over-temperature on the power stage</b> [spec-v3].
-<span class="k">⚠ /concepts/fault-codes.md is under review:</span> spec v2
-defined E42 differently; the conflict is flagged.</div>
+        <div class="code" data-f="4" style="margin-top:18px;font-size:13.5px;white-space:pre-wrap">ON_HOLD <b style="color:#fff">pauses the SLA clock</b> [wo-api-v3].
+<span class="k">⚠ /concepts/status-codes.md is under review:</span> API v2
+kept the clock running; the conflict is flagged.</div>
       </div>
       <div>
         <h3 data-f="6">Lint</h3>
@@ -869,7 +869,7 @@ defined E42 differently; the conflict is flagged.</div>
         <li data-f="5">Readers must be <b>permissive</b>: unknown keys preserved, broken links tolerated — so profiles can extend it safely.</li>
         <li class="small" data-f="5" style="font-size:15px">Spec: GoogleCloudPlatform/open-knowledge-format</li>
       </ul>
-      <div class="code okfcode" data-f="1"><span class="ln">---</span><span class="ln" data-hl="2"><span class="k">type</span>: Entity</span><span class="ln"><span class="k">title</span>: Motor Controller</span><span class="ln"><span class="k">description</span>: Drive unit for …</span><span class="ln" data-hl="4"><span class="k">status</span>: stable</span><span class="ln" data-hl="4"><span class="k">stale_after</span>: 2027-02-08</span><span class="ln" data-hl="4"><span class="k">sources</span>:</span><span class="ln" data-hl="4">  - <span class="k">resource</span>: /sources/2026-11-08-spec.md</span><span class="ln" data-hl="4">    <span class="k">id</span>: spec-v3</span><span class="ln" data-hl="4"><span class="k">generated</span>: {by: claude-code, at: 2026-11-08}</span><span class="ln" data-hl="5"><span class="k">lifecycle</span>: active   <span class="c"># extension key</span></span><span class="ln">---</span><span class="ln"># Motor Controller</span><span class="ln">Rated for … <span class="s">[spec-v3]</span></span></div>
+      <div class="code okfcode" data-f="1"><span class="ln">---</span><span class="ln" data-hl="2"><span class="k">type</span>: Entity</span><span class="ln"><span class="k">title</span>: Work Order</span><span class="ln"><span class="k">description</span>: A unit of field work …</span><span class="ln" data-hl="4"><span class="k">status</span>: stable</span><span class="ln" data-hl="4"><span class="k">stale_after</span>: 2027-02-08</span><span class="ln" data-hl="4"><span class="k">sources</span>:</span><span class="ln" data-hl="4">  - <span class="k">resource</span>: /sources/2026-11-08-wo-api-v3.md</span><span class="ln" data-hl="4">    <span class="k">id</span>: wo-api-v3</span><span class="ln" data-hl="4"><span class="k">generated</span>: {by: claude-code, at: 2026-11-08}</span><span class="ln" data-hl="5"><span class="k">lifecycle</span>: active   <span class="c"># extension key</span></span><span class="ln">---</span><span class="ln"># Work Order</span><span class="ln">Assigned by dispatch, synced offline … <span class="s">[wo-api-v3]</span></span></div>
     </div>
   </div>
   <div class="foot"><span class="brand"><i></i>LLM Wiki × OKF</span><span class="pn"></span></div>
@@ -1009,7 +1009,7 @@ defined E42 differently; the conflict is flagged.</div>
       <tbody>
         <tr data-f="1"><td>Bootstrap</td><td><code>kb-setup</code></td><td>“Set up the knowledge base”</td><td>Scaffolds <code>okf/</code> and drops in <code>okf.py</code></td></tr>
         <tr data-f="2"><td>Capture</td><td><code>kb-ingest</code></td><td>“Ingest this spec”</td><td>Immutable snapshot → draft pages → cross-links → active → index + log</td></tr>
-        <tr data-f="3"><td>Serve</td><td><code>kb-query</code></td><td>“What do we know about E42?”</td><td>Answers with citations and trust labels; files good answers back</td></tr>
+        <tr data-f="3"><td>Serve</td><td><code>kb-query</code></td><td>“What does ON_HOLD do to the SLA?”</td><td>Answers with citations and trust labels; files good answers back</td></tr>
         <tr data-f="4"><td>Verify</td><td><code>kb-review</code></td><td>“Work the review queue”</td><td>Re-checks overdue or drifted pages; resolves contradictions</td></tr>
         <tr data-f="5"><td>Garden</td><td><code>kb-curate</code></td><td>“Clean up duplicates”</td><td>Merges, splits, deprecates, archives — keeps links whole</td></tr>
         <tr data-f="6"><td>Audit</td><td><code>kb-lint</code></td><td>“Check the bundle”</td><td>Runs <code>okf.py lint</code> and fixes what it reports</td></tr>
@@ -1082,8 +1082,8 @@ python scripts/okf.py drift</div>
         <h3 data-f="3">3 · Then just talk to your agent</h3>
         <div class="chain">
           <div class="s" data-f="3"><span class="n" style="background:var(--red)">›</span>“Set up the knowledge base”</div>
-          <div class="s" data-f="4"><span class="n" style="background:var(--red)">›</span>“Ingest this design spec”</div>
-          <div class="s" data-f="5"><span class="n" style="background:var(--red)">›</span>“What do we know about fault E42?”</div>
+          <div class="s" data-f="4"><span class="n" style="background:var(--red)">›</span>“Ingest the work order API spec”</div>
+          <div class="s" data-f="5"><span class="n" style="background:var(--red)">›</span>“What does ON_HOLD do to the SLA?”</div>
           <div class="s" data-f="6"><span class="n" style="background:var(--red)">›</span>“Work the review queue”</div>
         </div>
         <div class="card r" data-f="7" style="margin-top:22px"><b>Start small.</b><p>One team, one domain, one bundle. Ingest what you already re-explain every week — and let it compound.</p></div>
