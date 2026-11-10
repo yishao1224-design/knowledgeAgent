@@ -21,14 +21,14 @@ okf_version: "0.2"
 * [MarkItDown](entities/markitdown.md) - Microsoft's Python utility that converts binary formats (PDF, Office, images, audio) to LLM-oriented Markdown — assessed as an optional extraction helper for this bundle's capture step, not adopted into any skill.
 * [The Lifecycle Skill Suite](entities/lifecycle-skills.md) - The five lifecycle skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) — one per phase, with strict division of responsibility — plus the kb-setup bootstrap skill that scaffolds a bundle in a fresh project.
 * [ado-workitem-sync — ADO Retrieval Toolchain](entities/ado-workitem-sync.md) - Removed 2026-08-26 — the scripts/ado.py + ado-workitem-sync skill pair that synced Azure DevOps work items into local analysis folders; kept for the rev-stamp provenance and code-vs-judgment design record. *(deprecated)*
-* [codebase-memory-mcp](entities/codebase-memory-mcp.md) - MCP server by DeusData that indexes codebases into a queryable SQLite knowledge graph (tree-sitter + hybrid LSP) with automatic freshness via git watching.
+* [codebase-memory-mcp](entities/codebase-memory-mcp.md) - MCP server by DeusData that indexes code, documentation and infrastructure into a local SQLite knowledge graph (tree-sitter + hybrid LSP), kept fresh by session-scoped git watching.
 * [okf.py — the Mechanical Toolchain](entities/okf-toolchain.md) - The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
-* [openwiki](entities/openwiki.md) - LangChain's TypeScript CLI that auto-generates and schedule-refreshes agent-optimized wikis (repo docs or a personal brain) from pluggable connectors — the regenerate-often counterpart to this bundle's curated lifecycle. *(needs_review)*
+* [openwiki](entities/openwiki.md) - LangChain's openwiki — generates and incrementally maintains linked Markdown wikis (repo docs or a personal brain), run inside coding agents or as a standalone CLI, with evidence-tracked "Grounded Claims" and OKF v0.2 output — the claim-level, auto-reconciling counterpart to this bundle's page-level curated lifecycle.
 
 # Comparisons
 
 * [codebase-memory-mcp vs the kb wiki](comparisons/codebase-memory-mcp-vs-kb-wiki.md) - Why a derived code-knowledge graph and a curated OKF bundle are complementary layers, where they overlap (ADRs), and a phased integration plan.
-* [openwiki vs the kb bundle](comparisons/openwiki-vs-kb-bundle.md) - A generator product vs a curation discipline — where openwiki's regenerate-often bet and this bundle's lifecycle bet each win, their independent convergences, and what each could borrow. *(needs_review)*
+* [openwiki vs the kb bundle](comparisons/openwiki-vs-kb-bundle.md) - A generator product vs a curation discipline — openwiki reconciles per-claim evidence automatically, this bundle curates per-page trust through a lifecycle; where each wins, how they converged (both now emit OKF v0.2), and what each could borrow.
 
 # Queries
 
@@ -39,6 +39,7 @@ okf_version: "0.2"
 # Sources
 
 * [DeusData codebase-memory-mcp README](sources/2026-07-06-codebase-memory-mcp.md) - Condensed capture of the codebase-memory-mcp project README from GitHub (fetched 2026-07-06).
+* [DeusData codebase-memory-mcp README](sources/2026-11-10-codebase-memory-mcp.md) - Condensed capture of the codebase-memory-mcp project README from GitHub (fetched 2026-11-10), covering its 17 MCP tools, 162-language indexing, session-scoped git watching, ADR storage, 46-client installer, CBM Lens UI and release security.
 * [Lifecycle skills (canonical SKILL.md files)](sources/2026-07-06-lifecycle-skills.md) - Faithful condensation of the five canonical lifecycle skills under skills/ (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) as of 2026-07-06.
 * [Microsoft MarkItDown README](sources/2026-07-11-markitdown.md) - Condensed capture of the microsoft/markitdown project README from GitHub (fetched 2026-07-11).
 * [Microsoft MarkItDown README](sources/2026-11-10-markitdown.md) - Condensed capture of the microsoft/markitdown project README from GitHub (fetched 2026-11-10); a faithful condensation, not verbatim, taken from raw main/README.md.
@@ -47,4 +48,5 @@ okf_version: "0.2"
 * [Q&A: governance, cross-tool federation, and token cost of an LLM Wiki](sources/2026-11-10-governance-federation-cost-qa.md) - Faithful condensation of three audience questions on the LLM Wiki × OKF talk and the answers given in a Claude Code session (2026-11-09/10) — agent-generated recommendations, not externally verified.
 * [ado.py + ado-workitem-sync skill (retrieval toolchain pair)](sources/2026-07-09-ado-workitem-sync.md) - Faithful condensation of scripts/ado.py and skills/ado-workitem-sync/SKILL.md — subcommands, normalization port provenance, rev-stamp staleness model — as of 2026-07-09.
 * [langchain-ai/openwiki README](sources/2026-07-12-openwiki.md) - Condensed capture of the openwiki project README from GitHub (fetched 2026-07-12) — CLI that auto-generates agent-optimized wikis for codebases and personal knowledge.
+* [langchain-ai/openwiki README](sources/2026-11-10-openwiki.md) - Condensed capture of the openwiki project README from GitHub (fetched 2026-11-10) — coding-agent integrations, code and personal modes, Grounded Claims evidence tracking, OKF v0.2 output, connectors, model providers, scheduled CI updates, and wiki workspaces.
 * [okf.py — mechanical toolchain (scripts/okf.py)](sources/2026-07-07-okf-toolchain.md) - Faithful condensation of scripts/okf.py — the six subcommands and the exact conformance/lifecycle rules its lint enforces, as of 2026-07-07.
