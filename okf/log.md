@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-11-10
+* **Ingestion**: three audience questions on the LLM Wiki × OKF talk from [capture](/sources/2026-11-10-governance-federation-cost-qa.md); created draft Query pages [governance for AI-generated knowledge](/queries/governance-for-ai-generated-knowledge.md), [OKF as a unified knowledge layer](/queries/okf-unified-knowledge-layer-across-tools.md) and [token cost of the LLM Wiki](/queries/token-cost-of-the-llm-wiki.md) (all unverified, low confidence); cross-linked from [pr-quality-gates](/concepts/pr-quality-gates.md), [ingesting-requirements](/concepts/ingesting-requirements-from-ticket-systems.md) and [adopting-the-bundle-pattern](/concepts/adopting-the-bundle-pattern.md).
+
 ## 2026-08-27
 * **Update**: fixed a provenance hole in [kb-review](/entities/lifecycle-skills.md) — the rewrite verdict advanced only `generated.at`, so a rewrite by a different agent kept the previous producer in `generated.by` and misattributed the new text. `generated` is now replaced wholesale as one provenance event, stated in both the skill and [SCHEMA.md](/SCHEMA.md).
 * **Update**: wired up the v0.2 `generated: { by, at }` trust field — kb-ingest now stamps it on every page it writes or materially rewrites (`<tool>/<version>`, today), kb-review advances it when it rewrites claims, and lint validates the shape of `generated`/`verified` when present. Absence is deliberately not warned: an unstamped page honestly records that nobody claimed authorship, and a presence warning would push queue-clearing into inventing records. `generated` (what produced it) and `verified` (who confirmed it) are kept strictly apart in [SCHEMA.md](/SCHEMA.md) and [okf-toolchain](/entities/okf-toolchain.md).

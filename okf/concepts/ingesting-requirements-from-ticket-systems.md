@@ -6,7 +6,7 @@ status: stable
 lifecycle: active
 confidence: low
 created: 2026-07-06
-updated: 2026-08-27
+updated: 2026-11-10
 stale_after: 2026-08-08
 tags: [unverified]
 ---
@@ -37,6 +37,13 @@ nothing over the tracker. Split responsibilities:
 | Story status, sprint, assignment, acceptance-criteria churn | Business rules and constraints distilled from stories (`Concept`) |
 | The authoritative current story text | Personas, external systems, features (`Entity`) |
 | — | Raw story text *as fetched*, only as immutable dated `/sources/` captures backing the pages above |
+
+The same split generalises beyond work-item trackers: Polarion,
+Confluence, ServiceNow and GitHub each stay the system of record, and
+the bundle cites them by id plus revision. How to do that across tools
+while preserving permissions is sketched in
+[OKF as a unified knowledge layer](/queries/okf-unified-knowledge-layer-across-tools.md)
+(a draft, unverified proposal).
 
 ## Access paths to Azure DevOps (pick by use shape, not one ranking)
 

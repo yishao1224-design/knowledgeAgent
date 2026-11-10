@@ -6,7 +6,7 @@ status: stable
 lifecycle: active
 confidence: low
 created: 2026-07-06
-updated: 2026-08-27
+updated: 2026-11-10
 stale_after: 2026-08-06
 tags: [unverified]
 ---
@@ -69,3 +69,10 @@ enforced over time. Teams adopting the bundle (see
 should wire Tier 1 in from day one; automated pipelines writing to the
 bundle rely on the same gates as their transaction boundary — see
 [automating the lifecycle](/concepts/automating-the-lifecycle.md).
+
+At organisation scale the same three tiers become the publication
+pipeline, extended with a secrets/personal-data scan, a classification
+check, and discoverability tiers that only let human-verified pages
+into an organisation-wide catalog — see
+[governance for AI-generated knowledge](/queries/governance-for-ai-generated-knowledge.md)
+(a draft, unverified proposal).

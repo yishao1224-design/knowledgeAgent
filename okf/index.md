@@ -30,6 +30,12 @@ okf_version: "0.2"
 * [codebase-memory-mcp vs the kb wiki](comparisons/codebase-memory-mcp-vs-kb-wiki.md) - Why a derived code-knowledge graph and a curated OKF bundle are complementary layers, where they overlap (ADRs), and a phased integration plan.
 * [openwiki vs the kb bundle](comparisons/openwiki-vs-kb-bundle.md) - A generator product vs a curation discipline — where openwiki's regenerate-often bet and this bundle's lifecycle bet each win, their independent convergences, and what each could borrow. *(needs_review)*
 
+# Queries
+
+* [Governance for AI-Generated Knowledge at Organisation Scale](queries/governance-for-ai-generated-knowledge.md) - How to validate, approve and version agent-written knowledge before it becomes discoverable across a large organisation — discoverability tiers, roles, a three-stage PR pipeline, git as the version system.
+* [OKF as a Unified Knowledge Layer Across Enterprise Tools](queries/okf-unified-knowledge-layer-across-tools.md) - Whether OKF can unify knowledge from Polarion, Azure DevOps, GitHub, Confluence and ServiceNow while preserving permissions and source-of-truth ownership — yes, as a federation of bundles, with three permission rules.
+* [Token Cost of an LLM-Maintained Wiki](queries/token-cost-of-the-llm-wiki.md) - Rough token counts per ingest, review and question, where the wiki adds or saves tokens versus re-reading raw documents and RAG, and the main growth driver (index size).
+
 # Sources
 
 * [DeusData codebase-memory-mcp README](sources/2026-07-06-codebase-memory-mcp.md) - Condensed capture of the codebase-memory-mcp project README from GitHub (fetched 2026-07-06).
@@ -37,6 +43,7 @@ okf_version: "0.2"
 * [Microsoft MarkItDown README](sources/2026-07-11-markitdown.md) - Condensed capture of the microsoft/markitdown project README from GitHub (fetched 2026-07-11).
 * [Open Knowledge Format (OKF) v0.1 Specification](sources/2026-07-05-okf-spec-v0-1.md) - Condensed capture of the OKF v0.1 spec from GoogleCloudPlatform/knowledge-catalog.
 * [Open Knowledge Format (OKF) v0.2 Specification](sources/2026-08-27-okf-spec-v0-2.md) - Condensed capture of the OKF v0.2 spec from the format's new standalone repository, GoogleCloudPlatform/open-knowledge-format.
+* [Q&A: governance, cross-tool federation, and token cost of an LLM Wiki](sources/2026-11-10-governance-federation-cost-qa.md) - Faithful condensation of three audience questions on the LLM Wiki × OKF talk and the answers given in a Claude Code session (2026-11-09/10) — agent-generated recommendations, not externally verified.
 * [ado.py + ado-workitem-sync skill (retrieval toolchain pair)](sources/2026-07-09-ado-workitem-sync.md) - Faithful condensation of scripts/ado.py and skills/ado-workitem-sync/SKILL.md — subcommands, normalization port provenance, rev-stamp staleness model — as of 2026-07-09.
 * [langchain-ai/openwiki README](sources/2026-07-12-openwiki.md) - Condensed capture of the openwiki project README from GitHub (fetched 2026-07-12) — CLI that auto-generates agent-optimized wikis for codebases and personal knowledge.
 * [okf.py — mechanical toolchain (scripts/okf.py)](sources/2026-07-07-okf-toolchain.md) - Faithful condensation of scripts/okf.py — the six subcommands and the exact conformance/lifecycle rules its lint enforces, as of 2026-07-07.

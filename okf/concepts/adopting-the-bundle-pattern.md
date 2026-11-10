@@ -6,7 +6,7 @@ status: stable
 lifecycle: active
 confidence: low
 created: 2026-07-06
-updated: 2026-08-26
+updated: 2026-11-10
 stale_after: 2026-08-06
 tags: [unverified]
 ---
@@ -120,3 +120,7 @@ churn it. When requirements live in an external tracker, follow
   to fit the domain; update SCHEMA.md and re-run `okf.py index` if so.
 - Conventions in this bundle's own [SCHEMA.md](/SCHEMA.md) are the
   reference implementation to compare against.
+- **Bundle size vs token cost** — every session reads `index.md`
+  (~55 tokens per entry), so a bundle past a few hundred pages should be
+  split by domain or given a search tool; rough per-operation token
+  counts are in [token cost of the LLM Wiki](/queries/token-cost-of-the-llm-wiki.md).
