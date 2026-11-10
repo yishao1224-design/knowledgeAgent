@@ -7,8 +7,11 @@ lifecycle: active
 confidence: low
 created: 2026-07-06
 updated: 2026-11-10
-stale_after: 2026-08-08
+stale_after: 2026-12-10
 tags: [unverified]
+verified:
+  - by: claude-code/2.1.322
+    at: 2026-11-10
 ---
 
 # Ingesting Requirements from Ticket Systems

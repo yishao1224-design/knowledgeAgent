@@ -18,8 +18,8 @@ okf_version: "0.2"
 
 # Entities
 
-* [MarkItDown](entities/markitdown.md) - Microsoft's Python utility that converts binary formats (PDF, Office, images, audio) to LLM-optimized Markdown — assessed as an optional extraction helper for this bundle's capture step, not adopted into any skill.
-* [The Lifecycle Skill Suite](entities/lifecycle-skills.md) - The five canonical skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) that drive the knowledge lifecycle — one per phase, with strict division of responsibility.
+* [MarkItDown](entities/markitdown.md) - Microsoft's Python utility that converts binary formats (PDF, Office, images, audio) to LLM-oriented Markdown — assessed as an optional extraction helper for this bundle's capture step, not adopted into any skill.
+* [The Lifecycle Skill Suite](entities/lifecycle-skills.md) - The five lifecycle skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) — one per phase, with strict division of responsibility — plus the kb-setup bootstrap skill that scaffolds a bundle in a fresh project.
 * [ado-workitem-sync — ADO Retrieval Toolchain](entities/ado-workitem-sync.md) - Removed 2026-08-26 — the scripts/ado.py + ado-workitem-sync skill pair that synced Azure DevOps work items into local analysis folders; kept for the rev-stamp provenance and code-vs-judgment design record. *(deprecated)*
 * [codebase-memory-mcp](entities/codebase-memory-mcp.md) - MCP server by DeusData that indexes codebases into a queryable SQLite knowledge graph (tree-sitter + hybrid LSP) with automatic freshness via git watching.
 * [okf.py — the Mechanical Toolchain](entities/okf-toolchain.md) - The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
@@ -41,6 +41,7 @@ okf_version: "0.2"
 * [DeusData codebase-memory-mcp README](sources/2026-07-06-codebase-memory-mcp.md) - Condensed capture of the codebase-memory-mcp project README from GitHub (fetched 2026-07-06).
 * [Lifecycle skills (canonical SKILL.md files)](sources/2026-07-06-lifecycle-skills.md) - Faithful condensation of the five canonical lifecycle skills under skills/ (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) as of 2026-07-06.
 * [Microsoft MarkItDown README](sources/2026-07-11-markitdown.md) - Condensed capture of the microsoft/markitdown project README from GitHub (fetched 2026-07-11).
+* [Microsoft MarkItDown README](sources/2026-11-10-markitdown.md) - Condensed capture of the microsoft/markitdown project README from GitHub (fetched 2026-11-10); a faithful condensation, not verbatim, taken from raw main/README.md.
 * [Open Knowledge Format (OKF) v0.1 Specification](sources/2026-07-05-okf-spec-v0-1.md) - Condensed capture of the OKF v0.1 spec from GoogleCloudPlatform/knowledge-catalog.
 * [Open Knowledge Format (OKF) v0.2 Specification](sources/2026-08-27-okf-spec-v0-2.md) - Condensed capture of the OKF v0.2 spec from the format's new standalone repository, GoogleCloudPlatform/open-knowledge-format.
 * [Q&A: governance, cross-tool federation, and token cost of an LLM Wiki](sources/2026-11-10-governance-federation-cost-qa.md) - Faithful condensation of three audience questions on the LLM Wiki × OKF talk and the answers given in a Claude Code session (2026-11-09/10) — agent-generated recommendations, not externally verified.

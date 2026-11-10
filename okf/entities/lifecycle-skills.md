@@ -1,13 +1,13 @@
 ---
 type: Entity
 title: The Lifecycle Skill Suite
-description: The five canonical skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) that drive the knowledge lifecycle — one per phase, with strict division of responsibility.
+description: The five lifecycle skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) — one per phase, with strict division of responsibility — plus the kb-setup bootstrap skill that scaffolds a bundle in a fresh project.
 status: stable
 lifecycle: active
 confidence: high
 created: 2026-07-06
-updated: 2026-08-27
-stale_after: 2026-10-06
+updated: 2026-11-10
+stale_after: 2027-05-10
 tags: []
 sources:
   - resource: /sources/2026-07-06-lifecycle-skills.md
@@ -16,28 +16,36 @@ sources:
   - resource: ../../skills/kb-ingest/SKILL.md
     id: kb-ingest
     title: kb-ingest SKILL.md
-    last_modified: 2026-08-27
+    last_modified: 2026-11-10
     blob: 53fdfb22b31c
   - resource: ../../skills/kb-query/SKILL.md
     id: kb-query
     title: kb-query SKILL.md
-    last_modified: 2026-08-27
+    last_modified: 2026-11-10
     blob: ffff4aa8f998
   - resource: ../../skills/kb-review/SKILL.md
     id: kb-review
     title: kb-review SKILL.md
-    last_modified: 2026-08-27
+    last_modified: 2026-11-10
     blob: 6ce3390450f6
   - resource: ../../skills/kb-curate/SKILL.md
     id: kb-curate
     title: kb-curate SKILL.md
-    last_modified: 2026-08-27
+    last_modified: 2026-11-10
     blob: b20099f5cf73
   - resource: ../../skills/kb-lint/SKILL.md
     id: kb-lint
     title: kb-lint SKILL.md
-    last_modified: 2026-08-27
+    last_modified: 2026-11-10
     blob: 2b4c59b3df75
+  - resource: ../../skills/kb-setup/SKILL.md
+    id: kb-setup
+    title: kb-setup SKILL.md
+    last_modified: 2026-11-10
+    blob: 20b0caa5157f
+generated:
+  by: claude-code/2.1.322
+  at: 2026-11-10
 ---
 
 # The Lifecycle Skill Suite
@@ -52,6 +60,13 @@ orchestration framework, and why
 [adopting the bundle pattern](/concepts/adopting-the-bundle-pattern.md)
 copies `skills/` into a target repo as one of two required pieces.
 
+A sixth skill, **kb-setup**, drives no lifecycle phase: it bootstraps a
+project that installed the skills with `npx skills add` — copies the
+`okf.py` bundled next to its SKILL.md to `scripts/okf.py`, asks the user
+for the bundle directory name (default `okf/`), runs `okf.py init`, and
+hands off to the other five [kb-setup]. The other skills' Step 0 points
+at it when no bundle or toolchain exists.
+
 # Schema
 
 | Skill | Phase | One-line contract |
@@ -61,6 +76,7 @@ copies `skills/` into a target repo as one of two required pieces.
 | kb-review | Verify | Work the queue (`stats`, `drift`, plus git history on `/sources/`); keep `active` a meaningful promise; verdict table from bump-and-extend down to deprecate |
 | kb-curate | Garden | Structure only — merge/split/archive/move; never changes what pages claim |
 | kb-lint | Audit | Mechanical health only — fix errors now, queue semantic issues for review/curate |
+| kb-setup | Bootstrap (no phase) | Scaffold `scripts/okf.py` + the bundle once; idempotent, never overwrites [kb-setup] |
 
 Adjacent tooling: [MarkItDown](/entities/markitdown.md) is an assessed
 (not adopted) extraction helper for kb-ingest's binary-source capture
@@ -100,6 +116,7 @@ The skills partition authority so no phase silently does another's job:
 
 The canonical copies live in `skills/`; `.claude/skills/` and
 `.github/prompts/` are generated — edit the canonical file and re-run
-`python scripts/okf.py init`. Skill changes alter the rules every
+`python scripts/okf.py init`. `skills/kb-setup/okf.py` is likewise a
+copy of `scripts/okf.py` that `init` refreshes, never edited directly. Skill changes alter the rules every
 future session plays by, so they sit in the highest human-review tier
 of the PR gates (CODEOWNERS territory).
