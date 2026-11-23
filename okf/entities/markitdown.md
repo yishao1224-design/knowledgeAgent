@@ -3,7 +3,6 @@ type: Entity
 title: MarkItDown
 description: Microsoft's Python utility that converts binary formats (PDF, Office, images, audio) to LLM-optimized Markdown — assessed as an optional extraction helper for this bundle's capture step, not adopted into any skill.
 status: stable
-lifecycle: active
 confidence: medium
 created: 2026-07-11
 updated: 2026-08-27

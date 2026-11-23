@@ -32,7 +32,7 @@ assert relationships that change answers. Note each page's `status`,
 - Synthesize across pages; cite every load-bearing claim with its
   bundle path, e.g. `(see /concepts/foo.md)`.
 - **Label trust explicitly in the answer**:
-  - `needs_review` or overdue `stale_after` → "may be stale (last
+  - tagged `needs-review` or overdue `stale_after` → "may be stale (last
     verified <updated>)".
   - `deprecated` → answer from `superseded_by` instead; mention the
     deprecation only if relevant.

@@ -3,7 +3,6 @@ type: Concept
 title: PR Quality Gates for a Team-Shared Bundle
 description: Three-tier merge guardrails for a git-managed wiki/bundle — blocking mechanical CI, advisory LLM review, human gates scoped by blast radius; conformance at merge, truth via lifecycle.
 status: stable
-lifecycle: active
 confidence: low
 created: 2026-07-06
 updated: 2026-08-27

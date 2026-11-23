@@ -3,12 +3,11 @@ type: Comparison
 title: openwiki vs the kb bundle
 description: A generator product vs a curation discipline — where openwiki's regenerate-often bet and this bundle's lifecycle bet each win, their independent convergences, and what each could borrow.
 status: stable
-lifecycle: needs_review
 confidence: medium
 created: 2026-07-12
-updated: 2026-08-27
+updated: 2026-11-23
 stale_after: 2026-10-12
-tags: []
+tags: [needs-review]
 sources:
   - resource: /sources/2026-07-12-openwiki.md
     id: openwiki
@@ -44,8 +43,8 @@ integrations [openwiki].
 |---|---|---|
 | Core bet | Regenerate often enough that staleness doesn't matter | Track staleness explicitly and curate |
 | Knowledge model | Synthesized wiki pages, own format [openwiki] | OKF v0.2 pages with typed frontmatter, readable by any plain OKF consumer |
-| Lifecycle | Implicit — pages rewritten on the next run | Explicit: `draft → active → needs_review → deprecated → archived` in a `lifecycle` key, with `stale_after` |
-| Staleness/drift | Scheduled re-runs (LaunchAgents, CI) [openwiki] | Pinned-file drift (`okf.py drift`) where the repo can answer; review queue (kb-review), `needs_review` flag, `stale_after` expiry otherwise |
+| Lifecycle | Implicit — pages rewritten on the next run | Explicit: `draft → active → needs review → deprecated → archived`, read off OKF `status` plus a `needs-review` tag and `stale_after` |
+| Staleness/drift | Scheduled re-runs (LaunchAgents, CI) [openwiki] | Pinned-file drift (`okf.py drift`) where the repo can answer; review queue (kb-review), `needs-review` tag, `stale_after` expiry otherwise |
 | Provenance | Raw connector manifests in `~/.openwiki/connectors/<name>/raw/` [openwiki] | Immutable dated captures in `/sources/`, never edited, plus `blob:`-pinned live repo files |
 | Ingestion | Built-in connectors: git, Gmail, Notion, X, HN, Tavily [openwiki] | Conversational (kb-ingest) plus bespoke scripts (e.g. the retired [ado-workitem-sync](/entities/ado-workitem-sync.md)) |
 | Deletion story | Overwritten on regeneration | Deprecate-don't-delete, supersession links, archive at zero inbound links |

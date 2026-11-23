@@ -3,7 +3,6 @@ type: Entity
 title: codebase-memory-mcp
 description: MCP server by DeusData that indexes codebases into a queryable SQLite knowledge graph (tree-sitter + hybrid LSP) with automatic freshness via git watching.
 status: stable
-lifecycle: active
 confidence: medium
 created: 2026-07-06
 updated: 2026-07-06

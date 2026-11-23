@@ -3,10 +3,9 @@ type: Entity
 title: The Lifecycle Skill Suite
 description: The five canonical skills (kb-ingest, kb-query, kb-review, kb-curate, kb-lint) that drive the knowledge lifecycle — one per phase, with strict division of responsibility.
 status: stable
-lifecycle: active
 confidence: high
 created: 2026-07-06
-updated: 2026-08-27
+updated: 2026-11-23
 stale_after: 2026-10-06
 tags: []
 sources:
@@ -16,28 +15,28 @@ sources:
   - resource: ../../skills/kb-ingest/SKILL.md
     id: kb-ingest
     title: kb-ingest SKILL.md
-    last_modified: 2026-08-27
-    blob: 53fdfb22b31c
+    last_modified: 2026-11-23
+    blob: 3bd2c35b251f
   - resource: ../../skills/kb-query/SKILL.md
     id: kb-query
     title: kb-query SKILL.md
-    last_modified: 2026-08-27
-    blob: ffff4aa8f998
+    last_modified: 2026-11-23
+    blob: ed082c8a5073
   - resource: ../../skills/kb-review/SKILL.md
     id: kb-review
     title: kb-review SKILL.md
-    last_modified: 2026-08-27
-    blob: 6ce3390450f6
+    last_modified: 2026-11-23
+    blob: 0f572e827fc3
   - resource: ../../skills/kb-curate/SKILL.md
     id: kb-curate
     title: kb-curate SKILL.md
-    last_modified: 2026-08-27
-    blob: b20099f5cf73
+    last_modified: 2026-11-23
+    blob: e3688ae86dad
   - resource: ../../skills/kb-lint/SKILL.md
     id: kb-lint
     title: kb-lint SKILL.md
-    last_modified: 2026-08-27
-    blob: 2b4c59b3df75
+    last_modified: 2026-11-23
+    blob: 9b6a74d7e64c
 ---
 
 # The Lifecycle Skill Suite
@@ -85,7 +84,7 @@ The skills partition authority so no phase silently does another's job:
   kb-review's strongest verdict is deprecation.
 - **Contradictions are never resolved silently.** Both kb-ingest and
   kb-review handle them the same way: `## Contradictions` section,
-  `contested` tag, `lifecycle: needs_review`; kb-query presents both
+  `contested` and `needs-review` tags; kb-query presents both
   positions when serving contested content.
 - **No filler links.** kb-lint fixes under-linked pages only with
   genuinely meaningful links; a page with no second real relationship

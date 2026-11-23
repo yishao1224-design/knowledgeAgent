@@ -54,9 +54,9 @@ external source; then concepts cite no `sources` and get
 Before touching concept pages, tell the user (briefly): the key
 takeaways, which existing pages you'll update, which new pages meet the
 creation threshold, and any contradictions with existing content. If
-the material contradicts an existing `active` page, do NOT silently
+the material contradicts an existing `stable` page, do NOT silently
 overwrite: add a `## Contradictions` section to that page, tag it
-`contested`, set `lifecycle: needs_review`.
+`contested` and `needs-review`.
 
 ## Step 3 — Write/update concepts
 
@@ -68,8 +68,8 @@ For each page:
   an idea/definition/explanation. **Never default to `type: Concept`**
   just because the frontmatter template example shows it.
 - Full frontmatter per SCHEMA.md's page frontmatter template, `type`
-  set per the above. New pages start `lifecycle: draft` (`status:
-  draft`); set `stale_after` from the confidence table.
+  set per the above. New pages start `status: draft` (there is no
+  `lifecycle` key); set `stale_after` from the confidence table.
 - Stamp `generated: { by, at }` on every page you write or materially
   rewrite — `by` is your own agent identity as `<tool>/<version>`, `at`
   is today. Never stamp `verified:` here: writing a page is not
@@ -102,7 +102,7 @@ For each page:
   title); close-out expands them to canonical form.
 - Bump `updated:` on every touched page.
 
-Promote `draft → active` only when the page is cross-linked, cited, and
+Promote `draft → active` (`status: stable`) only when the page is cross-linked, cited, and
 you'd stand behind its claims.
 
 ## Step 4 — Close out

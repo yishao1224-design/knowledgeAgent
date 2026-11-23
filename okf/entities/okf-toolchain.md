@@ -1,12 +1,11 @@
 ---
 type: Entity
 title: okf.py — the Mechanical Toolchain
-description: The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift — and the exact conformance/lifecycle rules its lint enforces.
+description: The stdlib-only script (scripts/okf.py) that mechanizes the bundle — init, lint, index, links, log, stats, drift, migrate — and the exact conformance/lifecycle rules its lint enforces.
 status: stable
-lifecycle: active
 confidence: high
 created: 2026-07-07
-updated: 2026-08-27
+updated: 2026-11-23
 stale_after: 2027-01-07
 tags: []
 sources:
@@ -16,8 +15,8 @@ sources:
   - resource: ../../scripts/okf.py
     id: okf-py
     title: scripts/okf.py implementation
-    last_modified: 2026-08-27
-    blob: 5d4a4ae830ed
+    last_modified: 2026-11-23
+    blob: ec7a2caedc73
 ---
 
 # okf.py — the Mechanical Toolchain
@@ -34,16 +33,17 @@ conformant [OKF v0.2](/concepts/open-knowledge-format.md) reader target.
 
 # Schema
 
-Seven subcommands; `lint` and `drift` gate (exit 1 on failure).
+Eight subcommands; `lint` and `drift` gate (exit 1 on failure).
 
 | Command | Role |
 |---------|------|
 | `init` | Create dir skeleton + seed SCHEMA/log; sync canonical `skills/` → `.claude/skills/` and `.github/prompts/`; then index + lint |
 | `lint` | Conformance + lifecycle audit (exit 1 on errors). `--inbound PATH` lists linkers to a bundle path |
-| `index` | Regenerate the bundle's `index.md` from tree + frontmatter, with lifecycle badges |
+| `index` | Regenerate the bundle's `index.md` from tree + frontmatter, with badges for deprecated, archived and `needs-review` pages |
 | `links` | Expand `[[slug]]`/`[[slug\|text]]` authoring shorthand into canonical bundle-relative links, in place |
 | `log "MSG"` | Prepend an entry under today's `## YYYY-MM-DD` heading |
-| `stats` | Counts by type/lifecycle, the review queue, and pinned-source drift |
+| `stats` | Counts by type/status, the review queue (tagged `needs-review` or past `stale_after`), and pinned-source drift |
+| `migrate` | Drop the retired `lifecycle` key from every page, folding it into `status` and the `needs-review` tag; `--dry-run` lists the changes only |
 | `drift` | Recheck every pinned `sources[].blob` against the file's current git blob (exit 1 if any moved). `--hash FILE` prints the sha to pin |
 
 ## What lint actually enforces
@@ -55,20 +55,21 @@ honest mechanically rather than by memory.
 **Errors (block, exit 1):**
 - missing or unparseable frontmatter;
 - no non-empty `type` (OKF §9);
-- a `status` outside OKF v0.2's `draft | stable | deprecated`, an
-  unknown `lifecycle`, or the two disagreeing with the mapping in
-  [SCHEMA.md](/SCHEMA.md);
+- a `status` outside OKF v0.2's `draft | stable | deprecated`, or a
+  legacy `lifecycle` key disagreeing with `status` (see
+  [SCHEMA.md](/SCHEMA.md));
 - a `sources` entry with no `resource`, or two entries sharing an `id`;
 - `deprecated` without `superseded_by` *and* without a `## Deprecation`
   section — i.e. deprecation must always leave a prose trail;
 - a non-root `index.md` carrying frontmatter.
 
 **Warnings (report, don't block):** missing `title`/`description`/
-`status`/`lifecycle`/`updated`; `active` without `stale_after`; `active` past its
-`stale_after` (overdue → should go `needs_review`); a pinned source that
-moved or vanished; `archived` outside
-`/archive/`; tag not in the SCHEMA taxonomy; `active`/`needs_review`
-page with < 2 outbound bundle links; orphan pages (no inbound links);
+`status`/`updated`; a legacy `lifecycle` key (`okf.py migrate` drops
+it); `stable` without `stale_after`; `stable` past its `stale_after`
+and not yet tagged `needs-review`; a pinned source that moved or
+vanished; a page under `/archive/` whose status is not `deprecated`;
+tag not in the SCHEMA taxonomy; `stable` page with < 2 outbound bundle
+links; orphan pages (no inbound links);
 source captures missing `source_url`; a malformed `generated`/
 `verified` entry (present but not a `{ by, at }` mapping); legacy v0.1
 shapes — a `review_after` field, a bare-string `sources` entry, or a

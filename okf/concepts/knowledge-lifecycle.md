@@ -3,10 +3,9 @@ type: Concept
 title: The Knowledge Lifecycle
 description: How concepts in this bundle move through draft, active, needs_review, deprecated, and archived — and which skill drives each transition.
 status: stable
-lifecycle: active
 confidence: high
 created: 2026-07-05
-updated: 2026-08-27
+updated: 2026-11-23
 stale_after: 2027-01-05
 tags: []
 sources:
@@ -21,10 +20,13 @@ sources:
 # The Knowledge Lifecycle
 
 This bundle treats knowledge as perishable: every page carries a
-`lifecycle` and `active` pages carry a `stale_after` date, after which
-they are no longer presumed true. The five states are a refinement of
-OKF v0.2's three-value `status`, carried in an extension key and kept
-in sync with it — see
+`status` and `stable` (active) pages carry a `stale_after` date, after
+which they are no longer presumed true. The five states are read off
+OKF v0.2's three-value `status` plus two derived signals — the
+`needs-review` tag or an overdue `stale_after` on a stable page, and
+the `archive/` folder for a deprecated one — so no extension key has to
+be kept in sync (an earlier `lifecycle` key did that; it is retired) —
+see
 [OKF](/concepts/open-knowledge-format.md) and [SCHEMA.md](/SCHEMA.md)
 for the mapping [okf-spec]. The profile borrows its operating discipline
 (orient-first, immutable sources, lint audits) from the Hermes llm-wiki
@@ -60,14 +62,14 @@ installed into any project repository — see
 
 ## Trust semantics — the page is the unit of trust
 
-`lifecycle`, `confidence`, and `stale_after` are page-level, but a page
+`status` (with the `needs-review` tag), `confidence`, and `stale_after` are page-level, but a page
 accumulates claims of different ages and provenance (e.g. a concept
 contributed to by several user stories — see the
 [user story analysis workflow](/concepts/user-story-analysis-workflow.md)).
 The fields resolve this by **weakest-link semantics**:
 
-- `lifecycle` = the *weakest* claim's state. One contested claim puts
-  the whole page in `needs_review`; over-warning beats silently serving
+- The page's state = the *weakest* claim's state. One contested claim
+  puts the whole page in needs review (tag `needs-review`); over-warning beats silently serving
   the one bad claim.
 - `stale_after` = the *soonest* check any claim needs — the page's
   cadence follows its most volatile / least-recently-verified claim.
@@ -105,7 +107,7 @@ Structurally it is the **convergence point** for every doubt detector:
 | A page's own open questions undermine its claims | SCHEMA's open-questions rule |
 
 Many fallible detectors, one uniform response — cheap, reversible,
-status-only. Any skill may *flag* (demote to `needs_review`); only
+frontmatter-only. Any skill may *flag* (tag the page `needs-review`); only
 kb-review may *resolve* (promote back or deprecate) — see the division
 of responsibility in
 [the lifecycle skill suite](/entities/lifecycle-skills.md). Flagging is

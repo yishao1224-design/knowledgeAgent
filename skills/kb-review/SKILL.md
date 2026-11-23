@@ -20,7 +20,7 @@ recently enough to trust.
 
 1. Read `okf/SCHEMA.md`; skim recent `okf/log.md`.
 2. `python scripts/okf.py stats` — the review queue lists every
-   `needs_review` page and every `active` page past `stale_after`.
+   `stable` page tagged `needs-review` or past `stale_after`.
    `python scripts/okf.py drift` lists every page whose pinned repo
    file moved or vanished; those are in scope too, and they are the
    highest-signal entries in the queue because something actually
@@ -62,11 +62,11 @@ For each page in scope:
 
 | Verdict | Action |
 |---------|--------|
-| All claims hold | Bump `updated`, set new `stale_after` per the SCHEMA.md cadence table, `lifecycle: active`, restamp any pinned `blob:` you re-read. Append a `verified:` entry (`by: human:<id>` if a person confirmed it, else your own `<tool>/<version>`). Consider raising `confidence`. |
-| Some claims changed | Rewrite those claims, cite the new capture or file, bump `updated`, reset `stale_after`, restamp pinned `blob:`, **replace `generated` entirely** with your own `{ by, at }`, keep `active`. |
-| Contested (sources disagree) | Write/refresh `## Contradictions` with both positions and citations; tag `contested`; keep `needs_review` until resolved. |
-| Substantially wrong or superseded | `lifecycle: deprecated` + `superseded_by` (write the successor page if needed, or a `## Deprecation` section explaining why with no successor). |
-| Can't verify, low stakes | Lower `confidence`, tag `unverified`, keep `needs_review`. Note it for the user. |
+| All claims hold | Bump `updated`, set new `stale_after` per the SCHEMA.md cadence table, `status: stable`, remove the `needs-review` tag, restamp any pinned `blob:` you re-read. Append a `verified:` entry (`by: human:<id>` if a person confirmed it, else your own `<tool>/<version>`). Consider raising `confidence`. |
+| Some claims changed | Rewrite those claims, cite the new capture or file, bump `updated`, reset `stale_after`, restamp pinned `blob:`, **replace `generated` entirely** with your own `{ by, at }`, keep `status: stable`, remove the `needs-review` tag. |
+| Contested (sources disagree) | Write/refresh `## Contradictions` with both positions and citations; tag `contested`; keep the `needs-review` tag until resolved. |
+| Substantially wrong or superseded | `status: deprecated` (drop `needs-review`) + `superseded_by` (write the successor page if needed, or a `## Deprecation` section explaining why with no successor). |
+| Can't verify, low stakes | Lower `confidence`, tag `unverified`, keep the `needs-review` tag. Note it for the user. |
 
 `generated` is replaced wholesale, never half-updated. It is a single
 provenance event — *this producer made this text on this date* — so the

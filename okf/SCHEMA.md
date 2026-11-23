@@ -1,15 +1,14 @@
 ---
 type: Schema
 title: Bundle Schema & Conventions
-description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, lifecycle rules.
+description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, review rules.
 status: stable
-lifecycle: active
-updated: 2026-08-27
+updated: 2026-11-23
 ---
 
 # Bundle Schema & Conventions
 
-This bundle follows **OKF v0.2** plus the lifecycle profile described
+This bundle follows **OKF v0.2** plus the review profile described
 here. When this file and habit disagree, this file wins. When this file
 and `CLAUDE.md` disagree, this file wins for content conventions;
 `CLAUDE.md` wins for process.
@@ -19,8 +18,8 @@ The spec now lives at
 the copy under `knowledge-catalog/okf/` this bundle was seeded from is a
 frozen v0.2 snapshot, no longer maintained. See
 [Open Knowledge Format (OKF)](/concepts/open-knowledge-format.md) for
-what v0.2 changed and why this bundle splits `status` from
-`lifecycle`.
+what v0.2 changed and how this bundle derives its review states from
+`status`.
 
 # Domain
 
@@ -40,7 +39,7 @@ okf/            # default name; a project may choose another
 ├── entities/         # concrete things: people, orgs, systems, datasets
 ├── comparisons/      # X-vs-Y analyses
 ├── queries/          # filed answers from kb-query worth keeping
-├── archive/          # archived concepts (lifecycle: archived)
+├── archive/          # archived concepts (status: deprecated)
 └── sources/          # IMMUTABLE raw captures
     ├── YYYY-MM-DD-<slug>.md
     └── assets/       # load-bearing binary evidence (see Source assets)
@@ -61,12 +60,11 @@ type: Concept            # required (OKF). Match to directory — see type regis
 title: Human Readable Title
 description: One sentence, used in index.md and previews.
 status: draft            # OKF v0.2 standard: draft | stable | deprecated
-lifecycle: draft         # draft | active | needs_review | deprecated | archived
 confidence: medium       # low | medium | high — how well-sourced the claims are
 created: 2026-07-05
 updated: 2026-07-05
-stale_after: 2026-10-05  # required once lifecycle: active
-tags: [tag-from-taxonomy]
+stale_after: 2026-10-05  # required once status: stable
+tags: [tag-from-taxonomy]   # needs-review flags a stable page for re-checking
 sources:                 # see "Source entries" below
   - resource: /sources/2026-07-05-example.md
     id: example
@@ -78,30 +76,36 @@ verified:                # optional; one entry per real re-verification
   - by: human:maintainer
     at: 2026-07-05
 supersedes: /concepts/old-page.md      # optional
-superseded_by: /concepts/new-page.md   # required when lifecycle: deprecated
+superseded_by: /concepts/new-page.md   # required when status: deprecated
 ---
 ```
 
-## `status` vs `lifecycle`
+## `status` and the review states
 
-OKF v0.2 promoted `status` to a standard field with exactly three
-values — `draft | stable | deprecated`. This bundle's five-state
-lifecycle is richer than that, so it lives in the `lifecycle`
-**extension** key and `status` is derived from it:
+OKF v0.2 defines `status` with exactly three values —
+`draft | stable | deprecated` — and that is the only state field a page
+carries. The five lifecycle states (see
+[The Knowledge Lifecycle](/concepts/knowledge-lifecycle.md)) are read
+off it:
 
-| `lifecycle` | `status` |
-|-------------|----------|
-| `draft` | `draft` |
-| `active` | `stable` |
-| `needs_review` | `stable` — still served, flagged in answers |
-| `deprecated` | `deprecated` |
-| `archived` | `deprecated` |
+| State | How a page shows it |
+|-------|---------------------|
+| draft | `status: draft` |
+| active | `status: stable` |
+| needs review | `status: stable` **and** the `needs-review` tag or an overdue `stale_after` (a moved `blob:` pin is the third signal, from `okf.py drift`) — still served, flagged in answers |
+| deprecated | `status: deprecated` |
+| archived | `status: deprecated`, under `archive/` |
 
-Write both; lint errors if they disagree. A plain v0.2 consumer that
-ignores extension keys still reads a legal `status`; a lifecycle-aware
-one reads the detail. Per the conformance rule, the body prose must
-still say when a page is deprecated or contested — the extension key
-alone is not allowed to carry that meaning.
+Flag a page for review by adding the `needs-review` tag; re-verifying it
+removes the tag and moves `stale_after` forward. `okf.py stats` lists
+the review queue; lint warns on an overdue page that is not tagged yet.
+
+Bundles written before 2026-11-23 also carried a `lifecycle` extension
+key holding the state name. It is retired: `okf.py migrate` folds it
+into `status` plus the tag, and lint warns on any page that still has
+it. Per the conformance rule, the body prose must still say when a page
+is deprecated or contested — the frontmatter alone is not allowed to
+carry that meaning.
 
 `generated` and `verified` both use the v0.2 actor convention:
 `human:<id>` for a person, `<tool>/<version>` for an agent or tool,
@@ -232,6 +236,7 @@ their original type).
 
 - `unverified` — claims not yet checked against a second source
 - `contested` — sources actively disagree; body must have a `## Contradictions` section
+- `needs-review` — a stable page flagged for re-checking (a contradiction found, a source changed upstream, a moved pin whose claims may have moved); kb-review removes it once the page is re-verified
 
 # Body conventions
 
@@ -317,7 +322,7 @@ Template rules:
   per artifact — an artifact gets an `Entity` page only when it meets
   the page-creation threshold below.
 - If `## Open Questions` accumulates items that contradict the page's
-  own claims, set `lifecycle: needs_review` (and tag `contested` where
+  own claims, tag the page `needs-review` (and `contested` where
   sources disagree) instead of only annotating.
 
 # Page-creation threshold
@@ -329,7 +334,7 @@ to it. Otherwise fold the material into the closest existing page.
 # Review cadence defaults
 
 `stale_after` is a **backstop, not the primary freshness mechanism** —
-a dead-man's-switch that guarantees an `active` page is eventually
+a dead-man's-switch that guarantees a `stable` page is eventually
 re-affirmed even when nothing else prompts it. It fires on the clock,
 not on change, so it cannot tell "nothing changed" from "everything
 changed." Scope the cadence to whether the page already has a *real
@@ -337,9 +342,8 @@ change signal*; running one blunt offset uniformly is what turns the
 review queue into ignorable noise.
 
 The `stale_after` **date is an internal maintainer field.** Readers
-never interpret it — the user-facing signal is the `lifecycle:
-needs_review` flag surfaced in answers, which the overdue date merely
-triggers.
+never interpret it — the user-facing signal is the *needs review*
+state surfaced in answers, which the overdue date puts the page in.
 
 Prefer a real change signal over the clock wherever one exists. In
 order of precedence:

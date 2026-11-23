@@ -3,12 +3,11 @@ type: Entity
 title: openwiki
 description: LangChain's TypeScript CLI that auto-generates and schedule-refreshes agent-optimized wikis (repo docs or a personal brain) from pluggable connectors — the regenerate-often counterpart to this bundle's curated lifecycle.
 status: stable
-lifecycle: needs_review
 confidence: medium
 created: 2026-07-12
 updated: 2026-08-27
 stale_after: 2026-10-12
-tags: []
+tags: [needs-review]
 sources:
   - resource: /sources/2026-07-12-openwiki.md
     id: openwiki
