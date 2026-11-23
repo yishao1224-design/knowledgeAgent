@@ -47,6 +47,10 @@ NON_BUNDLE_DIRS = {".git", ".github", ".claude", ".agents", ".cursor",
                    "node_modules", "scripts", "skills", "dist", "__pycache__"}
 RESERVED = {"index.md", "log.md"}
 OKF_VERSION = "0.2"
+# The toolchain's own version, as a date. Bump it on every change to this
+# file: tools that ship a copy (e.g. a team-wiki plugin seeding hub repos)
+# compare it to decide whether a repository's copy is out of date.
+TOOLCHAIN_VERSION = "2026.11.23"
 # OKF v0.2 defines `status` with exactly these three values; it is the
 # only state field a page carries.
 OKF_STATUSES = {"draft", "stable", "deprecated"}
@@ -1117,6 +1121,8 @@ def main():
     common.add_argument("--bundle", metavar="NAME",
                         help=f"bundle directory (default: auto-detect, "
                              f"else {DEFAULT_BUNDLE}/)")
+    ap.add_argument("--version", action="version",
+                    version=f"okf.py {TOOLCHAIN_VERSION} (OKF {OKF_VERSION})")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("init", parents=[common])
     p = sub.add_parser("lint", parents=[common])

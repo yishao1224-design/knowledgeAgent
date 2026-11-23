@@ -16,7 +16,7 @@ sources:
     id: okf-py
     title: scripts/okf.py implementation
     last_modified: 2026-11-23
-    blob: ec7a2caedc73
+    blob: c376ddaef38b
 ---
 
 # okf.py — the Mechanical Toolchain
@@ -33,7 +33,7 @@ conformant [OKF v0.2](/concepts/open-knowledge-format.md) reader target.
 
 # Schema
 
-Eight subcommands; `lint` and `drift` gate (exit 1 on failure).
+Eight subcommands; `lint` and `drift` gate (exit 1 on failure). `okf.py --version` prints `TOOLCHAIN_VERSION`, a date bumped on every change to the script, which tools shipping their own copy compare to refresh an outdated one.
 
 | Command | Role |
 |---------|------|
