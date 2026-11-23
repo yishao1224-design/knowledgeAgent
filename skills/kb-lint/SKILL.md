@@ -35,8 +35,10 @@ python scripts/okf.py stats
 - Frontmatter on a non-root `index.md` → remove it.
 
 **WARNs — fix the mechanical ones, queue the semantic ones:**
-- Missing `title`/`description`/`updated`/`stale_after`/`lifecycle` →
+- Missing `title`/`description`/`updated`/`stale_after` →
   fill from content and the SCHEMA.md cadence table.
+- Legacy `lifecycle` key → `python scripts/okf.py migrate` folds it into
+  `status` and the `needs-review` tag. Mechanical; do it here.
 - Legacy v0.1 shapes — a `review_after` field, a bare-string `sources`
   entry, a surviving `# Citations` section → migrate to the v0.2 shapes
   in SCHEMA.md (`stale_after`, `sources` mappings, inline `[source-id]`
@@ -49,15 +51,15 @@ python scripts/okf.py stats
   only. **Never add filler links to satisfy the count** — if no second
   real relationship exists, note the page for kb-curate (it may not
   meet the page threshold).
-- Overdue reviews → set `lifecycle: needs_review`; do NOT re-verify
+- Overdue reviews → tag the page `needs-review`; do NOT re-verify
   content here. Tell the user the review queue grew.
 
 **Pinned-source drift** (`pinned source ... changed` / `no longer
 exists`, also reported by `okf.py drift`): the file a page cites has
 moved on. This is a *semantic* finding — queue it for kb-review, do
 **not** restamp `blob:` here. Restamping is a claim that someone
-re-read the file, and lint never reads content. Set
-`lifecycle: needs_review` and tell the user.
+re-read the file, and lint never reads content. Tag the page
+`needs-review` and tell the user.
 
 **A source capture edited after ingestion** is a tamper/corruption
 signal, since captures are immutable. `git log -- okf/sources/`

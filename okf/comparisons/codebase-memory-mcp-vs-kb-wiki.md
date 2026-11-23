@@ -3,7 +3,6 @@ type: Comparison
 title: codebase-memory-mcp vs the kb wiki
 description: Why a derived code-knowledge graph and a curated OKF bundle are complementary layers, where they overlap (ADRs), and a phased integration plan.
 status: stable
-lifecycle: active
 confidence: medium
 created: 2026-07-06
 updated: 2026-08-27

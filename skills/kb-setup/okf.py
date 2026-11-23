@@ -4,12 +4,14 @@
 Subcommands:
   init             bootstrap the bundle skeleton + sync skills/ to per-tool
                    copies (.claude/skills/, .github/prompts/ for Copilot)
-  lint             conformance + lifecycle audit (exit 1 on errors)
+  lint             conformance + review-state audit (exit 1 on errors)
   lint --inbound P list files linking to bundle path P (safe-delete check)
   index            regenerate the bundle's index.md from tree + frontmatter
   links            expand [[slug]] shorthand into canonical bundle links
   log "MESSAGE"    prepend a log entry under today's date
-  stats            counts by type/lifecycle, review queue
+  stats            counts by type/status, review queue
+  migrate          drop the legacy `lifecycle` key (needs_review -> tag
+                   needs-review); --dry-run lists the changes only
   drift            recheck pinned sources against their current git blob
   drift --hash F   print the blob sha to pin for file F
 
@@ -17,9 +19,13 @@ Every subcommand takes --bundle NAME to point at a differently-named
 bundle directory. Without it the bundle is auto-detected (any top-level
 directory holding a SCHEMA.md), falling back to the okf/ default.
 
-The bundle targets OKF v0.2: `status` carries a standard v0.2 value and
-this bundle's richer five-state lifecycle lives in the `lifecycle`
-extension key, derived from it by LIFECYCLE_STATUS below.
+The bundle targets OKF v0.2 and uses its standard `status` alone
+(draft | stable | deprecated). The finer review states are derived, not
+stored: a stable page *needs review* when it carries the `needs-review`
+tag or its `stale_after` date has passed; a deprecated page is
+*archived* when it lives under archive/. Bundles written before this
+carried a five-state `lifecycle` extension key; `okf.py migrate` folds
+it into `status` + tag, and lint warns until that is done.
 
 Stdlib only. Uses PyYAML if installed, else a minimal frontmatter parser
 sufficient for the SCHEMA.md templates (scalars, inline lists and maps,
@@ -41,15 +47,17 @@ NON_BUNDLE_DIRS = {".git", ".github", ".claude", ".agents", ".cursor",
                    "node_modules", "scripts", "skills", "dist", "__pycache__"}
 RESERVED = {"index.md", "log.md"}
 OKF_VERSION = "0.2"
-# OKF v0.2 defines `status` with exactly these three values. This bundle's
-# five-state lifecycle is richer, so it lives in the `lifecycle` extension
-# key and `status` is derived from it: a plain v0.2 consumer reads a legal
-# standard field, a lifecycle-aware one reads the detail.
+# OKF v0.2 defines `status` with exactly these three values; it is the
+# only state field a page carries.
 OKF_STATUSES = {"draft", "stable", "deprecated"}
-LIFECYCLE = {"draft", "active", "needs_review", "deprecated", "archived"}
-LIFECYCLE_STATUS = {"draft": "draft", "active": "stable",
-                    "needs_review": "stable", "deprecated": "deprecated",
-                    "archived": "deprecated"}
+# The persistent "re-check this" flag on a stable page (a contradiction
+# found, a source changed). An overdue `stale_after` needs no flag.
+REVIEW_TAG = "needs-review"
+# The retired `lifecycle` extension key and the status each value maps to;
+# read only to lint and migrate bundles written before it was dropped.
+LEGACY_LIFECYCLE_STATUS = {"draft": "draft", "active": "stable",
+                           "needs_review": "stable", "deprecated": "deprecated",
+                           "archived": "deprecated"}
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
 WIKILINK_RE = re.compile(r"\[\[([^\]|\n]+?)(?:\|([^\]\n]+?))?\]\]")
 TAG_DEF_RE = re.compile(r"^\s*[-*]\s+`([A-Za-z0-9_-]+)`", re.M)
@@ -197,6 +205,31 @@ def load(path):
     if fm is None:
         return None, body, False
     return parse_frontmatter(fm), body, True
+
+
+def tags_of(meta):
+    """A page's tags as a list of strings."""
+    tags = meta.get("tags") or []
+    if isinstance(tags, str):
+        tags = [tags]
+    return [str(t) for t in tags]
+
+
+def review_due(meta, today):
+    """Why a stable page is in the review queue, or None.
+
+    The two signals that need no git: the `needs-review` tag (a person or
+    agent flagged it) and an overdue `stale_after`. Pinned sources that
+    moved are the third, reported by drift and lint separately.
+    """
+    if str(meta.get("status", "")).strip() != "stable":
+        return None
+    if REVIEW_TAG in tags_of(meta):
+        return "tagged needs-review"
+    sa = parse_date(meta.get("stale_after"))
+    if sa and sa < today:
+        return f"due {sa}"
+    return None
 
 
 def concept_files():
@@ -399,7 +432,7 @@ def cmd_drift(args):
     print(f"\ndrift: {len(stale)} stale of {len(results)} pinned source(s)")
     if stale:
         print("re-verify each page against its file, then restamp with "
-              "'okf.py drift --hash <file>' — and set lifecycle: needs_review "
+              "'okf.py drift --hash <file>' — and tag the page needs-review "
               "if the claims themselves moved")
     return 1 if stale else 0
 
@@ -459,18 +492,20 @@ def cmd_lint(args):
                 errors.append(f"{r}: type '{typ}' belongs in {expected} "
                               f"per SCHEMA.md type registry")
 
-        # lifecycle profile — OKF v0.2 `status` plus this bundle's `lifecycle`
+        # review state — OKF v0.2 `status` alone; see review_due()
         status = str(meta.get("status", "")).strip()
-        life = str(meta.get("lifecycle", "")).strip()
         if status and status not in OKF_STATUSES:
             errors.append(f"{r}: status '{status}' is not an OKF v0.2 value "
-                          f"({'|'.join(sorted(OKF_STATUSES))}) — the five-state "
-                          f"lifecycle belongs in 'lifecycle:'")
-        if life and life not in LIFECYCLE:
-            errors.append(f"{r}: unknown lifecycle '{life}'")
-        if life in LIFECYCLE and status and LIFECYCLE_STATUS[life] != status:
-            errors.append(f"{r}: lifecycle '{life}' implies status "
-                          f"'{LIFECYCLE_STATUS[life]}', found '{status}'")
+                          f"({'|'.join(sorted(OKF_STATUSES))}) — flag a page "
+                          f"for review with the '{REVIEW_TAG}' tag instead")
+        if "lifecycle" in meta:
+            life = str(meta.get("lifecycle") or "").strip()
+            if life in LEGACY_LIFECYCLE_STATUS and status \
+                    and LEGACY_LIFECYCLE_STATUS[life] != status:
+                errors.append(f"{r}: legacy lifecycle '{life}' implies status "
+                              f"'{LEGACY_LIFECYCLE_STATUS[life]}', found '{status}'")
+            warns.append(f"{r}: legacy 'lifecycle' key — run 'okf.py migrate' "
+                         f"to fold it into status (+ tag {REVIEW_TAG})")
         is_source = p.is_relative_to(KB / "sources")
         if p == KB / "SCHEMA.md":
             continue  # meta-file: OKF conformance applies, lifecycle rules don't
@@ -480,24 +515,26 @@ def cmd_lint(args):
                 warns.append(f"{r}: source capture missing source_url")
             continue  # sources are exempt from the rest
 
-        for field in ("title", "description", "status", "lifecycle", "updated"):
+        for field in ("title", "description", "status", "updated"):
             if not meta.get(field):
                 warns.append(f"{r}: missing '{field}'")
         if meta.get("review_after"):
             warns.append(f"{r}: legacy 'review_after' — OKF v0.2 names this "
                          f"field 'stale_after'")
-        if life == "active" and not meta.get("stale_after"):
-            warns.append(f"{r}: active but no stale_after")
-        if life == "deprecated" and not meta.get("superseded_by") \
+        archived = p.is_relative_to(KB / "archive")
+        if status == "stable" and not meta.get("stale_after"):
+            warns.append(f"{r}: stable but no stale_after")
+        if status == "deprecated" and not archived and not meta.get("superseded_by") \
                 and "## Deprecation" not in body:
             errors.append(f"{r}: deprecated without superseded_by or '## Deprecation' section")
-        if life == "archived" and not p.is_relative_to(KB / "archive"):
-            warns.append(f"{r}: archived but not under /archive/")
+        if archived and status and status != "deprecated":
+            warns.append(f"{r}: under /archive/ but status is '{status}' — "
+                         f"archived pages are 'deprecated'")
 
         sa = parse_date(meta.get("stale_after"))
-        if life == "active" and sa and sa < today:
-            warns.append(f"{r}: review overdue since {sa} — set "
-                         f"lifecycle: needs_review or re-verify")
+        if status == "stable" and sa and sa < today and REVIEW_TAG not in tags_of(meta):
+            warns.append(f"{r}: review overdue since {sa} — re-verify, or "
+                         f"tag it {REVIEW_TAG} if it cannot be done now")
 
         # sources shape — OKF v0.2 entries are mappings carrying a `resource`
         srcs = meta.get("sources") or []
@@ -556,7 +593,7 @@ def cmd_lint(args):
             if tgt.suffix == ".md" and tgt not in all_paths \
                     and tgt.name not in RESERVED and not tgt.exists():
                 infos.append(f"{r}: link to not-yet-written page ({t})")
-        if life in ("active", "needs_review") and n_out < 2:
+        if status == "stable" and n_out < 2:
             warns.append(f"{r}: only {n_out} outbound bundle link(s); minimum is 2")
 
         # wiki-links — authoring sugar that must be expanded before commit
@@ -615,8 +652,15 @@ def cmd_index(args):
         section = top if (KB / top).is_dir() else "_root"
         title = meta.get("title") or p.stem
         desc = str(meta.get("description") or "").strip()
-        life = str(meta.get("lifecycle") or "").strip()
-        badge = f" *({life})*" if life in ("needs_review", "deprecated", "archived") else ""
+        status = str(meta.get("status") or "").strip()
+        if top == "archive":
+            badge = " *(archived)*"
+        elif status == "deprecated":
+            badge = " *(deprecated)*"
+        elif status == "stable" and REVIEW_TAG in tags_of(meta):
+            badge = " *(needs review)*"
+        else:
+            badge = ""
         entries.setdefault(section, []).append(
             f"* [{title}]({p.relative_to(KB).as_posix()}) - {desc}{badge}")
 
@@ -711,31 +755,126 @@ def cmd_log(args):
 # ------------------------------------------------------------------ stats
 
 def cmd_stats(args):
-    by_type, by_life, queue = {}, {}, []
+    by_type, by_status, queue = {}, {}, []
     today = date.today()
     files = concept_files()
     for p in files:
         meta, _, _ = load(p)
         meta = meta or {}
         by_type[str(meta.get("type", "?"))] = by_type.get(str(meta.get("type", "?")), 0) + 1
-        life = str(meta.get("lifecycle", "?"))
-        by_life[life] = by_life.get(life, 0) + 1
-        sa = parse_date(meta.get("stale_after"))
-        if life == "needs_review" or (life == "active" and sa and sa < today):
-            queue.append((sa or date.min, rel(p)))
+        status = str(meta.get("status", "?"))
+        if p.is_relative_to(KB / "archive") and status == "deprecated":
+            status = "deprecated (archived)"
+        by_status[status] = by_status.get(status, 0) + 1
+        why = review_due(meta, today)
+        if why is not None:
+            sa = parse_date(meta.get("stale_after"))
+            queue.append((sa or date.min, rel(p), why))
     print(f"{len(files)} concept file(s)\n\nby type:")
     for k, v in sorted(by_type.items(), key=lambda kv: -kv[1]):
         print(f"  {k}: {v}")
-    print("\nby lifecycle:")
-    for k, v in sorted(by_life.items(), key=lambda kv: -kv[1]):
+    print("\nby status:")
+    for k, v in sorted(by_status.items(), key=lambda kv: -kv[1]):
         print(f"  {k}: {v}")
     print(f"\nreview queue ({len(queue)}):")
-    for sa, r in sorted(queue):
-        print(f"  {r}" + (f" (due {sa})" if sa != date.min else ""))
+    for _, r, why in sorted(queue):
+        print(f"  {r} ({why})")
     results, git_ok = check_drift(files)
     if git_ok:
         stale = [x for x in results if x[2] != "ok"]
         print(f"\npinned sources: {len(results)} ({len(stale)} stale)")
+    return 0
+
+
+# ---------------------------------------------------------------- migrate
+
+FM_RE = re.compile(r"^(\ufeff?---[ \t]*\r?\n)(.*?\r?\n)(---[ \t]*(?:\r?\n|$))", re.S)
+
+
+def migrate_text(text):
+    """Fold a page's legacy `lifecycle` key into `status` (+ tag).
+
+    Edits the frontmatter as text so every other key, comment and
+    ordering survives. Returns (new_text, note) or (text, None) when the
+    page has no `lifecycle` key.
+    """
+    m = FM_RE.match(text)
+    if not m:
+        return text, None
+    nl = "\r\n" if "\r\n" in m.group(2) else "\n"
+    lines = m.group(2).splitlines()
+    life_at = next((i for i, ln in enumerate(lines)
+                    if re.match(r"^lifecycle\s*:", ln)), None)
+    if life_at is None:
+        return text, None
+    life = re.sub(r"\s+#.*$", "", lines[life_at].split(":", 1)[1]).strip().strip("'\"")
+    del lines[life_at]
+    notes = [f"lifecycle {life or '(empty)'} dropped"]
+
+    want = LEGACY_LIFECYCLE_STATUS.get(life)
+    st_at = next((i for i, ln in enumerate(lines) if re.match(r"^status\s*:", ln)), None)
+    if want is not None:
+        if st_at is None:
+            lines.insert(min(life_at, len(lines)), f"status: {want}")
+            st_at = min(life_at, len(lines) - 1)
+            notes.append(f"status: {want} added")
+        else:
+            cur = re.sub(r"\s+#.*$", "", lines[st_at].split(":", 1)[1]).strip().strip("'\"")
+            if cur != want:
+                lines[st_at] = f"status: {want}"
+                notes.append(f"status {cur or '(empty)'} -> {want}")
+
+    if life == "needs_review":
+        tag_at = next((i for i, ln in enumerate(lines) if re.match(r"^tags\s*:", ln)), None)
+        if tag_at is None:
+            lines.insert((st_at if st_at is not None else len(lines) - 1) + 1,
+                         f"tags: [{REVIEW_TAG}]")
+        else:
+            value = re.sub(r"\s+#.*$", "", lines[tag_at].split(":", 1)[1]).strip()
+            if value.startswith("["):
+                inner = value.strip("[]").strip()
+                items = [t.strip() for t in inner.split(",") if t.strip()]
+                if REVIEW_TAG not in [t.strip("'\"") for t in items]:
+                    lines[tag_at] = f"tags: [{', '.join(items + [REVIEW_TAG])}]"
+            elif value == "":
+                block = tag_at + 1
+                items, indent = [], "  "
+                while block < len(lines) and re.match(r"^\s+-\s", lines[block]):
+                    indent = re.match(r"^(\s+)-", lines[block]).group(1)
+                    items.append(lines[block].split("-", 1)[1].strip().strip("'\""))
+                    block += 1
+                if REVIEW_TAG not in items:
+                    lines.insert(block, f"{indent}- {REVIEW_TAG}")
+            else:
+                single = value.strip("'\"")
+                if single != REVIEW_TAG:
+                    lines[tag_at] = f"tags: [{single}, {REVIEW_TAG}]"
+        notes.append(f"tag {REVIEW_TAG}")
+
+    fm = nl.join(lines) + nl
+    return m.group(1) + fm + m.group(3) + text[m.end():], ", ".join(notes)
+
+
+def cmd_migrate(args):
+    changed = []
+    for p in concept_files():
+        if p.is_relative_to(KB / "sources"):
+            continue  # captures are immutable
+        raw = p.read_bytes().decode("utf-8")
+        new, note = migrate_text(raw)
+        if note is None:
+            continue
+        changed.append((rel(p), note))
+        if not args.dry_run:
+            p.write_bytes(new.encode("utf-8"))
+    for r, note in changed:
+        print(f"{'would migrate' if args.dry_run else 'migrated'} {r}: {note}")
+    print(f"\nmigrate: {len(changed)} page(s) "
+          f"{'to change' if args.dry_run else 'changed'}")
+    if changed and not args.dry_run:
+        print("next: add 'needs-review' to SCHEMA.md's tag taxonomy if it is "
+              "missing, drop lifecycle from its templates, then run index, "
+              "log and lint")
     return 0
 
 
@@ -747,9 +886,8 @@ BUNDLE_DIRS = ["concepts", "entities", "comparisons", "queries",
 SCHEMA_SEED = """---
 type: Schema
 title: Bundle Schema & Conventions
-description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, lifecycle rules.
+description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, review rules.
 status: stable
-lifecycle: active
 updated: {today}
 ---
 
@@ -790,11 +928,10 @@ type: Concept            # match to directory — see type registry above
 title: Human Readable Title
 description: One sentence for index/previews.
 status: draft            # OKF v0.2: draft | stable | deprecated
-lifecycle: draft         # draft | active | needs_review | deprecated | archived
 confidence: medium       # low | medium | high
 created: {today}
 updated: {today}
-stale_after: {today}     # required once lifecycle: active
+stale_after: {today}     # required once status: stable
 tags: []
 sources:
   - resource: /sources/{today}-example.md   # capture, bundle-relative
@@ -814,10 +951,11 @@ verified:                # append one entry per real re-verification
 ---
 ```
 
-`status` is the OKF v0.2 standard field; `lifecycle` is this bundle's
-five-state extension and `status` is derived from it (`active` and
-`needs_review` are both `stable`; `archived` is `deprecated`). Lint
-errors if the two disagree.
+`status` (OKF v0.2) is the only state field: `draft` until verified,
+`stable` once verified, `deprecated` when superseded (archived pages
+are `deprecated` pages under `archive/`). A stable page needs review
+when its `stale_after` has passed or it carries the `needs-review` tag
+(a contradiction found, a source changed); `okf.py stats` lists them.
 
 `generated` says what produced the page; `verified` says who confirmed
 it. Stamp `generated` whenever you write, and `verified` only after a
@@ -839,6 +977,7 @@ method/meta `Concept` pages keep free structure instead.
 
 - `unverified` — claims not yet checked against a second source
 - `contested` — sources actively disagree
+- `needs-review` — a stable page to re-check (contradiction found, source changed)
 """
 
 LOG_SEED = """# Bundle Update Log
@@ -986,6 +1125,9 @@ def main():
     sub.add_parser("links", parents=[common])
     p = sub.add_parser("log", parents=[common]);   p.add_argument("message")
     sub.add_parser("stats", parents=[common])
+    p = sub.add_parser("migrate", parents=[common])
+    p.add_argument("--dry-run", action="store_true",
+                   help="list the pages that would change, write nothing")
     p = sub.add_parser("drift", parents=[common])
     p.add_argument("--hash", metavar="FILE",
                    help="print the blob sha to pin for FILE and exit")
@@ -999,7 +1141,7 @@ def main():
         return 2
     return {"init": cmd_init, "lint": cmd_lint, "index": cmd_index,
             "links": cmd_links, "log": cmd_log, "stats": cmd_stats,
-            "drift": cmd_drift}[args.cmd](args)
+            "drift": cmd_drift, "migrate": cmd_migrate}[args.cmd](args)
 
 
 if __name__ == "__main__":

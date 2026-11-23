@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-11-23
+* **Update**: Retired the `lifecycle` frontmatter key — review states now read off OKF `status`, the new `needs-review` tag and the `archive/` folder; `okf.py migrate` folded it out of every page ([SCHEMA](/SCHEMA.md), [lifecycle](/concepts/knowledge-lifecycle.md), [okf.py](/entities/okf-toolchain.md); re-pinned okf.py and the kb-* skills after editing them)
+
 ## 2026-08-27
 * **Update**: fixed a provenance hole in [kb-review](/entities/lifecycle-skills.md) — the rewrite verdict advanced only `generated.at`, so a rewrite by a different agent kept the previous producer in `generated.by` and misattributed the new text. `generated` is now replaced wholesale as one provenance event, stated in both the skill and [SCHEMA.md](/SCHEMA.md).
 * **Update**: wired up the v0.2 `generated: { by, at }` trust field — kb-ingest now stamps it on every page it writes or materially rewrites (`<tool>/<version>`, today), kb-review advances it when it rewrites claims, and lint validates the shape of `generated`/`verified` when present. Absence is deliberately not warned: an unstamped page honestly records that nobody claimed authorship, and a presence warning would push queue-clearing into inventing records. `generated` (what produced it) and `verified` (who confirmed it) are kept strictly apart in [SCHEMA.md](/SCHEMA.md) and [okf-toolchain](/entities/okf-toolchain.md).

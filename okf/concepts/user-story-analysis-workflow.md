@@ -3,10 +3,9 @@ type: Concept
 title: User Story Analysis Workflow (Ingest After Verify)
 description: The bundle-integrated pipeline for working a user story — query first, flag contradictions at analysis time, implement and verify, ingest what shipped last.
 status: stable
-lifecycle: active
 confidence: low
 created: 2026-07-08
-updated: 2026-08-27
+updated: 2026-11-23
 stale_after: 2026-08-08
 tags: [unverified]
 ---
@@ -63,7 +62,7 @@ query → analyze → implement → test/verify → ingest → story closes
 1. **Contradiction flagging cannot wait for the end.** If the query
    step reveals the story conflicts with a documented invariant, flag
    the affected page **at analysis time**: `## Contradictions` section,
-   `contested` tag, `lifecycle: needs_review`. It might mean the *story*
+   `contested` and `needs-review` tags. It might mean the *story*
    is wrong and implementation should pause; and until resolved,
    anyone else querying that page must see it is contested. Flagging
    changes no claims — it defers the writing of knowledge, not the
@@ -97,7 +96,7 @@ Guardrails:
 
    | Finding | Analyst-agent may… |
    |---------|--------------------|
-   | Code contradicts a page claim | Flag immediately: `needs_review` + `## Contradictions` note with file refs (status-only, same as carve-out 1) |
+   | Code contradicts a page claim | Flag immediately: tag `needs-review` + `## Contradictions` note with file refs (status-only, same as carve-out 1) |
    | Code confirms the claims checked | Bump `stale_after` — only for a genuine verification, with a `**Review**` log entry (kb-review work done opportunistically) |
    | Page wrong, fix obvious | Still no mid-analysis rewrite — content correction belongs to the ingest step or kb-review |
 

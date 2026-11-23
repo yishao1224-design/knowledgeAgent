@@ -3,10 +3,9 @@ type: Concept
 title: Open Knowledge Format (OKF)
 description: The storage format this bundle conforms to — markdown + YAML frontmatter bundles with reserved index/log files and permissive consumption.
 status: stable
-lifecycle: active
 confidence: high
 created: 2026-07-05
-updated: 2026-08-27
+updated: 2026-11-23
 stale_after: 2027-01-05
 tags: []
 sources:
@@ -61,11 +60,13 @@ v0.2's `status` is a *standard* field with exactly three values:
 `draft | stable | deprecated` [okf-spec-v2]. Under v0.1 this bundle's
 five-state lifecycle was a harmless extension key; under v0.2 writing
 `status: active` would put an illegal value in a standard field —
-conformance lost for a formatting habit. So the five states moved to a
-`lifecycle` extension key and `status` is derived from it, per the
-mapping in [SCHEMA.md](/SCHEMA.md). Plain consumers read a legal
-`status`; lifecycle-aware ones read the detail; nothing load-bearing
-lives only in the extension.
+conformance lost for a formatting habit. The states first moved to a
+`lifecycle` extension key with `status` derived from it; since
+2026-11-23 that key is retired and the finer states are read off
+`status` itself — a `needs-review` tag or an overdue `stale_after` on a
+stable page, the `archive/` folder for a deprecated one — per
+[SCHEMA.md](/SCHEMA.md). Plain consumers read the same legal `status`
+the bundle's own tools do, and no field has to be kept in sync.
 
 # Schema
 

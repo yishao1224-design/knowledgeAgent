@@ -3,7 +3,6 @@ type: Entity
 title: ado-workitem-sync — ADO Retrieval Toolchain
 description: Removed 2026-08-26 — the scripts/ado.py + ado-workitem-sync skill pair that synced Azure DevOps work items into local analysis folders; kept for the rev-stamp provenance and code-vs-judgment design record.
 status: deprecated
-lifecycle: deprecated
 confidence: medium
 created: 2026-07-09
 updated: 2026-08-26

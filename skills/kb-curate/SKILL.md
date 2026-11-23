@@ -32,7 +32,7 @@ just do them.
 1. Pick the survivor (better title/location/inbound links).
 2. Fold unique content and `sources` in; union the tags; keep the
    earliest `created`; bump `updated`.
-3. The loser becomes `lifecycle: deprecated`, body replaced by a one-line
+3. The loser becomes `status: deprecated`, body replaced by a one-line
    pointer, `superseded_by: /path/to/survivor.md`.
 4. Repoint inbound links to the survivor:
    `okf.py lint --inbound /path/to/loser.md` lists the linkers.
@@ -41,12 +41,12 @@ just do them.
 Trigger: the page covers 2+ subjects that each pass SCHEMA.md's
 page-creation threshold on their own. Earlier symptoms worth acting on:
 one volatile claim repeatedly dragging a stable page into
-`needs_review` (trust granularity no longer matches page granularity);
+needs review (trust granularity no longer matches page granularity);
 sections citing disjoint `sources`; the page's one-sentence
 `description` no longer honest.
 
 1. Move content **verbatim** — split changes structure, not claims. A
-   wrong claim noticed mid-split gets flagged `needs_review`, never
+   wrong claim noticed mid-split gets tagged `needs-review`, never
    fixed in the same operation.
 2. New pages' frontmatter: `status` carries over from the parent (the
    content was already verified; only its address changed);
@@ -65,7 +65,8 @@ sections citing disjoint `sources`; the page's one-sentence
 ### Archive
 Only `deprecated` pages with **zero inbound links** (verify with
 `okf.py lint --inbound`) and no historical value in place: move the
-file to `okf/archive/`, set `lifecycle: archived`. Deletion (rare) only
+file to `okf/archive/` (it keeps `status: deprecated`; the folder is
+what marks it archived). Deletion (rare) only
 with explicit user approval, and only for pages that never carried
 unique knowledge (e.g., accidental duplicates).
 

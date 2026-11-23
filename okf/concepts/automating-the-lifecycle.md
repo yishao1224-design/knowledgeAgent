@@ -3,7 +3,6 @@ type: Concept
 title: Automating the Lifecycle (LangGraph and Alternatives)
 description: Whether to put an orchestration framework like LangGraph in charge of the knowledge lifecycle — verdict, rules if you do, and the simpler scheduled-skills alternative.
 status: stable
-lifecycle: active
 confidence: low
 created: 2026-07-06
 updated: 2026-07-06

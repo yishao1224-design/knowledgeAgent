@@ -12,13 +12,14 @@ Non-negotiables, restated:
    dated filename, never edit. Git history is the tamper record.
 2. Every edit to `okf/` gets a log entry:
    `python scripts/okf.py log "**Verb**: message"`.
-3. Deprecate, don't delete. `lifecycle: deprecated` requires
+3. Deprecate, don't delete. `status: deprecated` requires
    `superseded_by` or a `## Deprecation` section.
 4. Run `python scripts/okf.py lint` before finishing any session that
    modified `okf/`; errors must be zero.
 5. `status` is OKF v0.2's standard field (`draft | stable |
-   deprecated`); this bundle's five-state machine lives in `lifecycle`
-   and the two must agree. Cite sources inline by `sources[].id`, never
+   deprecated`) and the only state key; flag a stable page for review
+   with the `needs-review` tag (no `lifecycle` key — `okf.py migrate`
+   drops old ones). Cite sources inline by `sources[].id`, never
    with a `# Citations` section.
 
 Lifecycle workflows (capture / serve / verify / garden / audit) are

@@ -3,7 +3,6 @@ type: Concept
 title: Ingesting Requirements from Ticket Systems
 description: How to feed user stories from a work-item tracker (e.g. Azure DevOps) into the bundle — access paths, immutable captures, and the don't-mirror-the-backlog rule.
 status: stable
-lifecycle: active
 confidence: low
 created: 2026-07-06
 updated: 2026-08-27

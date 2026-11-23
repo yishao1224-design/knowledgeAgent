@@ -1,8 +1,8 @@
 # Copilot instructions for knowledgeAgent
 
 This repo is an agent-maintained knowledge base: an OKF v0.2 bundle in
-`okf/` with a lifecycle profile (a five-state `lifecycle` key derived
-into the standard `status` field, `stale_after` review dates,
+`okf/` with a lifecycle profile (states read off the standard `status`
+field plus a `needs-review` tag, `stale_after` review dates,
 `blob:`-pinned repo evidence, immutable sources).
 
 The authoritative operating contract is [CLAUDE.md](../CLAUDE.md) —
