@@ -23,8 +23,9 @@ existing bundle.
 
 From the project root:
 
-- If `scripts/okf.py` exists **and** some top-level directory holds a
-  `SCHEMA.md` (`okf/SCHEMA.md`, or whatever name this project chose),
+- If `scripts/okf.py` exists **and** the project root or some top-level
+  directory holds a `SCHEMA.md` (`okf/SCHEMA.md`, whatever name this
+  project chose, or `SCHEMA.md` itself for a root bundle),
   the bundle is set up. Stop here and tell the user there's nothing to
   do — point them at `kb-ingest` / `kb-query` instead.
 - Otherwise continue.
@@ -68,11 +69,18 @@ Do not suggest a dot-prefixed name. The bundle is content people read
 and edit, so hiding it from `ls` and from file explorers works against
 it; dot-directories are for tooling config.
 
+When the folder exists only to hold this knowledge base (nothing else
+lives in it), the bundle can also be the project root itself: pages,
+`SCHEMA.md`, `index.md` and `log.md` at the top level, next to
+`scripts/okf.py`. Use that when the user asks for it, or when the
+request already says to set the bundle up at the root.
+
 Then run `init`, passing `--bundle` only when they chose a non-default name:
 
 ```
 python scripts/okf.py init                      # → okf/
 python scripts/okf.py init --bundle knowledge   # → knowledge/
+python scripts/okf.py init --bundle .           # → the project root itself
 ```
 
 This creates the skeleton (empty type directories, a seed `SCHEMA.md`,

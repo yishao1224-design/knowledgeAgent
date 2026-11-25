@@ -16,8 +16,9 @@ Subcommands:
   drift --hash F   print the blob sha to pin for file F
 
 Every subcommand takes --bundle NAME to point at a differently-named
-bundle directory. Without it the bundle is auto-detected (any top-level
-directory holding a SCHEMA.md), falling back to the okf/ default.
+bundle directory. Without it the bundle is auto-detected (the project
+root itself when it holds a SCHEMA.md — set up with `init --bundle .` —
+else any top-level directory holding one), falling back to the okf/ default.
 
 The bundle targets OKF v0.2 and uses its standard `status` alone
 (draft | stable | deprecated). The finer review states are derived, not
@@ -45,12 +46,16 @@ KB = ROOT / DEFAULT_BUNDLE
 # Never scanned when sniffing for an existing bundle.
 NON_BUNDLE_DIRS = {".git", ".github", ".claude", ".agents", ".cursor",
                    "node_modules", "scripts", "skills", "dist", "__pycache__"}
+# Project files that sit beside the pages when the bundle IS the project
+# root (`okf.py init --bundle .`); they are not concepts.
+ROOT_PROJECT_FILES = {"AGENTS.md", "CLAUDE.md", "README.md", "CONTRIBUTING.md",
+                      "CHANGELOG.md", "LICENSE.md"}
 RESERVED = {"index.md", "log.md"}
 OKF_VERSION = "0.2"
 # The toolchain's own version, as a date. Bump it on every change to this
 # file: tools that ship a copy (e.g. a team-wiki plugin seeding hub repos)
 # compare it to decide whether a repository's copy is out of date.
-TOOLCHAIN_VERSION = "2026.11.23"
+TOOLCHAIN_VERSION = "2026.11.25"
 # OKF v0.2 defines `status` with exactly these three values; it is the
 # only state field a page carries.
 OKF_STATUSES = {"draft", "stable", "deprecated"}
@@ -236,12 +241,30 @@ def review_due(meta, today):
     return None
 
 
+def bundle_md(pattern="*.md"):
+    """Every bundle markdown file matching pattern.
+
+    Hidden folders are never part of a bundle. When the bundle is the
+    project root itself, the toolchain's own folders (scripts/, skills/,
+    node_modules/ …) and the project's AGENTS.md / README.md style files
+    are skipped too: they live beside the pages, not among them.
+    """
+    at_root = KB.resolve() == ROOT.resolve()
+    out = []
+    for p in KB.rglob(pattern):
+        parts = p.relative_to(KB).parts
+        if any(part.startswith(".") for part in parts[:-1]):
+            continue
+        if at_root and (parts[0] in NON_BUNDLE_DIRS
+                        or (len(parts) == 1 and p.name in ROOT_PROJECT_FILES)):
+            continue
+        out.append(p)
+    return sorted(out)
+
+
 def concept_files():
     """All non-reserved .md files in the bundle."""
-    return sorted(
-        p for p in KB.rglob("*.md")
-        if p.name not in RESERVED
-    )
+    return [p for p in bundle_md() if p.name not in RESERVED]
 
 
 def rel(path):
@@ -453,7 +476,7 @@ def cmd_lint(args):
     all_paths = {p.resolve() for p in files}
 
     # collect inbound links from every md file, including index/log
-    for p in sorted(KB.rglob("*.md")):
+    for p in bundle_md():
         _, body, _ = load(p)
         src = body if p.name not in RESERVED else p.read_text(encoding="utf-8", errors="replace")
         for t in LINK_RE.findall(strip_code(src)):
@@ -628,7 +651,7 @@ def cmd_lint(args):
             warns.append(f"{page}: pinned source {res} no longer exists")
 
     # reserved-file rules
-    for idx in KB.rglob("index.md"):
+    for idx in bundle_md("index.md"):
         fm, _, had = load(idx)
         if had and idx.parent != KB:
             errors.append(f"{rel(idx)}: index.md may only carry frontmatter at bundle root (OKF §6/§11)")
@@ -1084,12 +1107,16 @@ def cmd_init(args):
 def detect_bundle(root):
     """Return the existing bundle directory under root, or None.
 
-    A bundle is any top-level directory holding a SCHEMA.md. This is what
+    A project root holding a SCHEMA.md is itself the bundle (set up with
+    `okf.py init --bundle .`). Otherwise a bundle is any top-level
+    directory holding a SCHEMA.md. This is what
     keeps projects that predate the okf default — or that chose their own
     name at setup — working with no flag and no config file. Ambiguity is
     reported rather than guessed at: two candidates mean the caller must
     say which with --bundle.
     """
+    if (root / "SCHEMA.md").is_file():
+        return root
     found = [p for p in sorted(root.iterdir())
              if p.is_dir() and p.name not in NON_BUNDLE_DIRS
              and (p / "SCHEMA.md").is_file()]

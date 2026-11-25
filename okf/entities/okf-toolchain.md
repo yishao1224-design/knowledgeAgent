@@ -5,7 +5,7 @@ description: The stdlib-only script (scripts/okf.py) that mechanizes the bundle 
 status: stable
 confidence: high
 created: 2026-07-07
-updated: 2026-11-23
+updated: 2026-11-25
 stale_after: 2027-01-07
 tags: []
 sources:
@@ -15,8 +15,8 @@ sources:
   - resource: ../../scripts/okf.py
     id: okf-py
     title: scripts/okf.py implementation
-    last_modified: 2026-11-23
-    blob: c376ddaef38b
+    last_modified: 2026-11-25
+    blob: 288907166f23
 ---
 
 # okf.py — the Mechanical Toolchain
@@ -45,6 +45,15 @@ Eight subcommands; `lint` and `drift` gate (exit 1 on failure). `okf.py --versio
 | `stats` | Counts by type/status, the review queue (tagged `needs-review` or past `stale_after`), and pinned-source drift |
 | `migrate` | Drop the retired `lifecycle` key from every page, folding it into `status` and the `needs-review` tag; `--dry-run` lists the changes only |
 | `drift` | Recheck every pinned `sources[].blob` against the file's current git blob (exit 1 if any moved). `--hash FILE` prints the sha to pin |
+
+**Where the bundle is.** Every command resolves the bundle the same way:
+`--bundle NAME` when given; else the project root itself when it holds a
+`SCHEMA.md` (a knowledge base whose whole folder is the bundle, set up
+with `init --bundle .`); else the one top-level directory holding a
+`SCHEMA.md`; else the `okf/` default [okf-py]. In a root bundle the
+toolchain's own folders (`scripts/`, `skills/`, hidden folders …) and the
+project's `AGENTS.md` / `README.md` style files are skipped, so they never
+count as pages.
 
 ## What lint actually enforces
 
