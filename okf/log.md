@@ -1,6 +1,7 @@
 # Bundle Update Log
 
 ## 2026-11-25
+* **Update**: sources keep handed-over files (workbooks, PDFs, images) as-is and pages cite them directly — [SCHEMA.md](/SCHEMA.md) *Source files*; okf.py lint/index/stats check them; updated [okf-toolchain](/entities/okf-toolchain.md), [lifecycle-skills](/entities/lifecycle-skills.md), [markitdown](/entities/markitdown.md).
 * Update: okf.py treats a project root holding SCHEMA.md as the bundle (init --bundle .), skipping scripts/, hidden folders and AGENTS.md-style project files there; kb-setup offers it ([okf.py](/entities/okf-toolchain.md); re-pinned okf.py after re-reading the change)
 
 ## 2026-11-23

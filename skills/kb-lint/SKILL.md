@@ -66,6 +66,14 @@ signal, since captures are immutable. `git log -- okf/sources/`
 surfaces it. Restore from git history if available; otherwise report to
 the user before touching it.
 
+**Source files** (`source file no page cites`, `source file … does not
+exist`, size warnings): a file kept as-is under `sources/` that nothing
+cites is either a forgotten ingest (queue it for kb-ingest — do not
+delete it here) or a leftover kb-curate can remove after checking
+`okf.py lint --inbound`. A missing cited file is a broken citation:
+find it in git history or ask the user. A file over 100 MB cannot be
+pushed: replace it with a citation of its own URL before committing.
+
 **INFOs (links to not-yet-written pages):** fine by design (OKF §5).
 Only report a summary count, plus any that have accumulated 3+
 referrers — those have crossed the page-creation threshold and are

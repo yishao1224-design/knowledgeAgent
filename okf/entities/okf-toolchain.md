@@ -16,7 +16,7 @@ sources:
     id: okf-py
     title: scripts/okf.py implementation
     last_modified: 2026-11-25
-    blob: 288907166f23
+    blob: 30434ee83378
 ---
 
 # okf.py — the Mechanical Toolchain
@@ -71,6 +71,8 @@ honest mechanically rather than by memory.
 - `deprecated` without `superseded_by` *and* without a `## Deprecation`
   section — i.e. deprecation must always leave a prose trail;
 - a non-root `index.md` carrying frontmatter.
+- a source file kept as-is under `sources/` larger than 100 MB (the most
+  a git host accepts).
 
 **Warnings (report, don't block):** missing `title`/`description`/
 `status`/`updated`; a legacy `lifecycle` key (`okf.py migrate` drops
@@ -82,7 +84,9 @@ links; orphan pages (no inbound links);
 source captures missing `source_url`; a malformed `generated`/
 `verified` entry (present but not a `{ by, at }` mapping); legacy v0.1
 shapes — a `review_after` field, a bare-string `sources` entry, or a
-surviving `# Citations` section.
+surviving `# Citations` section; a local `sources` resource that does
+not exist; a source file kept as-is (workbook, PDF, image — anything
+under `sources/` but `.md`) that no page cites, or that is over 50 MB.
 
 Note what lint deliberately does *not* warn about: a page with **no**
 `generated` or `verified` at all. An absent stamp is an honest "nobody
@@ -92,7 +96,10 @@ those fields cannot survive. Shape is mechanical and gets checked;
 presence is a claim and does not.
 
 **Info:** links to not-yet-written pages — allowed by design, never an
-error.
+error; a source file whose name lacks the `YYYY-MM-DD-` prefix.
+
+`index` lists every source file under *Sources*, titled by the first
+page citing it, and `stats` counts them with their total size.
 
 **Exemptions:** `SCHEMA.md` is checked for OKF conformance but skips
 lifecycle rules; `sources/*` only get the `source_url` warning.

@@ -31,6 +31,10 @@ assert relationships that change answers. Note each page's `status`,
 
 - Synthesize across pages; cite every load-bearing claim with its
   bundle path, e.g. `(see /concepts/foo.md)`.
+  When a page's figure comes from a source file kept as-is
+  (`/sources/….xlsx`, `.pdf`) and the question needs more detail than
+  the page holds, open the file itself at the sheet or page the page
+  names, and link it in the answer.
 - **Label trust explicitly in the answer**:
   - tagged `needs-review` or overdue `stale_after` → "may be stale (last
     verified <updated>)".
