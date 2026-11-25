@@ -1,5 +1,8 @@
 # Bundle Update Log
 
+## 2026-11-25
+* Update: okf.py treats a project root holding SCHEMA.md as the bundle (init --bundle .), skipping scripts/, hidden folders and AGENTS.md-style project files there; kb-setup offers it ([okf.py](/entities/okf-toolchain.md); re-pinned okf.py after re-reading the change)
+
 ## 2026-11-23
 * **Update**: okf.py carries a TOOLCHAIN_VERSION (shown by --version) so copies elsewhere can tell when they are outdated ([okf.py](/entities/okf-toolchain.md))
 * **Update**: Retired the `lifecycle` frontmatter key — review states now read off OKF `status`, the new `needs-review` tag and the `archive/` folder; `okf.py migrate` folded it out of every page ([SCHEMA](/SCHEMA.md), [lifecycle](/concepts/knowledge-lifecycle.md), [okf.py](/entities/okf-toolchain.md); re-pinned okf.py and the kb-* skills after editing them)
