@@ -3,7 +3,7 @@ type: Schema
 title: Bundle Schema & Conventions
 description: Authoritative conventions for this OKF bundle — types, tags, frontmatter templates, review rules.
 status: stable
-updated: 2026-11-23
+updated: 2026-11-25
 ---
 
 # Bundle Schema & Conventions
@@ -40,10 +40,9 @@ okf/            # default name; a project may choose another
 ├── comparisons/      # X-vs-Y analyses
 ├── queries/          # filed answers from kb-query worth keeping
 ├── archive/          # archived concepts (status: deprecated)
-└── sources/          # IMMUTABLE raw captures
-    ├── YYYY-MM-DD-<slug>.md
-    └── assets/       # load-bearing binary evidence (see Source assets)
-        └── YYYY-MM-DD-<slug>.<ext>
+└── sources/          # IMMUTABLE raw sources
+    ├── YYYY-MM-DD-<slug>.md      # capture of a web page, URL, paste, conversation
+    └── YYYY-MM-DD-<slug>.<ext>   # file kept as-is: workbook, PDF, deck, image (see Source files)
 ```
 
 # Page frontmatter template (all types)
@@ -134,8 +133,10 @@ actually establish.
 
 # Source-capture frontmatter template
 
-Files under `sources/` are verbatim or near-verbatim captures. Immutable
-after creation — git history is the tamper record; `git log -- sources/`
+`.md` files under `sources/` are verbatim or near-verbatim captures of
+things that have no file of their own — a web page, a URL, pasted text,
+a conversation. (Files someone hands over are kept as they are instead;
+see *Source files*.) Immutable after creation — git history is the tamper record; `git log -- sources/`
 surfaces any post-ingestion edit, with the original recoverable.
 
 ```yaml
@@ -158,6 +159,9 @@ sources:
   - resource: /sources/2026-07-12-example.md   # frozen capture
     id: example-readme
     title: Example README capture
+  - resource: /sources/2026-11-25-q3-budget.xlsx   # source file kept as-is
+    id: q3-budget
+    title: Q3 budget workbook (sheet "Summary")
   - resource: ../../scripts/okf.py             # live repo file
     id: okf-py
     title: scripts/okf.py implementation
@@ -167,7 +171,10 @@ sources:
 
 - **Frozen captures** are bundle-relative (`/sources/...`) and immutable.
   Use them for anything that cannot be re-read later — a web page, a
-  conversation, a verification already performed.
+  conversation, a verification already performed. A source file kept
+  as-is (`/sources/...xlsx`) is cited the same way, directly: there is
+  no Markdown stub in between. Name the part a claim rests on (sheet,
+  page, slide) in `title` or next to the citation.
 - **Live files** are document-relative, so a page in `entities/` reaches
   repo files as `../../path` — that form resolves both on disk and as a
   rendered link. Pin them with `blob:` (12 chars of the git blob sha,
@@ -189,28 +196,32 @@ delete it and let the agent read the file. Do not pin a capture under
 `id` is the citation key: cite it in the body as `[okf-py]`. Ids must be
 unique within a page (lint errors on duplicates).
 
-# Source assets (binary evidence)
+# Source files (kept as-is)
 
-Most binaries are **not** kept: extract their knowledge into the `.md`
-capture and point `source_url` at the authoritative copy (SharePoint,
-the tracker, a URL). Keep a binary in `sources/assets/` only when
-**the pixels are the evidence** and there is no authoritative home —
-above all, dense architecture diagrams and annotated screenshots that
-cannot be fully extracted in one pass and will be re-read on later
-ingests and reviews.
+A file someone hands over — a workbook, PDF, deck, Word document, image,
+diagram — is **kept as it is** under `sources/`, not converted into a
+Markdown copy. The original is the evidence; a conversion only adds a
+lossy second copy that can drift from it.
 
-- Name: `assets/YYYY-MM-DD-<slug>.<ext>`, referenced from at least one
-  source capture, whose body says what the asset shows and what has
-  been extracted from it *so far* (an asset may yield more on a later
-  pass — note what remains unread).
-- Assets are **immutable like captures**: an updated diagram is a new
-  dated file, never an overwrite.
-- The capture's written description of the asset is what a reviewer
-  checks it against; a mismatch between description and image is a
-  review flag.
-- Size discipline: small images only. Decks/PDFs/videos stay at their
-  authoritative home; when in doubt, extract harder rather than commit
-  bigger.
+- Name: `sources/YYYY-MM-DD-<slug>.<ext>`, the date it was ingested.
+  (Older bundles kept images under `sources/assets/`; those still work.)
+- Pages cite the file directly in `sources` (`resource:
+  /sources/2026-11-25-q3-budget.xlsx`) and inline by its `id`. A page
+  may also link or embed it in the body (`![diagram](/sources/….png)`).
+- What the file says is extracted into the **pages** that rely on it —
+  definitions, figures, decisions — not into a stub. Say which sheet,
+  page or slide a claim comes from, so a reviewer can re-open the file
+  and check it.
+- Immutable like captures: a new version of the workbook is a new
+  dated file, and the pages move their citation to it (kb-review).
+- Only web pages, URLs, pasted text and conversations are captured as
+  `.md` — they have no file to keep.
+- Size: git is not a file share. Over 50 MB, do not commit the file:
+  cite its own home (SharePoint, Drive, a URL) as the `resource`
+  instead. Lint warns past 50 MB and errors past 100 MB (the most a git
+  host accepts).
+- Lint warns about a source file no page cites; `okf.py index` lists
+  every source file under *Sources*.
 
 # Type registry
 
@@ -222,7 +233,7 @@ No central registry is required by OKF, but *this bundle* uses:
 | `Entity` | `entities/` | A concrete nameable thing |
 | `Comparison` | `comparisons/` | Structured X-vs-Y |
 | `Query` | `queries/` | A filed answer to a real question |
-| `Source` | `sources/` | Immutable raw capture |
+| `Source` | `sources/` | Immutable raw capture (`.md`); files kept as-is sit beside them with no frontmatter |
 | `Schema` | root | This file only |
 
 Add new types here before first use. **Lint enforces this table**: a

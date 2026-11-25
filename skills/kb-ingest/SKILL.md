@@ -24,26 +24,27 @@ Read `okf/SCHEMA.md`, `okf/index.md`, and the last ~20 lines of
 
 ## Step 1 — Capture the source
 
-1. Fetch/read the source. For URLs use WebFetch; for files read them.
-2. Write `okf/sources/YYYY-MM-DD-<slug>.md` with the Source frontmatter
-   template from SCHEMA.md. The body is the captured content (verbatim
-   or a faithful condensation — say which in the description).
-3. Never overwrite an existing capture. Same source again → new dated
-   file; the old one stays for diffing against the new one. Git is the
-   tamper record — `git log -- okf/sources/` shows any edit to a
-   capture after ingestion, with the original recoverable.
-4. **Load-bearing visuals get kept, not just described.** When the
-   source is or contains an image whose pixels are the evidence —
-   especially a dense architecture diagram that can't be fully
-   extracted in one pass — copy it to
-   `okf/sources/assets/YYYY-MM-DD-<slug>.<ext>`, link it from the
-   capture, and state in the capture what the asset shows, what you
-   extracted this pass, and what remains unread (later ingests and
-   reviews will re-read it). Assets are immutable like captures; rules
-   and the trust caveat live in SCHEMA.md's *Source assets* section.
-   Binaries with an authoritative home elsewhere (decks, PDFs) are NOT
-   copied — extract their content and point `source_url` at the
-   original.
+How a source is kept depends on whether it is a file:
+
+- **A file someone hands over** — workbook (`.xlsx`), PDF, deck, Word
+  document, image, diagram — is **kept as-is**: copy it, unchanged, to
+  `okf/sources/YYYY-MM-DD-<slug>.<ext>`. Do not write a Markdown
+  conversion or a stub next to it; pages cite the file itself (Step 2).
+  Open it to read it (for a workbook, Python with `openpyxl` or
+  `pandas`; for a PDF, a PDF reader), and note which sheets, pages or
+  slides you used. Over 50 MB, do not copy it — cite the URL of its
+  own home (SharePoint, Drive) as the `resource` instead and tell the
+  user; lint errors past 100 MB. Rules: SCHEMA.md's *Source files*.
+- **Anything without a file of its own** — a web page or URL (use
+  WebFetch), pasted text, a conversation — becomes a capture:
+  `okf/sources/YYYY-MM-DD-<slug>.md` with the Source frontmatter
+  template from SCHEMA.md. The body is the captured content (verbatim
+  or a faithful condensation — say which in the description).
+
+Either way, never overwrite: the same source again → a new dated file;
+the old one stays for comparing against the new one. Git is the tamper
+record — `git log -- okf/sources/` shows any edit after ingestion, with
+the original recoverable.
 
 Skip this step only when ingesting pure conversation takeaways with no
 external source; then concepts cite no `sources` and get
@@ -74,8 +75,11 @@ For each page:
   rewrite — `by` is your own agent identity as `<tool>/<version>`, `at`
   is today. Never stamp `verified:` here: writing a page is not
   confirming it, and that field belongs to kb-review.
-- `sources:` lists the capture(s) from Step 1 as OKF v0.2 mappings —
-  `resource:` (bundle-relative for a capture), `id:`, `title:`.
+- `sources:` lists the capture(s) or source file(s) from Step 1 as OKF
+  v0.2 mappings — `resource:` (bundle-relative: `/sources/….md` or
+  `/sources/….xlsx`), `id:`, `title:`. For a source file, name the
+  sheet, page or slide a claim rests on in `title` or beside the
+  inline citation, so a reviewer can find it again.
 - **Pin re-readable repo files.** When a claim rests on a file in this
   repo rather than on a capture, add a second kind of `sources` entry:
   a document-relative `resource:` (`../../scripts/okf.py`), plus

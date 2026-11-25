@@ -5,7 +5,7 @@ description: The five canonical skills (kb-ingest, kb-query, kb-review, kb-curat
 status: stable
 confidence: high
 created: 2026-07-06
-updated: 2026-11-23
+updated: 2026-11-25
 stale_after: 2026-10-06
 tags: []
 sources:
@@ -15,18 +15,18 @@ sources:
   - resource: ../../skills/kb-ingest/SKILL.md
     id: kb-ingest
     title: kb-ingest SKILL.md
-    last_modified: 2026-11-23
-    blob: 3bd2c35b251f
+    last_modified: 2026-11-25
+    blob: f1802c9e44da
   - resource: ../../skills/kb-query/SKILL.md
     id: kb-query
     title: kb-query SKILL.md
-    last_modified: 2026-11-23
-    blob: ed082c8a5073
+    last_modified: 2026-11-25
+    blob: c96de6aa4123
   - resource: ../../skills/kb-review/SKILL.md
     id: kb-review
     title: kb-review SKILL.md
-    last_modified: 2026-11-23
-    blob: 0f572e827fc3
+    last_modified: 2026-11-25
+    blob: 990e2d7d80f4
   - resource: ../../skills/kb-curate/SKILL.md
     id: kb-curate
     title: kb-curate SKILL.md
@@ -35,8 +35,8 @@ sources:
   - resource: ../../skills/kb-lint/SKILL.md
     id: kb-lint
     title: kb-lint SKILL.md
-    last_modified: 2026-11-23
-    blob: 9b6a74d7e64c
+    last_modified: 2026-11-25
+    blob: 1f0c2fe561b9
 ---
 
 # The Lifecycle Skill Suite
@@ -61,9 +61,13 @@ copies `skills/` into a target repo as one of two required pieces.
 | kb-curate | Garden | Structure only — merge/split/archive/move; never changes what pages claim |
 | kb-lint | Audit | Mechanical health only — fix errors now, queue semantic issues for review/curate |
 
-Adjacent tooling: [MarkItDown](/entities/markitdown.md) is an assessed
-(not adopted) extraction helper for kb-ingest's binary-source capture
-rule — the skill itself does not reference it.
+kb-ingest keeps a handed-over file (workbook, PDF, deck, image) as-is
+under `/sources/` and pages cite it directly; only web pages, URLs,
+pasted text and conversations become `.md` captures [kb-ingest]. kb-review
+and kb-query re-open such a file at the sheet or page a page names
+[kb-review] [kb-query]. Adjacent tooling: [MarkItDown](/entities/markitdown.md)
+is an assessed (not adopted) helper for *reading* those files — the
+skill itself does not reference it.
 
 ## Division of responsibility (the load-bearing rules)
 

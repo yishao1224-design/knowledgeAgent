@@ -55,7 +55,7 @@ OKF_VERSION = "0.2"
 # The toolchain's own version, as a date. Bump it on every change to this
 # file: tools that ship a copy (e.g. a team-wiki plugin seeding hub repos)
 # compare it to decide whether a repository's copy is out of date.
-TOOLCHAIN_VERSION = "2026.11.25"
+TOOLCHAIN_VERSION = "2026.11.25.1"
 # OKF v0.2 defines `status` with exactly these three values; it is the
 # only state field a page carries.
 OKF_STATUSES = {"draft", "stable", "deprecated"}
@@ -67,6 +67,12 @@ REVIEW_TAG = "needs-review"
 LEGACY_LIFECYCLE_STATUS = {"draft": "draft", "active": "stable",
                            "needs_review": "stable", "deprecated": "deprecated",
                            "archived": "deprecated"}
+# Source files kept as-is (workbooks, PDFs, images …) — see SCHEMA.md
+# "Source files". GitHub refuses a file over 100 MB; past 50 MB it warns.
+SOURCE_FILE_WARN_BYTES = 50 * 1024 * 1024
+SOURCE_FILE_MAX_BYTES = 100 * 1024 * 1024
+SOURCE_FILE_IGNORE = {".gitkeep", ".ds_store", "thumbs.db", "desktop.ini"}
+
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
 WIKILINK_RE = re.compile(r"\[\[([^\]|\n]+?)(?:\|([^\]\n]+?))?\]\]")
 TAG_DEF_RE = re.compile(r"^\s*[-*]\s+`([A-Za-z0-9_-]+)`", re.M)
@@ -265,6 +271,37 @@ def bundle_md(pattern="*.md"):
 def concept_files():
     """All non-reserved .md files in the bundle."""
     return [p for p in bundle_md() if p.name not in RESERVED]
+
+
+def source_files():
+    """Files under sources/ kept as-is: everything there but the .md
+    captures (workbooks, PDFs, decks, images …)."""
+    base = KB / "sources"
+    if not base.is_dir():
+        return []
+    out = []
+    for p in base.rglob("*"):
+        parts = p.relative_to(base).parts
+        if not p.is_file() or any(part.startswith(".") for part in parts) \
+                or p.suffix.lower() == ".md" or p.name.lower() in SOURCE_FILE_IGNORE:
+            continue
+        out.append(p)
+    return sorted(out)
+
+
+def source_entries(meta):
+    """A page's `sources` entries that are mappings."""
+    entries = (meta or {}).get("sources") or []
+    if isinstance(entries, (str, dict)):
+        entries = [entries]
+    return [e for e in entries if isinstance(e, dict)]
+
+
+def human_size(n):
+    for unit in ("B", "KB", "MB", "GB"):
+        if n < 1024 or unit == "GB":
+            return f"{n:.0f} {unit}" if unit == "B" else f"{n:.1f} {unit}"
+        n /= 1024
 
 
 def rel(path):
@@ -483,6 +520,18 @@ def cmd_lint(args):
             tgt = resolve_link(t, p)
             if tgt is not None:
                 inbound.setdefault(tgt, set()).add(p)
+    # a page's `sources` entries reference their files too (safe-delete
+    # checks and unreferenced source files both need them); index.md
+    # lists every source file, so it does not count as citing one
+    cited = {t for t, linkers in inbound.items()
+             if any(l.name not in RESERVED for l in linkers)}
+    for p in files:
+        meta, _, _ = load(p)
+        for entry in source_entries(meta):
+            tgt = resolve_resource(entry.get("resource"), p)
+            if tgt is not None:
+                inbound.setdefault(tgt, set()).add(p)
+                cited.add(tgt)
 
     if args.inbound:
         target = (KB / args.inbound.lstrip("/")).resolve()
@@ -573,8 +622,14 @@ def cmd_lint(args):
                 warns.append(f"{r}: legacy source entry '{entry}' — v0.2 wants "
                              f"a mapping with 'resource:'")
                 continue
-            if not str(entry.get("resource", "")).strip():
+            res = str(entry.get("resource", "")).strip()
+            if not res:
                 errors.append(f"{r}: source entry without 'resource'")
+            else:
+                tgt = resolve_resource(res, p)
+                # pinned entries are reported by the drift check below
+                if tgt is not None and not entry.get("blob") and not tgt.exists():
+                    warns.append(f"{r}: source file {res} does not exist")
             sid = str(entry.get("id", "")).strip()
             if sid and sid in seen_ids:
                 errors.append(f"{r}: duplicate source id '{sid}'")
@@ -642,6 +697,23 @@ def cmd_lint(args):
             warns.append(f"{r}: orphan — no inbound links and not in index.md "
                          f"(run 'okf.py index')")
 
+    # source files kept as-is: cited, dated, and small enough for git
+    for f in source_files():
+        r = rel(f)
+        size = f.stat().st_size
+        if size > SOURCE_FILE_MAX_BYTES:
+            errors.append(f"{r}: {human_size(size)} — over the 100 MB a git "
+                          f"host accepts; keep it at its own home and cite "
+                          f"its URL instead")
+        elif size > SOURCE_FILE_WARN_BYTES:
+            warns.append(f"{r}: {human_size(size)} — large for git; prefer "
+                         f"citing the file's own URL")
+        if f.resolve() not in cited:
+            warns.append(f"{r}: source file no page cites — add it to a "
+                         f"page's sources, or it is dead weight")
+        if not re.match(r"\d{4}-\d{2}-\d{2}-", f.name):
+            infos.append(f"{r}: source file name lacks the YYYY-MM-DD- prefix")
+
     # pinned-source drift (skipped silently when git is unavailable)
     for page, res, state, pinned, cur in check_drift(files)[0]:
         if state == "moved":
@@ -690,6 +762,22 @@ def cmd_index(args):
             badge = ""
         entries.setdefault(section, []).append(
             f"* [{title}]({p.relative_to(KB).as_posix()}) - {desc}{badge}")
+
+    # source files kept as-is, titled by the first page that cites them
+    files = concept_files()
+    titles = {}
+    for p in files:
+        meta, _, _ = load(p)
+        for entry in source_entries(meta):
+            tgt = resolve_resource(entry.get("resource"), p)
+            if tgt is not None and entry.get("title"):
+                titles.setdefault(tgt, str(entry["title"]).strip())
+    for f in source_files():
+        kind = f.suffix.lstrip(".").upper() or "binary"
+        title = titles.get(f.resolve(), f.name)
+        entries.setdefault("sources", []).append(
+            f"* [{title}]({f.relative_to(KB).as_posix()}) - {kind} file, "
+            f"{human_size(f.stat().st_size)}, kept as-is")
 
     total = sum(len(v) for v in entries.values())
     lines = ['---', f'okf_version: "{OKF_VERSION}"', '---', '',
@@ -810,6 +898,10 @@ def cmd_stats(args):
     if git_ok:
         stale = [x for x in results if x[2] != "ok"]
         print(f"\npinned sources: {len(results)} ({len(stale)} stale)")
+    kept = source_files()
+    if kept:
+        total = sum(f.stat().st_size for f in kept)
+        print(f"\nsource files kept as-is: {len(kept)} ({human_size(total)})")
     return 0
 
 
@@ -992,6 +1084,14 @@ Cite sources by `id` in the body — `…as the README states [example]` —
 not with a `# Citations` section, which v0.2 replaced with `sources`.
 Pin `blob:` only on re-readable local files; `okf.py drift` rechecks
 those and lint reports the ones that moved.
+
+Source files — a workbook, PDF, deck, image or document someone hands
+over — are kept **as-is** under `sources/` (`sources/{today}-budget.xlsx`),
+never converted into a Markdown copy. Pages cite the file itself:
+`resource: /sources/{today}-budget.xlsx`. Only web pages, URLs, pasted
+text and conversations become `.md` captures. A file over 50 MB stays
+at its own home (cite its URL); lint warns past 50 MB and errors past
+100 MB, the most a git host accepts.
 
 Only `type: Concept` pages describing **domain** knowledge (business
 rules, processes, system behavior) use the domain-concept body template

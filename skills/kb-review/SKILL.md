@@ -37,12 +37,14 @@ and how much you'll cover this session.
 
 For each page in scope:
 
-1. Re-read the page and its `sources` captures. If a capture references
-   a `sources/assets/` image (e.g. an architecture diagram), **re-read
-   the image itself**, not just the capture's description of it — dense
-   visuals yield claims on later passes that earlier ingests missed,
-   and a mismatch between the image and the capture's description is
-   itself a review flag.
+1. Re-read the page and its `sources`. A source kept as a file
+   (`/sources/….xlsx`, `.pdf`, `.png` — or an older `sources/assets/`
+   image) is **re-opened and checked itself**, at the sheet, page or
+   slide the page names: dense workbooks and diagrams yield claims on
+   later passes that earlier ingests missed, and a figure that no
+   longer matches the file is a review flag. When a newer version of
+   the file arrives it is a new dated file; move the page's citation
+   to it once its claims are re-checked.
 2. **Re-fetching `source_url` is the only upstream-change detection in
    the system** — `drift` covers files in this repo, nothing covers a
    web page, so do the re-fetch for any page whose claims are

@@ -5,7 +5,7 @@ description: Microsoft's Python utility that converts binary formats (PDF, Offic
 status: stable
 confidence: medium
 created: 2026-07-11
-updated: 2026-08-27
+updated: 2026-11-25
 stale_after: 2026-08-11
 tags: []
 sources:
@@ -32,11 +32,13 @@ the shelf, not an adopted dependency; the
 [lifecycle skill suite](/entities/lifecycle-skills.md) was deliberately
 left unchanged.)*
 
-kb-ingest's capture rule for binaries (decks, PDFs: extract the
-content, point `source_url` at the authoritative copy, do not commit
-the binary) currently relies on the agent's own file-reading tools.
-MarkItDown offers a deterministic, scriptable extraction path for
-exactly that step — useful for large PDFs (agent PDF reading is
+Since 2026-11-25 kb-ingest keeps a handed-over file (workbook, PDF,
+deck, image) **as-is** under `sources/` and cites it directly — no
+Markdown conversion is committed (see *Source files* in
+[SCHEMA.md](/SCHEMA.md)). The agent still has to *read* the file to
+write the pages that rely on it, and relies on its own file-reading
+tools for that. MarkItDown offers a deterministic, scriptable reading
+path for exactly that step — useful for large PDFs (agent PDF reading is
 page-limited), Office formats, and agents without native binary
 readers (e.g. the Copilot entry points). Same Python runtime the
 [okf.py toolchain](/entities/okf-toolchain.md) already requires, so no
@@ -47,8 +49,8 @@ attachments when
 Boundaries of the fit:
 
 - **It knows nothing about OKF.** No frontmatter, no lifecycle fields —
-  the Source template and linking still happen in the skill/okf.py
-  layer. Its output is only ever a capture *body*.
+  citing and linking still happen in the skill/okf.py layer. Its
+  output is a reading aid for the agent, never committed as a source.
 - **Output is a condensation, not verbatim.** PDF headings flatten and
   tables can degrade [markitdown]; captures built from it must say so in their
   `description`, per the Source convention.
